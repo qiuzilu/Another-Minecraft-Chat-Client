@@ -1,0 +1,207 @@
+package net.defekt.mc.chatclient.ui.swing;
+
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+
+import javax.imageio.ImageIO;
+import javax.swing.Box;
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.JTextPane;
+import javax.swing.SwingUtilities;
+
+import net.defekt.mc.chatclient.protocol.data.ChatMessage;
+import net.defekt.mc.chatclient.protocol.data.PlayerInfo;
+import net.defekt.mc.chatclient.protocol.data.PlayerSkinCache;
+import net.defekt.mc.chatclient.ui.Main;
+
+public class MinecraftPlayerListRenderer extends DefaultListCellRenderer {
+	private static final long serialVersionUID = 1L;
+
+	public final static BufferedImage bar0 = new BufferedImage(40, 28, BufferedImage.TYPE_INT_ARGB) {
+		{
+			try {
+				Graphics2D g2 = createGraphics();
+				BufferedImage img = ImageIO
+						.read(MinecraftPlayerListRenderer.class.getResourceAsStream("/resources/ping/0.png"));
+				g2.drawImage(img, 0, 0, getWidth(), getHeight(), null);
+			} catch (Exception e) {
+
+			}
+		}
+	};
+	public final static BufferedImage bar5 = new BufferedImage(40, 28, BufferedImage.TYPE_INT_ARGB) {
+		{
+			try {
+				Graphics2D g2 = createGraphics();
+				BufferedImage img = ImageIO
+						.read(MinecraftPlayerListRenderer.class.getResourceAsStream("/resources/ping/5.png"));
+				g2.drawImage(img, 0, 0, getWidth(), getHeight(), null);
+			} catch (Exception e) {
+
+			}
+		}
+	};
+	public final static BufferedImage bar1 = new BufferedImage(40, 28, BufferedImage.TYPE_INT_ARGB) {
+		{
+			try {
+				Graphics2D g2 = createGraphics();
+				BufferedImage img = ImageIO
+						.read(MinecraftPlayerListRenderer.class.getResourceAsStream("/resources/ping/1.png"));
+				g2.drawImage(img, 0, 0, getWidth(), getHeight(), null);
+			} catch (Exception e) {
+
+			}
+		}
+	};
+	public final static BufferedImage bar2 = new BufferedImage(40, 28, BufferedImage.TYPE_INT_ARGB) {
+		{
+			try {
+				Graphics2D g2 = createGraphics();
+				BufferedImage img = ImageIO
+						.read(MinecraftPlayerListRenderer.class.getResourceAsStream("/resources/ping/2.png"));
+				g2.drawImage(img, 0, 0, getWidth(), getHeight(), null);
+			} catch (Exception e) {
+
+			}
+		}
+	};
+	public final static BufferedImage bar3 = new BufferedImage(40, 28, BufferedImage.TYPE_INT_ARGB) {
+		{
+			try {
+				Graphics2D g2 = createGraphics();
+				BufferedImage img = ImageIO
+						.read(MinecraftPlayerListRenderer.class.getResourceAsStream("/resources/ping/3.png"));
+				g2.drawImage(img, 0, 0, getWidth(), getHeight(), null);
+			} catch (Exception e) {
+
+			}
+		}
+	};
+	public final static BufferedImage bar4 = new BufferedImage(40, 28, BufferedImage.TYPE_INT_ARGB) {
+		{
+			try {
+				Graphics2D g2 = createGraphics();
+				BufferedImage img = ImageIO
+						.read(MinecraftPlayerListRenderer.class.getResourceAsStream("/resources/ping/4.png"));
+				g2.drawImage(img, 0, 0, getWidth(), getHeight(), null);
+			} catch (Exception e) {
+
+			}
+		}
+	};
+
+	private final JTextField filter;
+
+	public MinecraftPlayerListRenderer(JTextField filter, final JMemList<PlayerInfo> ml) {
+		this.filter = filter;
+		new Thread(new Runnable() {
+
+			@Override
+			public void run() {
+				try {
+					while (true) {
+						Thread.sleep(3000);
+						synchronized (MinecraftPlayerListRenderer.this) {
+							SwingUtilities.invokeLater(() -> {
+								int ind = ml.getSelectedIndex();
+								ml.setListData(ml.getListData());
+								ml.setSelectedIndex(ind);
+								ml.repaint();
+							});
+						}
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}).start();
+	}
+
+	@Override
+	public Component getListCellRendererComponent(JList<? extends Object> list, Object value, int index,
+			boolean isSelected, boolean cellHasFocus) {
+		PlayerInfo info = (PlayerInfo) value;
+		String dname = info.getDisplayName() != null ? ChatMessage.parse(info.getDisplayName()) : info.getName();
+
+		if (!filter.getText().isEmpty()
+				&& !ChatMessage.removeColors(dname).toLowerCase().contains(filter.getText().toLowerCase()))
+			return new JLabel();
+
+		Box playerLine = Box.createHorizontalBox();
+
+		if (info.getTexture() != null)
+			try {
+				PlayerSkinCache.putSkin(info.getUuid(), info.getTexture(), info.getName());
+				if (true) {
+					playerLine.add(new JPanel() {
+						BufferedImage img = PlayerSkinCache.getHead(info.getUuid());
+						private static final long serialVersionUID = 1L;
+						{
+							setPreferredSize(new Dimension(32, 40));
+							setOpaque(false);
+						}
+
+						@Override
+						public void paintComponent(Graphics g) {
+							super.paintComponent(g);
+							g.drawImage(img, 0, 0, 32, 32, null);
+						}
+					});
+				}
+			} catch (Exception e) {
+
+			}
+
+		JTextPane nameField = new JTextPane();
+		nameField.setEditable(false);
+		nameField.setFont(Main.mcFont.deriveFont((float) 13.5f));
+		nameField.setOpaque(false);
+		nameField.setForeground(Color.white);
+
+		SwingUtils.appendColoredText(dname, nameField);
+
+		playerLine.add(nameField);
+
+		playerLine.add(new JPanel() {
+			private static final long serialVersionUID = 1L;
+			{
+				setPreferredSize(new Dimension(bar0.getWidth(), bar0.getHeight()));
+				setOpaque(false);
+			}
+
+			@Override
+			public void paintComponent(Graphics g) {
+				super.paintComponent(g);
+				BufferedImage bb = bar5;
+
+				int ping = info.getPing();
+
+				if (ping >= 1000)
+					bb = bar1;
+				else if (ping >= 600)
+					bb = bar2;
+				else if (ping >= 300)
+					bb = bar3;
+				else if (ping >= 150)
+					bb = bar4;
+				else if (ping > 0)
+					bb = bar5;
+				g.drawImage(bb, 0, 0, null);
+			}
+		});
+
+		playerLine.setOpaque(true);
+		playerLine.setBackground(new Color(0, 0, 0, isSelected ? 255 / 3 : 0));
+
+		return playerLine;
+	}
+
+}
