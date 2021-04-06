@@ -23,6 +23,17 @@ import net.defekt.mc.chatclient.protocol.data.StatusInfo;
 import net.defekt.mc.chatclient.ui.Main;
 import net.defekt.mc.chatclient.ui.ServerEntry;
 
+/**
+ * Custom cell renderer used in {@link JMinecraftServerList}.<br>
+ * It is used to render contained servers and show information about them,
+ * including motd, server name, player count, etc.
+ * 
+ * @see JMinecraftServerList
+ * @see ServerEntry
+ * 
+ * @author Defective4
+ *
+ */
 public class MinecraftServerListRenderer extends DefaultListCellRenderer {
 	private static final long serialVersionUID = 1L;
 

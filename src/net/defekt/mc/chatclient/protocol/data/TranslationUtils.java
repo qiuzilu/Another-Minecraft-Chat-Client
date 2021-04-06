@@ -5,6 +5,14 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * This class contains translation keys used by Minecraft chat messages.<br>
+ * They are used in parsing of chat messages
+ * 
+ * @see ChatMessage
+ * @author Defective4
+ *
+ */
 @SuppressWarnings("serial")
 public class TranslationUtils {
 	private TranslationUtils() {
@@ -29,6 +37,12 @@ public class TranslationUtils {
 		}
 	};
 
+	/**
+	 * Translate a key
+	 * 
+	 * @param key key
+	 * @return translated string
+	 */
 	protected static String translateKey(String key) {
 		return translationKeys.containsKey(key) ? translationKeys.get(key).replace("%s", "\u00A7%s") : key;
 	}

@@ -8,6 +8,14 @@ import java.lang.reflect.InvocationTargetException;
 import net.defekt.mc.chatclient.protocol.io.VarInputStream;
 import net.defekt.mc.chatclient.protocol.io.VarOutputStream;
 
+/**
+ * Base class for all packets
+ * 
+ * @see PacketFactory
+ * @see PacketRegistry
+ * @author Defective4
+ *
+ */
 public class Packet {
 
 	protected int id = -1;
@@ -15,27 +23,62 @@ public class Packet {
 	private final ByteArrayOutputStream rawBuffer = new ByteArrayOutputStream();
 	private final VarOutputStream varBuffer = new VarOutputStream(rawBuffer);
 
-	public Packet(PacketRegistry reg) {
+	/**
+	 * Constructs a packet (serverbound)<br>
+	 * This constructor is usually used to create serverbound packets
+	 * 
+	 * @param reg packet registry used to determine this packet's id
+	 */
+	protected Packet(PacketRegistry reg) {
 		id = reg.getPacketID(this.getClass());
 	}
 
-	public Packet(PacketRegistry reg, byte[] data) throws IOException {
+	/**
+	 * Constructs a packet (clientbound)<br>
+	 * This constructor is usually used to create clientbound packets
+	 * 
+	 * @param reg  packet registry used to determine this packet's id
+	 * @param data data contained in this packet
+	 * @throws IOException never thrown
+	 */
+	protected Packet(PacketRegistry reg, byte[] data) throws IOException {
 		id = reg.getPacketID(this.getClass());
 		varBuffer.write(data);
 	}
 
+	/**
+	 * Get {@link VarInputStream} with this packet's contents
+	 * 
+	 * @return input stream with packet's contents
+	 */
 	protected VarInputStream getInputStream() {
 		return new VarInputStream(new ByteArrayInputStream(rawBuffer.toByteArray()));
 	}
 
+	/**
+	 * Get this packet's determined ID
+	 * 
+	 * @return packet's ID
+	 */
 	public int getID() {
 		return id;
 	}
 
+	/**
+	 * Check if this packet's name equals String
+	 * 
+	 * @param name string to compare
+	 * @return true if this packet's name is the same as provided String
+	 */
 	protected boolean equalsName(String name) {
 		return this.getClass().getSimpleName().equals(name);
 	}
 
+	/**
+	 * Put a VarInt to this packet
+	 * 
+	 * @param v VarInt value
+	 */
 	protected void putVarInt(int v) {
 		try {
 			varBuffer.writeVarInt(v);
@@ -44,6 +87,11 @@ public class Packet {
 		}
 	}
 
+	/**
+	 * Put a Long to this packet
+	 * 
+	 * @param v value
+	 */
 	protected void putLong(long v) {
 		try {
 			varBuffer.writeLong(v);
@@ -52,6 +100,11 @@ public class Packet {
 		}
 	}
 
+	/**
+	 * Put a byte array to this packet
+	 * 
+	 * @param v byte array
+	 */
 	protected void putBytes(byte[] v) {
 		try {
 			varBuffer.write(v);
@@ -60,6 +113,11 @@ public class Packet {
 		}
 	}
 
+	/**
+	 * Put short to this packet
+	 * 
+	 * @param v value
+	 */
 	protected void putShort(int v) {
 		try {
 			varBuffer.writeShort(v);
@@ -68,6 +126,11 @@ public class Packet {
 		}
 	}
 
+	/**
+	 * Put String to this packet
+	 * 
+	 * @param v value
+	 */
 	protected void putString(String v) {
 		try {
 			varBuffer.writeString(v);
@@ -76,6 +139,12 @@ public class Packet {
 		}
 	}
 
+	/**
+	 * Get this packet's bytes as ready to send data in Minecraft's packet format
+	 * 
+	 * @param compression whether to use post-compression format
+	 * @return byte array with packet's data
+	 */
 	public byte[] getData(boolean compression) {
 		try {
 			byte[] data = rawBuffer.toByteArray();
@@ -96,6 +165,12 @@ public class Packet {
 		}
 	}
 
+	/**
+	 * Access packet's method via reflection
+	 * 
+	 * @param name method name
+	 * @return method's return value
+	 */
 	public Object accessPacketMethod(String name) {
 		Class<? extends Packet> cl = getClass();
 		try {

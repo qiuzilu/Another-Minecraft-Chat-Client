@@ -22,6 +22,11 @@ import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.Client
 import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.ClientResourcePackStatusPacket;
 import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.ClientRespawnPacket;
 
+/**
+ * A packet registry implementation for protocol 735
+ * 
+ * @author Defective4
+ */
 public class PacketRegistryV735 extends PacketRegistry {
 
 	@Override

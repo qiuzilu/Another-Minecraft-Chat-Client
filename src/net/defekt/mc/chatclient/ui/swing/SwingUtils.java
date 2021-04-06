@@ -17,7 +17,6 @@ import javax.swing.JTextArea;
 import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
-import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
@@ -26,30 +25,38 @@ import javax.swing.text.StyledDocument;
 
 import net.defekt.mc.chatclient.protocol.data.ChatColor;
 
+/**
+ * Various UI utilities used internally
+ * 
+ * @see ChatColor
+ * @author Defective4
+ *
+ */
 @SuppressWarnings("serial")
 public class SwingUtils {
+	/**
+	 * Set system look and feel.<br>
+	 * It does work fine on Windows, but as far as I know it does NOT work with GTK.
+	 */
 	public static void setNativeLook() {
-		LookAndFeelInfo[] infs = UIManager.getInstalledLookAndFeels();
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException
 				| UnsupportedLookAndFeelException e) {
 			e.printStackTrace();
 		}
-		for (LookAndFeelInfo inf : infs) {
-			if (inf.getName().toLowerCase().contains("gtk") || inf.getName().toLowerCase().contains("ux")
-					|| inf.getName().toLowerCase().contains("ix"))
-				try {
-					UIManager.setLookAndFeel(inf.getClassName());
-				} catch (ClassNotFoundException | InstantiationException | IllegalAccessException
-						| UnsupportedLookAndFeelException e) {
-					e.printStackTrace();
-				}
-		}
 	}
 
+	/**
+	 * User's screen size
+	 */
 	public static final Dimension sSize = Toolkit.getDefaultToolkit().getScreenSize();
 
+	/**
+	 * Sets window's position to center
+	 * 
+	 * @param win window to center
+	 */
 	public static void centerWindow(Window win) {
 		int x = (sSize.width - win.getWidth()) / 2;
 		int y = (sSize.height - win.getHeight()) / 2;
@@ -57,6 +64,17 @@ public class SwingUtils {
 		win.setLocation(x, y);
 	}
 
+	/**
+	 * Appends colored text to text pane.<br>
+	 * It follows Minecraft colors defined in {@link ChatColor}
+	 * 
+	 * @param text text to append.<br>
+	 *             It follows the same rules defined in Minecraft, for example,
+	 *             §4Hello §9World would be
+	 *             "<font style="color: aa0000;">Hello</font>
+	 *             <font style="color: 5555ff;">World</font>""
+	 * @param pane pane to append text to
+	 */
 	public static void appendColoredText(String text, JTextPane pane) {
 		StyledDocument doc = pane.getStyledDocument();
 		StyleContext ctx = new StyleContext();
@@ -81,6 +99,14 @@ public class SwingUtils {
 		}
 	}
 
+	/**
+	 * Shows error dialog, allowing to display exception details
+	 * 
+	 * @param parent  parent of this dialog
+	 * @param title   dialog title
+	 * @param ex      exception to display details of
+	 * @param message custom dialog message
+	 */
 	public static void showErrorDialog(Window parent, String title, Exception ex, String message) {
 		final JDialog errDial = new JDialog(parent);
 		errDial.setModal(true);
@@ -106,6 +132,47 @@ public class SwingUtils {
 		errDial.pack();
 		SwingUtils.centerWindow(errDial);
 		errDial.setVisible(true);
+	}
+
+	/**
+	 * Get color as RGB in HEX
+	 * 
+	 * @param c color to convert
+	 * @return HEX string
+	 */
+	public static String getHexRGB(Color c) {
+		return Integer.toHexString(c.getRGB()).substring(2);
+	}
+
+	/**
+	 * Change each of RGB values by index
+	 * 
+	 * @param c     color to modify
+	 * @param index color modifier
+	 * @return modified color
+	 */
+	public static Color brighten(Color c, int index) {
+		int r = c.getRed();
+		int g = c.getGreen();
+		int b = c.getBlue();
+		for (int x = 0; x < Math.abs(index); x++) {
+			if (index < 0) {
+				if (r > 1)
+					r--;
+				if (g > 1)
+					g--;
+				if (b > 1)
+					b--;
+			} else {
+				if (r < 255)
+					r++;
+				if (g < 255)
+					g++;
+				if (b < 255)
+					b++;
+			}
+		}
+		return new Color(r, g, b);
 	}
 
 	private static void showExceptionDetails(Window parent, Exception ex) {

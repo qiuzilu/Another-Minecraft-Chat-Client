@@ -1,5 +1,6 @@
 package net.defekt.mc.chatclient.ui;
 
+import java.awt.Color;
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
@@ -9,8 +10,18 @@ import java.util.List;
 
 import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.ServerChatMessagePacket.Position;
 import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.ClientResourcePackStatusPacket.Status;
+import net.defekt.mc.chatclient.ui.swing.SwingUtils;
 
+/**
+ * Class containing user's preferences.<br>
+ * It is intended to be saved on disk every time the application exits.
+ * 
+ * @author Defective4
+ *
+ */
 public class UserPreferences implements Serializable {
+
+	private static final long serialVersionUID = 5064975536053236721L;
 
 	private UserPreferences() {
 	}
@@ -29,9 +40,64 @@ public class UserPreferences implements Serializable {
 		public static final int WINDOW_CLOSE_EXIT = 2;
 	}
 
-	private static final long serialVersionUID = 1L;
+	public static final ColorPreferences defaultColorPreferences = new ColorPreferences();
 
 	protected final List<ServerEntry> servers = Collections.synchronizedList(new ArrayList<ServerEntry>());
+
+	public static class ColorPreferences implements Serializable {
+
+		private static final long serialVersionUID = 1L;
+		private String colorEnabledButton = "6f6f6f";
+		private String colorEnabledHoverButton = "7c86be";
+		private String colorDisabledButton = "2d2d2d";
+		private String colorText = SwingUtils.getHexRGB(Color.white);
+		private String disabledColorText = SwingUtils.getHexRGB(Color.lightGray);
+
+		public ColorPreferences() {
+		}
+
+		public String getColorEnabledButton() {
+			return colorEnabledButton;
+		}
+
+		public String getColorEnabledHoverButton() {
+			return colorEnabledHoverButton;
+		}
+
+		public String getColorDisabledButton() {
+			return colorDisabledButton;
+		}
+
+		public void setColorEnabledButton(String colorEnabledButton) {
+			this.colorEnabledButton = colorEnabledButton;
+		}
+
+		public void setColorEnabledHoverButton(String colorEnabledHoverButton) {
+			this.colorEnabledHoverButton = colorEnabledHoverButton;
+		}
+
+		public void setColorDisabledButton(String colorDisabledButton) {
+			this.colorDisabledButton = colorDisabledButton;
+		}
+
+		public String getColorText() {
+			return colorText;
+		}
+
+		public String getDisabledColorText() {
+			return disabledColorText;
+		}
+
+		public void setColorText(String colorText) {
+			this.colorText = colorText;
+		}
+
+		public void setDisabledColorText(String disabledColorText) {
+			this.disabledColorText = disabledColorText;
+		}
+	}
+
+	private ColorPreferences colorPreferences = new ColorPreferences();
 
 	private Status resourcePackBehavior = Status.LOADED;
 	private boolean showResourcePackMessages = true;
@@ -153,5 +219,11 @@ public class UserPreferences implements Serializable {
 
 	public void setTrayShowDisconnectMessages(boolean trayShowDisconnectMessages) {
 		this.trayShowDisconnectMessages = trayShowDisconnectMessages;
+	}
+
+	public ColorPreferences getColorPreferences() {
+		if (colorPreferences == null)
+			colorPreferences = new ColorPreferences();
+		return colorPreferences;
 	}
 }

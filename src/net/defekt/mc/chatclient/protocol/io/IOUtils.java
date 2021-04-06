@@ -8,7 +8,24 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import net.defekt.mc.chatclient.protocol.data.PlayerSkinCache;
+
+/**
+ * Class containing some IO and image manipulation utilities
+ * 
+ * @see PlayerSkinCache
+ * @author Defective4
+ *
+ */
 public class IOUtils {
+
+	/**
+	 * Read all bytes from stream and close it
+	 * 
+	 * @param is input stream to read from
+	 * @return byte array read from stream
+	 * @throws IOException thrown when there was an error reading from stream
+	 */
 	public static byte[] readFully(InputStream is) throws IOException {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		byte[] buffer = new byte[1024];
@@ -20,18 +37,30 @@ public class IOUtils {
 		return bos.toByteArray();
 	}
 
+	/**
+	 * Trim skin image to head
+	 * 
+	 * @param img   skin image (must be original skin size)
+	 * @param hatOn if true a skin hat will also be included if present
+	 * @return image of skin head
+	 */
 	public static BufferedImage trimSkinHead(BufferedImage img, boolean hatOn) {
 		return trimSkinHead(img, hatOn, 0);
 	}
 
+	/**
+	 * Trim skin image to head
+	 * 
+	 * @param img   skin image (must be original skin size)
+	 * @param hatOn if true a skin hat will also be included if present
+	 * @param side  sets head direction. Current values are:<br>
+	 *              0 - forward, <br>
+	 *              1 - backward
+	 * @return image of skin head
+	 */
 	public static BufferedImage trimSkinHead(BufferedImage img, boolean hatOn, int side) {
 		int sx, sy;
 		switch (side) {
-			case 0: {
-				sx = 8;
-				sy = 8;
-				break;
-			}
 			case 1: {
 				sx = 24;
 				sy = 8;
@@ -53,11 +82,25 @@ public class IOUtils {
 		return hat;
 	}
 
-	public static BufferedImage rescaleImageProp(BufferedImage img, int height) {
-		return rescaleImage(img, height / img.getHeight());
+	/**
+	 * Resize image to match given height
+	 * 
+	 * @param img    image to rescale
+	 * @param height target height
+	 * @return resized image
+	 */
+	public static BufferedImage resizeImageProp(BufferedImage img, int height) {
+		return scaleImage(img, height / img.getHeight());
 	}
 
-	public static BufferedImage rescaleImage(BufferedImage img, double scale) {
+	/**
+	 * Scale image with a given scale
+	 * 
+	 * @param img   image to rescale
+	 * @param scale resize scale
+	 * @return scaled image
+	 */
+	public static BufferedImage scaleImage(BufferedImage img, double scale) {
 		BufferedImage nw = new BufferedImage((int) (img.getWidth() * scale), (int) (img.getHeight() * scale),
 				img.getType());
 		Graphics2D g2 = nw.createGraphics();
@@ -65,6 +108,15 @@ public class IOUtils {
 		return nw;
 	}
 
+	/**
+	 * Creates image of player skin displayed as in-game
+	 * 
+	 * @param skin      original skin image
+	 * @param direction direction of output image, same as in
+	 *                  {@link #trimSkinHead(BufferedImage, boolean, int)
+	 *                  trimSkinHead}
+	 * @return rendered skin of player
+	 */
 	public static BufferedImage renderPlayerSkin(BufferedImage skin, int direction) {
 		if (direction > 2)
 			return null;
@@ -109,6 +161,12 @@ public class IOUtils {
 		return et;
 	}
 
+	/**
+	 * Flip an image along X axis
+	 * 
+	 * @param img image to flip
+	 * @return flipped image
+	 */
 	private static BufferedImage flipImage(BufferedImage img) {
 		AffineTransform at = AffineTransform.getScaleInstance(-1, 1);
 		at.translate(-img.getWidth(), 0);
@@ -116,6 +174,16 @@ public class IOUtils {
 		return ap.filter(img, null);
 	}
 
+	/**
+	 * Trim an image
+	 * 
+	 * @param img image to trim
+	 * @param x   X coordinate of left upper corner
+	 * @param y   Y coordinate of left upper corner
+	 * @param w   width
+	 * @param h   height
+	 * @return trimmed image
+	 */
 	private static BufferedImage trim(BufferedImage img, int x, int y, int w, int h) {
 		BufferedImage br = new BufferedImage(w, h, img.getType());
 		Graphics2D g2 = br.createGraphics();

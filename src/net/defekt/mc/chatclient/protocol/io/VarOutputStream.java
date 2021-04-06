@@ -6,17 +6,47 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 
+import net.defekt.mc.chatclient.protocol.packets.Packet;
+
+/**
+ * An extension of {@link DataOutputStream} with methods to write out Minecraft'
+ * data types
+ * 
+ * @see VarInputStream
+ * @see Packet
+ * @author Defective4
+ *
+ */
 public class VarOutputStream extends DataOutputStream {
 
+	/**
+	 * Wrap output stream in {@link VarOutputStream}
+	 * 
+	 * @param out output stream to wrap 
+	 */
 	public VarOutputStream(OutputStream out) {
 		super(out);
 	}
 
+	/**
+	 * Write a string to stream<br>
+	 * This method first writes VarInt equal string's length, then it writes string
+	 * as byte array
+	 * 
+	 * @param v string to write
+	 * @throws IOException thrown when there was an error writting to stream
+	 */
 	public void writeString(String v) throws IOException {
 		writeVarInt(v.length());
 		write(v.getBytes(StandardCharsets.UTF_8));
 	}
 
+	/**
+	 * Checks how many bytes will this int take after creating VarInt from it
+	 * 
+	 * @param v VarInt value
+	 * @return size of VarInt
+	 */
 	public static int checkVarIntSize(int v) {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		VarOutputStream vos = new VarOutputStream(bos);
@@ -28,6 +58,13 @@ public class VarOutputStream extends DataOutputStream {
 		return bos.size();
 	}
 
+	/**
+	 * Writes VarInt to stream Snippet from
+	 * <a href="https://wiki.vg/Protocol#VarInt_and_VarLong">wiki.vg</a>
+	 * 
+	 * @param value VarInt value
+	 * @throws IOException thrown when there was an error writting to stream
+	 */
 	public void writeVarInt(int value) throws IOException {
 		do {
 			byte temp = (byte) (value & 0b01111111);

@@ -22,6 +22,16 @@ import net.defekt.mc.chatclient.protocol.packets.PacketRegistry;
 import net.defekt.mc.chatclient.protocol.packets.PacketRegistry.State;
 import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.ClientEntityActionPacket.EntityAction;
 
+/**
+ * MinecraftClient is Minecraft protocol implementation at IO level. It is
+ * responsible for connecting to a Minecraft server and handling all data
+ * received from it.
+ * 
+ * @see ClientListener
+ * @see MinecraftStat
+ * @see ProtocolNumber
+ * @author Defective4
+ */
 public class MinecraftClient {
 
 	private final String host;
@@ -55,18 +65,44 @@ public class MinecraftClient {
 
 	private Thread packetReaderThread = null;
 
+	/**
+	 * Add a client listener to receive client events
+	 * 
+	 * @param listener a client listener for receiving client updates
+	 */
 	public void addClientListener(ClientListener listener) {
 		clientListeners.add(listener);
 	}
 
+	/**
+	 * Remove a client listener
+	 * 
+	 * @param listener client listener to remove
+	 */
 	public void removeClientListener(ClientListener listener) {
 		clientListeners.remove(listener);
 	}
 
+	/**
+	 * Get a copy of client listener list
+	 * 
+	 * @return list of client listeners added to this client
+	 */
 	public List<ClientListener> getClientListeners() {
 		return new ArrayList<ClientListener>(clientListeners);
 	}
 
+	/**
+	 * Creates a new Minecraft Client ready to connect to specified server
+	 * 
+	 * @param host     address of server to connect to
+	 * @param port     port of target server
+	 * @param protocol protocol that will be used to connect to server
+	 * @throws IOException thrown when there was an error initializing
+	 *                     {@link PacketRegistry} for specified protocol (for
+	 *                     example when could not find a matching packet registry
+	 *                     implementation for specified protocol)
+	 */
 	public MinecraftClient(String host, int port, int protocol) throws IOException {
 		this.host = host;
 		this.port = port;
@@ -75,6 +111,9 @@ public class MinecraftClient {
 		state = protocol >= 753 ? State.IN : State.LOGIN;
 	}
 
+	/**
+	 * Closes this MinecraftClient
+	 */
 	public void close() {
 		if (soc != null && !soc.isClosed())
 			try {
@@ -91,10 +130,22 @@ public class MinecraftClient {
 
 	private State state;
 
+	/**
+	 * Set current client state. This method is used internally by
+	 * {@link ClientPacketListener} bound to this client
+	 * 
+	 * @param state next client state
+	 */
 	protected void setCurrentState(State state) {
 		this.state = state;
 	}
 
+	/**
+	 * Connect to server specified in constructor
+	 * 
+	 * @param username username of connecting client
+	 * @throws IOException thrown when client was unable to connect to target server
+	 */
 	public void connect(String username) throws IOException {
 		this.username = username;
 		try {
@@ -149,8 +200,8 @@ public class MinecraftClient {
 							is.readFully(data);
 
 							VarInputStream packetbuf = new VarInputStream(new ByteArrayInputStream(data));
-							int id = -1;
-							byte[] packetData = new byte[0];
+							final int id;
+							final byte[] packetData;
 
 							if (compression) {
 								int dlen = packetbuf.readVarInt();
@@ -211,18 +262,29 @@ public class MinecraftClient {
 		}
 	}
 
+	/**
+	 * Get protocol of this client
+	 * 
+	 * @return protocol used by this client
+	 */
 	protected int getProtocol() {
 		return protocol;
 	}
 
-	protected OutputStream getOutputStream() {
-		return os;
-	}
-
+	/**
+	 * Check if compression is enabled by server
+	 * 
+	 * @return compressio state
+	 */
 	protected boolean isCompressionEnabled() {
 		return compression;
 	}
 
+	/**
+	 * Get compression treshold
+	 * 
+	 * @return compression treshold sent by server. -1 if none
+	 */
 	protected int getCTreshold() {
 		return cTreshold;
 	}
@@ -231,50 +293,112 @@ public class MinecraftClient {
 		return lock;
 	}
 
+	/**
+	 * Get X position of this client in-game
+	 * 
+	 * @return X coordinates of client
+	 */
 	public double getX() {
 		return x;
 	}
 
+	/**
+	 * Get Y position of this client in-game
+	 * 
+	 * @return Y coordinates of client
+	 */
 	public double getY() {
 		return y;
 	}
 
+	/**
+	 * Get Z position of this client in-game
+	 * 
+	 * @return Z coordinates of client
+	 */
 	public double getZ() {
 		return z;
 	}
 
+	/**
+	 * Set X position of this client. This method only sets internal variable, it
+	 * does NOT change client's position on server.
+	 * 
+	 * @param x new X position
+	 */
 	protected void setX(double x) {
 		this.x = x;
 	}
 
+	/**
+	 * Set Y position of this client. This method only sets internal variable, it
+	 * does NOT change client's position on server.
+	 * 
+	 * @param y new Y position
+	 */
 	protected void setY(double y) {
 		this.y = y;
 	}
 
+	/**
+	 * Set Z position of this client. This method only sets internal variable, it
+	 * does NOT change client's position on server.
+	 * 
+	 * @param z new Z position
+	 */
 	protected void setZ(double z) {
 		this.z = z;
 	}
 
+	/**
+	 * Toggle client sneaking state. It also sets client sneaking in-game/
+	 * 
+	 * @throws IOException thrown when server was not connected, or there was an
+	 *                     error sending packet to server
+	 */
 	public void toggleSneaking() throws IOException {
 		if (connected && soc != null && !soc.isClosed()) {
 			sneaking = !sneaking;
 			EntityAction action = sneaking ? EntityAction.START_SNEAKING : EntityAction.STOP_SNEAKING;
-			os.write(PacketFactory.constructPacket(reg, "ClientEntityActionPacket", entityID, action)
-					.getData(compression));
+			try {
+				os.write(PacketFactory.constructPacket(reg, "ClientEntityActionPacket", entityID, action)
+						.getData(compression));
+			} catch (Exception e) {
+				sneaking = !sneaking;
+				throw e;
+			}
 		} else
 			throw new IOException("Not connected!");
 	}
 
+	/**
+	 * Toggle client sprinting state. It also sets client sprinting in-game/
+	 * 
+	 * @throws IOException thrown when server was not connected, or there was an
+	 *                     error sending packet to server
+	 */
 	public void toggleSprinting() throws IOException {
 		if (connected && soc != null && !soc.isClosed()) {
 			sprinting = !sprinting;
 			EntityAction action = sprinting ? EntityAction.START_SPRINTING : EntityAction.STOP_SPRINTING;
-			os.write(PacketFactory.constructPacket(reg, "ClientEntityActionPacket", entityID, action)
-					.getData(compression));
+			try {
+				os.write(PacketFactory.constructPacket(reg, "ClientEntityActionPacket", entityID, action)
+						.getData(compression));
+			} catch (Exception e) {
+				sprinting = !sprinting;
+				throw e;
+			}
 		} else
 			throw new IOException("Not connected!");
 	}
 
+	/**
+	 * Send chat message to server
+	 * 
+	 * @param message a chat message to send
+	 * @throws IOException thrown when server was not connected, or there was an
+	 *                     error sending packet to server
+	 */
 	public void sendChatMessage(String message) throws IOException {
 		if (connected && soc != null && !soc.isClosed()) {
 			os.write(PacketFactory.constructPacket(reg, "ClientChatMessagePacket", message).getData(compression));
@@ -282,35 +406,86 @@ public class MinecraftClient {
 			throw new IOException("Not connected!");
 	}
 
+	/**
+	 * Get entity ID of this client on server
+	 * 
+	 * @return client's entity ID
+	 */
 	public int getEntityID() {
 		return entityID;
 	}
 
+	/**
+	 * Used internally by {@link ClientPacketListener} to set client's entity ID
+	 * 
+	 * @param entityID new entity ID
+	 */
 	protected void setEntityID(int entityID) {
 		this.entityID = entityID;
 	}
 
+	/**
+	 * Get client sneaking state of this client. It only returns variable stored
+	 * locally
+	 * 
+	 * @return sneaking state
+	 */
 	public boolean isSneaking() {
 		return sneaking;
 	}
 
+	/**
+	 * Get client sprinting state of this client. It only returns variable stored
+	 * locally
+	 * 
+	 * @return sprinting state
+	 */
 	public boolean isSprinting() {
 		return sprinting;
 	}
 
+	/**
+	 * Get player list
+	 * 
+	 * @return player list received from server
+	 */
 	public ListenerHashMap<UUID, PlayerInfo> getPlayersTabList() {
 		return playersTabList;
 	}
 
+	/**
+	 * Get server's address
+	 * 
+	 * @return server's hostname
+	 */
 	public String getHost() {
 		return host;
 	}
 
+	/**
+	 * Get server's port
+	 * 
+	 * @return server's port
+	 */
 	public int getPort() {
 		return port;
 	}
 
+	/**
+	 * Get client's username (only if client is connected)
+	 * 
+	 * @return client's username
+	 */
 	public String getUsername() {
 		return username;
+	}
+
+	/**
+	 * Get output stream used by this client
+	 * 
+	 * @return client's output stream
+	 */
+	protected OutputStream getOutputStream() {
+		return os;
 	}
 }

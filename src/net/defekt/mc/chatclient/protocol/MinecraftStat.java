@@ -18,7 +18,24 @@ import net.defekt.mc.chatclient.protocol.packets.HandshakePacket;
 import net.defekt.mc.chatclient.protocol.packets.Packet;
 import net.defekt.mc.chatclient.protocol.packets.PacketFactory;
 
+/**
+ * This class contains methods for getting status of a Minecraft server and
+ * discovering servers on LAN netowrk
+ * 
+ * @see LANListener
+ * @see StatusInfo
+ * @author Defective4
+ *
+ */
 public class MinecraftStat {
+	/**
+	 * Perform a Server List Ping on specified server to get its status
+	 * 
+	 * @param host hostname of target server
+	 * @param port port of target server
+	 * @return An object containing data returned by server
+	 * @throws IOException thrown when there was an error pinging target server
+	 */
 	public static StatusInfo serverListPing(String host, int port) throws IOException {
 		try (Socket soc = new Socket()) {
 			soc.connect(new InetSocketAddress(host, port));
@@ -64,6 +81,11 @@ public class MinecraftStat {
 		}
 	}
 
+	/**
+	 * Starts listening for LAN servers
+	 * 
+	 * @param listener listener used to handle discovered servers
+	 */
 	public static void listenOnLAN(final LANListener listener) {
 		new Thread(new Runnable() {
 

@@ -4,7 +4,18 @@ import java.awt.Color;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Class containing Minecraft's color codes, their names and their RGB
+ * representation
+ * 
+ * @see <a href="https://wiki.vg/Chat#Colors">Chat Colors (wiki.vg)</a>
+ * @author Defective4
+ *
+ */
 public class ChatColor {
+	private ChatColor() {
+	}
+
 	private static final Map<String, String> colorCodes = new HashMap<String, String>() {
 		private static final long serialVersionUID = 1L;
 		{
@@ -50,6 +61,13 @@ public class ChatColor {
 		}
 	};
 
+	/**
+	 * Translate Minecraft color code (0-9 a-f) to {@link Color} object.<br>
+	 * Formatting codes (k-m) are NOT supported yet.
+	 * 
+	 * @param code color code
+	 * @return RGB color
+	 */
 	public static Color translateColorCode(String code) {
 		if (colors.containsKey(code)) {
 			String[] rgb = colors.get(code).split(":");
@@ -61,6 +79,12 @@ public class ChatColor {
 			return Color.white;
 	}
 
+	/**
+	 * Translate Minecraft chat color name to color code
+	 * 
+	 * @param name color name
+	 * @return color code
+	 */
 	public static String translateColorName(String name) {
 		return colorCodes.containsKey(name) ? colorCodes.get(name) : colorCodes.get("white");
 	}

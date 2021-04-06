@@ -16,9 +16,22 @@ import net.defekt.mc.chatclient.protocol.MojangAPI;
 import net.defekt.mc.chatclient.protocol.io.FallbackHashMap;
 import net.defekt.mc.chatclient.protocol.io.IOUtils;
 import net.defekt.mc.chatclient.ui.Main;
+import net.defekt.mc.chatclient.ui.UserPreferences;
 import net.defekt.mc.chatclient.ui.UserPreferences.SkinRule;
 
+/**
+ * Static class used to store information about player skins.<br>
+ * This class may not be static in future as it is planned for it to be saved on
+ * disk.
+ * 
+ * @see PlayerSkinInfo
+ * @author Defective4
+ *
+ */
 public class PlayerSkinCache {
+	private PlayerSkinCache() {
+	}
+
 	private static final FallbackHashMap<UUID, PlayerSkinInfo> skinCache = new FallbackHashMap<UUID, PlayerSkinInfo>() {
 		private static final long serialVersionUID = 1L;
 		{
@@ -32,6 +45,14 @@ public class PlayerSkinCache {
 	};
 	private static final List<UUID> pending = new ArrayList<UUID>();
 
+	/**
+	 * Fetch and put player's skin in cache. It will obey {@link UserPreferences}'s
+	 * skin rule
+	 * 
+	 * @param uid       UUID of player
+	 * @param texturesO texture URL of player
+	 * @param username  username of player
+	 */
 	public static void putSkin(final UUID uid, String texturesO, String username) {
 		if (!pending.contains(uid)) {
 			pending.add(uid);
@@ -67,10 +88,21 @@ public class PlayerSkinCache {
 		}
 	}
 
+	/**
+	 * Get head texture of player
+	 * 
+	 * @param id player's UUID
+	 * @return image of player's head
+	 */
 	public static BufferedImage getHead(UUID id) {
 		return IOUtils.trimSkinHead(skinCache.get(id).getImg(), true);
 	}
 
+	/**
+	 * Get skin cache
+	 * 
+	 * @return skin cache
+	 */
 	public static Map<UUID, PlayerSkinInfo> getSkincache() {
 		return skinCache;
 	}

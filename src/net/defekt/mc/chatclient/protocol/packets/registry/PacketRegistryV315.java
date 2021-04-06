@@ -23,6 +23,12 @@ import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.Client
 import net.defekt.mc.chatclient.protocol.packets.v47.clientbound.play.ServerKeepAlivePacket;
 import net.defekt.mc.chatclient.protocol.packets.v47.serverbound.play.ClientKeepAlivePacket;
 
+
+/**
+ * A packet registry implementation for protocol 315
+ * 
+ * @author Defective4
+ */
 public class PacketRegistryV315 extends PacketRegistry {
 
 	@Override

@@ -22,9 +22,20 @@ import net.defekt.mc.chatclient.protocol.data.PlayerInfo;
 import net.defekt.mc.chatclient.protocol.data.PlayerSkinCache;
 import net.defekt.mc.chatclient.ui.Main;
 
+/**
+ * Custom cell rendered used in {@link JMinecraftPlayerList}.<br>
+ * It is used to render players list along with their custom names, ping, and
+ * their skins.
+ * 
+ * @author Defective4
+ *
+ */
 public class MinecraftPlayerListRenderer extends DefaultListCellRenderer {
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * <img src="doc-files/0.png" height="16" alt="0"> No connection indicator image
+	 */
 	public final static BufferedImage bar0 = new BufferedImage(40, 28, BufferedImage.TYPE_INT_ARGB) {
 		{
 			try {
@@ -37,6 +48,10 @@ public class MinecraftPlayerListRenderer extends DefaultListCellRenderer {
 			}
 		}
 	};
+
+	/**
+	 * <img src="doc-files/5.png" height="16" alt="5"> Full connection indicator image
+	 */
 	public final static BufferedImage bar5 = new BufferedImage(40, 28, BufferedImage.TYPE_INT_ARGB) {
 		{
 			try {
@@ -49,6 +64,10 @@ public class MinecraftPlayerListRenderer extends DefaultListCellRenderer {
 			}
 		}
 	};
+
+	/**
+	 * <img src="doc-files/1.png" height="16" alt="1"> One bar connection indicator image
+	 */
 	public final static BufferedImage bar1 = new BufferedImage(40, 28, BufferedImage.TYPE_INT_ARGB) {
 		{
 			try {
@@ -61,6 +80,10 @@ public class MinecraftPlayerListRenderer extends DefaultListCellRenderer {
 			}
 		}
 	};
+
+	/**
+	 * <img src="doc-files/2.png" height="16" alt="2"> Two bar connection indicator image
+	 */
 	public final static BufferedImage bar2 = new BufferedImage(40, 28, BufferedImage.TYPE_INT_ARGB) {
 		{
 			try {
@@ -73,6 +96,10 @@ public class MinecraftPlayerListRenderer extends DefaultListCellRenderer {
 			}
 		}
 	};
+
+	/**
+	 * <img src="doc-files/3.png" height="16" alt="3"> Three bar connection indicator image
+	 */
 	public final static BufferedImage bar3 = new BufferedImage(40, 28, BufferedImage.TYPE_INT_ARGB) {
 		{
 			try {
@@ -85,6 +112,10 @@ public class MinecraftPlayerListRenderer extends DefaultListCellRenderer {
 			}
 		}
 	};
+
+	/**
+	 * <img src="doc-files/4.png" height="16" alt="4"> Four bar connection indicator image
+	 */
 	public final static BufferedImage bar4 = new BufferedImage(40, 28, BufferedImage.TYPE_INT_ARGB) {
 		{
 			try {
@@ -100,7 +131,13 @@ public class MinecraftPlayerListRenderer extends DefaultListCellRenderer {
 
 	private final JTextField filter;
 
-	public MinecraftPlayerListRenderer(JTextField filter, final JMemList<PlayerInfo> ml) {
+	/**
+	 * Default constructor
+	 * 
+	 * @param filter     text field used to filter player names
+	 * @param playerList a player list component associated with this renderer
+	 */
+	protected MinecraftPlayerListRenderer(JTextField filter, final JMemList<PlayerInfo> playerList) {
 		this.filter = filter;
 		new Thread(new Runnable() {
 
@@ -111,10 +148,10 @@ public class MinecraftPlayerListRenderer extends DefaultListCellRenderer {
 						Thread.sleep(3000);
 						synchronized (MinecraftPlayerListRenderer.this) {
 							SwingUtilities.invokeLater(() -> {
-								int ind = ml.getSelectedIndex();
-								ml.setListData(ml.getListData());
-								ml.setSelectedIndex(ind);
-								ml.repaint();
+								int ind = playerList.getSelectedIndex();
+								playerList.setListData(playerList.getListData());
+								playerList.setSelectedIndex(ind);
+								playerList.repaint();
 							});
 						}
 					}
@@ -139,10 +176,10 @@ public class MinecraftPlayerListRenderer extends DefaultListCellRenderer {
 
 		if (info.getTexture() != null)
 			try {
-				PlayerSkinCache.putSkin(info.getUuid(), info.getTexture(), info.getName());
+				PlayerSkinCache.putSkin(info.getUUID(), info.getTexture(), info.getName());
 				if (true) {
 					playerLine.add(new JPanel() {
-						BufferedImage img = PlayerSkinCache.getHead(info.getUuid());
+						BufferedImage img = PlayerSkinCache.getHead(info.getUUID());
 						private static final long serialVersionUID = 1L;
 						{
 							setPreferredSize(new Dimension(32, 40));

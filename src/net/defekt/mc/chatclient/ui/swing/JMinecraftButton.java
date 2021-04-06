@@ -13,11 +13,26 @@ import java.awt.font.GlyphVector;
 import javax.swing.JButton;
 
 import net.defekt.mc.chatclient.ui.Main;
+import net.defekt.mc.chatclient.ui.UserPreferences.ColorPreferences;
 
+/**
+ * A Minecraft styled button.<br>
+ * Other than appearance, there is no difference between this button and a
+ * regular {@link JButton}
+ * 
+ * @author Defective4
+ *
+ */
 public class JMinecraftButton extends JButton {
 	private static final long serialVersionUID = 1L;
 	private boolean hover = false;
+	private ColorPreferences cp = Main.up.getColorPreferences();
 
+	/**
+	 * Default constructor
+	 * 
+	 * @param text text that should appear on button
+	 */
 	public JMinecraftButton(String text) {
 		super(text);
 		setFont(Main.mcFont.deriveFont((float) 14));
@@ -54,15 +69,31 @@ public class JMinecraftButton extends JButton {
 		g2.fillRect(0, 0, getWidth(), 2);
 		g2.fillRect(0, getHeight() - 2, getWidth(), 2);
 
-		g2.setColor(new Color(Integer.parseInt(!isEnabled() ? "2d2d2d" : hover ? "bec7ff" : "ababab", 16)));
+		Color baseEnabledColor = new Color(Integer.parseInt(cp.getColorEnabledButton(), 16));
+		Color baseEnabledHoverColor = new Color(Integer.parseInt(cp.getColorEnabledHoverButton(), 16));
+
+		g2.setColor(
+				new Color(
+						Integer.parseInt(
+								!isEnabled() ? cp.getColorDisabledButton()
+										: hover ? SwingUtils.getHexRGB(SwingUtils.brighten(baseEnabledHoverColor, 66))
+												: SwingUtils.getHexRGB(SwingUtils.brighten(baseEnabledColor, 60)),
+								16)));
 		g2.fillRect(2, 2, getWidth() - 4, 2);
 		g2.fillRect(2, 2, 2, getHeight() - 4);
 
-		g2.setColor(new Color(Integer.parseInt(!isEnabled() ? "2d2d2d" : hover ? "5f69a0" : "565656", 16)));
+		g2.setColor(
+				new Color(
+						Integer.parseInt(
+								!isEnabled() ? cp.getColorDisabledButton()
+										: hover ? SwingUtils.getHexRGB(SwingUtils.brighten(baseEnabledHoverColor, -29))
+												: SwingUtils.getHexRGB(SwingUtils.brighten(baseEnabledColor, -25)),
+								16)));
 		g2.fillRect(2, getHeight() - 4, getWidth() - 4, 2);
 		g2.fillRect(getWidth() - 4, 2, 2, getHeight() - 4);
 
-		g2.setColor(new Color(Integer.parseInt(!isEnabled() ? "2d2d2d" : hover ? "7c86be" : "6f6f6f", 16)));
+		g2.setColor(new Color(Integer.parseInt(!isEnabled() ? cp.getColorDisabledButton()
+				: hover ? cp.getColorEnabledHoverButton() : cp.getColorEnabledButton(), 16)));
 		g2.fillRect(4, 4, getWidth() - 8, getHeight() - 8);
 
 		GlyphVector glyph = getFont().createGlyphVector(g2.getFontRenderContext(), getText());
@@ -70,13 +101,22 @@ public class JMinecraftButton extends JButton {
 		float y = (float) ((getHeight() + (bText.getBounds2D().getHeight() * 2)) / 2);
 		float x = (float) ((getWidth() - (bText.getBounds2D().getWidth())) / 2);
 
-		if(isEnabled()) {
-			g2.setColor(Color.DARK_GRAY);
-			g2.fill(glyph.getOutline(x+2, y+2));
+		Color tx = new Color(Integer.parseInt(cp.getColorText(), 16));
+		if (isEnabled()) {
+			g2.setColor(SwingUtils.brighten(tx, -190));
+			g2.fill(glyph.getOutline(x + 2, y + 2));
 		}
 
-		g2.setColor(isEnabled() ? Color.white : Color.lightGray);
+		g2.setColor(isEnabled() ? tx : new Color(Integer.parseInt(cp.getDisabledColorText(), 16)));
 		g2.fill(glyph.getOutline(x, y));
+	}
+
+	public ColorPreferences getCp() {
+		return cp;
+	}
+
+	public void setCp(ColorPreferences cp) {
+		this.cp = cp;
 	}
 
 }

@@ -23,8 +23,13 @@ import net.defekt.mc.chatclient.protocol.packets.v47.clientbound.play.ServerKeep
 import net.defekt.mc.chatclient.protocol.packets.v47.serverbound.play.ClientKeepAlivePacket;
 import net.defekt.mc.chatclient.protocol.packets.v47.serverbound.play.ClientResourcePackStatusPacket;
 
+/**
+ * A packet registry implementation for protocol 107
+ * 
+ * @author Defective4
+ */
 public class PacketRegistryV107 extends PacketRegistry {
-
+	
 	@Override
 	public Map<Integer, Class<? extends Packet>> initLoginPackets() {
 		return new HashMap<Integer, Class<? extends Packet>>() {

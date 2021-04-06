@@ -35,10 +35,27 @@ import net.defekt.mc.chatclient.protocol.data.PlayerInfo;
 import net.defekt.mc.chatclient.protocol.data.PlayerSkinCache;
 import net.defekt.mc.chatclient.protocol.io.IOUtils;
 
+/**
+ * Custom list component used to display players list.<br>
+ * By default it uses custom cell renderer - {@link MinecraftPlayerListRenderer}
+ * 
+ * @see MinecraftPlayerListRenderer
+ * @see PlayerInfo
+ * @see MinecraftClient
+ * @author Defective4
+ *
+ */
 public class JMinecraftPlayerList extends JMemList<PlayerInfo> {
 	private static final long serialVersionUID = 1L;
 	private MinecraftClient mcl = null;
 
+	/**
+	 * Default constructor
+	 * 
+	 * @param filterField text field used as player filter
+	 * @param win         parent window containing this list
+	 * @param addr        associated server's address
+	 */
 	public JMinecraftPlayerList(JTextField filterField, final JFrame win, final String addr) {
 		setCellRenderer(new MinecraftPlayerListRenderer(filterField, this));
 		setBackground(new Color(35, 35, 35));
@@ -54,7 +71,7 @@ public class JMinecraftPlayerList extends JMemList<PlayerInfo> {
 					JMenuItem placeholder;
 					try {
 						placeholder = new JMenuItem(inf.getName(),
-								new ImageIcon(IOUtils.rescaleImage(PlayerSkinCache.getHead(inf.getUuid()), 2)));
+								new ImageIcon(IOUtils.scaleImage(PlayerSkinCache.getHead(inf.getUUID()), 2)));
 					} catch (Exception e2) {
 						placeholder = new JMenuItem(inf.getName());
 					}
@@ -67,8 +84,8 @@ public class JMinecraftPlayerList extends JMemList<PlayerInfo> {
 
 					JMenuItem resetSkin = new JMenuItem("Reset skin");
 					resetSkin.addActionListener(ev -> {
-						if (PlayerSkinCache.getSkincache().containsKey(inf.getUuid()))
-							PlayerSkinCache.getSkincache().remove(inf.getUuid());
+						if (PlayerSkinCache.getSkincache().containsKey(inf.getUUID()))
+							PlayerSkinCache.getSkincache().remove(inf.getUUID());
 					});
 
 					JMenuItem resetAllSkins = new JMenuItem("Clear skin cache");
@@ -109,10 +126,10 @@ public class JMinecraftPlayerList extends JMemList<PlayerInfo> {
 											String dname = pinf.getDisplayName() == null ? "N/A"
 													: ChatMessage
 															.removeColors(ChatMessage.parse(pinf.getDisplayName()));
-											String uuid = pinf.getUuid().toString();
+											String uuid = pinf.getUUID().toString();
 											String ping = pinf.getPing() > 0 ? Integer.toString(pinf.getPing()) : "?";
-											String skurl = PlayerSkinCache.getSkincache().containsKey(pinf.getUuid())
-													? PlayerSkinCache.getSkincache().get(pinf.getUuid()).getUrl()
+											String skurl = PlayerSkinCache.getSkincache().containsKey(pinf.getUUID())
+													? PlayerSkinCache.getSkincache().get(pinf.getUUID()).getUrl()
 													: "N/A";
 
 											pw.println(name + "; " + dname + "; " + uuid + "; " + ping + "; " + skurl);
@@ -153,7 +170,7 @@ public class JMinecraftPlayerList extends JMemList<PlayerInfo> {
 		String dname = info.getDisplayName() == null ? "N/A" : ChatMessage.parse(info.getDisplayName());
 		int ping = info.getPing();
 		String pingI = Integer.toString(ping);
-		String uuid = info.getUuid().toString();
+		String uuid = info.getUUID().toString();
 
 		box.add(new JLabel("Name: " + name));
 		box.add(new JPanel() {
@@ -238,7 +255,7 @@ public class JMinecraftPlayerList extends JMemList<PlayerInfo> {
 			{
 				addActionListener(ev -> {
 					diag.dispose();
-					BufferedImage skin = PlayerSkinCache.getSkincache().get(info.getUuid()).getImg();
+					BufferedImage skin = PlayerSkinCache.getSkincache().get(info.getUUID()).getImg();
 					BufferedImage p1 = IOUtils.renderPlayerSkin(skin, 0);
 					BufferedImage p2 = IOUtils.renderPlayerSkin(skin, 1);
 
@@ -264,7 +281,7 @@ public class JMinecraftPlayerList extends JMemList<PlayerInfo> {
 						@Override
 						public void paintComponent(Graphics g) {
 							super.paintComponent(g);
-							g.drawImage(IOUtils.rescaleImageProp(igs[inRef[0]], getHeight()), 0, 0, null);
+							g.drawImage(IOUtils.resizeImageProp(igs[inRef[0]], getHeight()), 0, 0, null);
 						}
 					};
 					box.add(jp);
@@ -321,10 +338,20 @@ public class JMinecraftPlayerList extends JMemList<PlayerInfo> {
 		diag.setVisible(true);
 	}
 
+	/**
+	 * Get Minecraft client instance
+	 * 
+	 * @return Minecraft client instance
+	 */
 	public MinecraftClient getMcl() {
 		return mcl;
 	}
 
+	/**
+	 * Set current Minecraft client instance
+	 * 
+	 * @param mcl Minecraft client instance
+	 */
 	public void setMcl(MinecraftClient mcl) {
 		this.mcl = mcl;
 	}

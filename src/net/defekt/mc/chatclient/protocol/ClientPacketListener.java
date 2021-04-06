@@ -17,6 +17,16 @@ import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.Client
 import net.defekt.mc.chatclient.ui.Main;
 import net.defekt.mc.chatclient.ui.UserPreferences;
 
+/**
+ * An implementation of {@link InternalPacketListener} responsible for handling
+ * all packets received from server. It is added to every instance of
+ * {@link MinecraftClient} after successfully connecting to server.
+ * 
+ * @see MinecraftClient
+ * @see ClientListener
+ * @author Defective4
+ *
+ */
 public class ClientPacketListener implements InternalPacketListener {
 
 	private final OutputStream os;
@@ -24,6 +34,11 @@ public class ClientPacketListener implements InternalPacketListener {
 	private final MinecraftClient cl;
 	private final UserPreferences up = Main.up;
 
+	/**
+	 * Constructs packet listener bound to specified client
+	 * 
+	 * @param client A Minecraft client this listener is bound o
+	 */
 	protected ClientPacketListener(MinecraftClient client) {
 		this.cl = client;
 		this.os = cl.getOutputStream();

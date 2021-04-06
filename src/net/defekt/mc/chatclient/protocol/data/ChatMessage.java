@@ -7,11 +7,27 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import net.defekt.mc.chatclient.protocol.ClientListener;
+
+/**
+ * Class containing methods to make parsing chat messages easier
+ * 
+ * @see ClientListener
+ * @see ChatColor
+ * @author Defective4
+ *
+ */
 public class ChatMessage {
 
 	private ChatMessage() {
 	}
 
+	/**
+	 * Parse JSON chat message
+	 * 
+	 * @param json chat message
+	 * @return parsed text
+	 */
 	public static String parse(String json) {
 		json = json.replace("\u00A7k", "").replace("\u00A7l", "").replace("\u00A7m", "").replace("\u00A7n", "");
 		try {
@@ -99,6 +115,13 @@ public class ChatMessage {
 		}
 	}
 
+	/**
+	 * Remove colors from message.<br>
+	 * This method removes all color and formatting codes from message.
+	 * 
+	 * @param message message to remove colors from
+	 * @return colorless message
+	 */
 	public static String removeColors(String message) {
 		String colorless = "";
 		char[] chs = message.toCharArray();

@@ -5,6 +5,12 @@ import java.io.Serializable;
 import net.defekt.mc.chatclient.protocol.MinecraftStat;
 import net.defekt.mc.chatclient.protocol.data.StatusInfo;
 
+/**
+ * A container for a server list entry
+ * 
+ * @author Defective4
+ *
+ */
 public class ServerEntry implements Serializable {
 	private static final long serialVersionUID = 4963617404444444550L;
 
@@ -19,6 +25,14 @@ public class ServerEntry implements Serializable {
 
 	protected boolean refreshing = false;
 
+	/**
+	 * Creates new server entry
+	 * 
+	 * @param host    server's hostname
+	 * @param port    server's port
+	 * @param name    server name
+	 * @param version human-readable server version
+	 */
 	protected ServerEntry(String host, int port, String name, String version) {
 		this.host = host;
 		this.port = port;
@@ -26,6 +40,9 @@ public class ServerEntry implements Serializable {
 		this.version = version;
 	}
 
+	/**
+	 * Performs server list ping on this server and updates it on server list
+	 */
 	protected void ping() {
 		if (!refreshing) {
 			new Thread(new Runnable() {
@@ -49,26 +66,56 @@ public class ServerEntry implements Serializable {
 		}
 	}
 
+	/**
+	 * Get server host name
+	 * 
+	 * @return server's host name
+	 */
 	public String getHost() {
 		return host;
 	}
 
+	/**
+	 * Get server's port
+	 * 
+	 * @return server's port
+	 */
 	public int getPort() {
 		return port;
 	}
 
+	/**
+	 * Get server's name
+	 * 
+	 * @return server's name
+	 */
 	public String getName() {
 		return name;
 	}
 
+	/**
+	 * Get latest server's status info
+	 * 
+	 * @return server's status
+	 */
 	public StatusInfo getInfo() {
 		return info;
 	}
 
+	/**
+	 * Get server's version
+	 * 
+	 * @return server's version
+	 */
 	public String getVersion() {
 		return version;
 	}
 
+	/**
+	 * Get base64 server icon
+	 * 
+	 * @return server's icon
+	 */
 	public String getIcon() {
 		return icon;
 	}

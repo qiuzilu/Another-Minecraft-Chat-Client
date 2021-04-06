@@ -17,6 +17,14 @@ import net.defekt.mc.chatclient.protocol.packets.registry.PacketRegistryV573;
 import net.defekt.mc.chatclient.protocol.packets.registry.PacketRegistryV735;
 import net.defekt.mc.chatclient.protocol.packets.registry.PacketRegistryV751;
 
+/**
+ * A class used to construct packets according to their name
+ * 
+ * @see Packet
+ * @see PacketRegistry
+ * @author Defective4
+ *
+ */
 @SuppressWarnings("serial")
 public class PacketFactory {
 
@@ -62,6 +70,13 @@ public class PacketFactory {
 		}
 	};
 
+	/**
+	 * Returns packet registry or specified protocol number
+	 * 
+	 * @param protocol protocol number
+	 * @return created packet registry
+	 * @throws IOException thrown when specified protocol is not implemented
+	 */
 	public static PacketRegistry constructPacketRegistry(int protocol) throws IOException {
 		if (protocolBinds.containsKey(protocol))
 			protocol = protocolBinds.get(protocol);
@@ -72,6 +87,16 @@ public class PacketFactory {
 			throw new IOException("Protocol not implemented: " + Integer.toString(protocol));
 	}
 
+	/**
+	 * Creates a packet using its class name and provided packet registry
+	 * 
+	 * @param reg       packet registry that will be used to construct this packet
+	 * @param name      packet name
+	 * @param arguments arguments required to contruct this packet
+	 * @return constructed packet
+	 * @throws IOException thrown when there was an error constructing packet, or
+	 *                     packet with this name was not found
+	 */
 	public static Packet constructPacket(PacketRegistry reg, String name, Object... arguments) throws IOException {
 		Object[] relArguments = new Object[arguments.length + 1];
 		for (int x = 1; x < relArguments.length; x++)

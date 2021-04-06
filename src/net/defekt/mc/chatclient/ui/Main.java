@@ -79,8 +79,10 @@ import net.defekt.mc.chatclient.protocol.io.IOUtils;
 import net.defekt.mc.chatclient.protocol.io.ListenerHashMap.MapChangeListener;
 import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.ServerChatMessagePacket.Position;
 import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.ClientResourcePackStatusPacket.Status;
+import net.defekt.mc.chatclient.ui.UserPreferences.ColorPreferences;
 import net.defekt.mc.chatclient.ui.UserPreferences.Constants;
 import net.defekt.mc.chatclient.ui.UserPreferences.SkinRule;
+import net.defekt.mc.chatclient.ui.swing.JColorChooserButton;
 import net.defekt.mc.chatclient.ui.swing.JMinecraftButton;
 import net.defekt.mc.chatclient.ui.swing.JMinecraftField;
 import net.defekt.mc.chatclient.ui.swing.JMinecraftPlayerList;
@@ -241,7 +243,6 @@ public class Main {
 		});
 
 		serverListComponent.setListData(entries);
-
 		Runtime.getRuntime().addShutdownHook(new Thread(upSaveRunnable));
 
 		win.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -274,9 +275,11 @@ public class Main {
 						public void actionPerformed(ActionEvent ev) {
 							if (rememberOp.isSelected())
 								up.setCloseMode(Constants.WINDOW_CLOSE_TO_TRAY);
+							if (trayIcon != null)
+								return;
 							diag.dispose();
 							SystemTray tray = SystemTray.getSystemTray();
-							trayIcon = new TrayIcon(IOUtils.rescaleImage(logoImage, 0.5), "Another Chat Client");
+							trayIcon = new TrayIcon(IOUtils.scaleImage(logoImage, 0.5), "Another Chat Client");
 							try {
 								MouseListener ml = new MouseAdapter() {
 									@Override
@@ -709,6 +712,7 @@ public class Main {
 						addActionListener(ev -> {
 							JDialog od = new JDialog(win);
 							od.setModal(true);
+							od.setResizable(false);
 							od.setTitle("Minecraft Chat Client settings");
 
 							Box b = Box.createVerticalBox();
@@ -772,6 +776,12 @@ public class Main {
 							rsBox.add(new JLabel(" "));
 							rsBox.add(new JLabel("Resource pack message position"));
 							rsBox.add(rsPackMessagePosition);
+							rsBox.add(new JTextPane() {
+								{
+									setEditable(false);
+									setOpaque(false);
+								}
+							});
 
 							rsBox.alignAll();
 
@@ -806,9 +816,10 @@ public class Main {
 							pkBox.add(ignoreKAPackets);
 							pkBox.add(new JLabel("Minecraft Brand (empty = do not send brand info)"));
 							pkBox.add(brandField);
-							pkBox.add(new JLabel(" ") {
+							pkBox.add(new JTextPane() {
 								{
-									setPreferredSize(new Dimension(0, 100));
+									setEditable(false);
+									setOpaque(false);
 								}
 							});
 							pkBox.alignAll();
@@ -846,6 +857,123 @@ public class Main {
 
 							trBox.alignAll();
 
+							JTabbedPane apPane = new JTabbedPane();
+
+							JVBoxPanel apButtonSettings = new JVBoxPanel();
+							JScrollPane apButtonSettingsSP = new JScrollPane(apButtonSettings);
+							JVBoxPanel apButtonSettingsFull = new JVBoxPanel();
+							apButtonSettingsSP.setPreferredSize(new Dimension(0, 0));
+
+							ColorPreferences cp = Main.up.getColorPreferences();
+							ColorPreferences cprefCopy = new UserPreferences.ColorPreferences();
+							cprefCopy.setColorDisabledButton(cp.getColorDisabledButton());
+							cprefCopy.setColorEnabledButton(cp.getColorEnabledButton());
+							cprefCopy.setColorEnabledHoverButton(cp.getColorEnabledHoverButton());
+							cprefCopy.setColorText(cp.getColorText());
+							cprefCopy.setDisabledColorText(cp.getDisabledColorText());
+
+							JColorChooserButton apButtonEnabled = new JColorChooserButton(cp.getColorEnabledButton(),
+									od);
+							JColorChooserButton apButtonEnabledHover = new JColorChooserButton(
+									cp.getColorEnabledHoverButton(), od);
+							JColorChooserButton apButtonDisabled = new JColorChooserButton(cp.getColorDisabledButton(),
+									od);
+							JColorChooserButton apButtonText = new JColorChooserButton(cp.getColorText(), od);
+							JColorChooserButton apButtonTextDisabled = new JColorChooserButton(
+									cp.getDisabledColorText(), od);
+
+							JCheckBox apButtonLockColors = new JCheckBox("Automatical colors");
+							apButtonLockColors.setSelected(true);
+							JButton apButtonReset = new JButton("Reset to defaults");
+
+							JMinecraftButton sampleButton = new JMinecraftButton("Test");
+							JMinecraftButton sampleDisabledButton = new JMinecraftButton("Test");
+							sampleButton.setCp(cprefCopy);
+							sampleDisabledButton.setCp(cprefCopy);
+							sampleDisabledButton.setEnabled(false);
+
+							apButtonSettings.add(apButtonLockColors);
+							apButtonSettings.add(new JLabel(" Button background color:"));
+							apButtonSettings.add(apButtonEnabled);
+							apButtonSettings.add(new JLabel(" Button hover color:"));
+							apButtonSettings.add(apButtonEnabledHover);
+							apButtonSettings.add(new JLabel(" Disabled button background color:"));
+							apButtonSettings.add(apButtonDisabled);
+							apButtonSettings.add(new JLabel(" Button text color:"));
+							apButtonSettings.add(apButtonText);
+							apButtonSettings.add(new JLabel(" Disabled text color:"));
+							apButtonSettings.add(apButtonTextDisabled);
+							apButtonSettings.add(new JLabel(" "));
+							apButtonSettings.add(apButtonReset);
+							apButtonSettings.add(new JLabel(" "));
+
+							apButtonEnabled.addColorChangeListener(c -> {
+								cprefCopy.setColorEnabledButton(SwingUtils.getHexRGB(c));
+								if (apButtonLockColors.isSelected()) {
+									Color hover = SwingUtils.brighten(c, 51);
+									Color disabled = SwingUtils.brighten(c,
+											(int) -(((c.getRed() + c.getGreen() + c.getBlue()) / 3)/1.3));
+									cprefCopy.setColorEnabledHoverButton(SwingUtils.getHexRGB(hover));
+									cprefCopy.setColorDisabledButton(SwingUtils.getHexRGB(disabled));
+									apButtonEnabledHover.setColor(hover);
+									apButtonDisabled.setColor(disabled);
+								}
+								sampleButton.repaint();
+								sampleDisabledButton.repaint();
+							});
+							apButtonEnabledHover.addColorChangeListener(c -> {
+								cprefCopy.setColorEnabledHoverButton(SwingUtils.getHexRGB(c));
+								sampleButton.repaint();
+								sampleDisabledButton.repaint();
+							});
+
+							apButtonDisabled.addColorChangeListener(c -> {
+								cprefCopy.setColorDisabledButton(SwingUtils.getHexRGB(c));
+								sampleButton.repaint();
+								sampleDisabledButton.repaint();
+							});
+							apButtonText.addColorChangeListener(c -> {
+								cprefCopy.setColorText(SwingUtils.getHexRGB(c));
+								sampleButton.repaint();
+								sampleDisabledButton.repaint();
+							});
+							apButtonTextDisabled.addColorChangeListener(c -> {
+								cprefCopy.setDisabledColorText(SwingUtils.getHexRGB(c));
+								sampleButton.repaint();
+								sampleDisabledButton.repaint();
+							});
+							apButtonReset.addActionListener(ev2 -> {
+								ColorPreferences cp2 = UserPreferences.defaultColorPreferences;
+								cprefCopy.setColorDisabledButton(cp2.getColorDisabledButton());
+								cprefCopy.setColorEnabledButton(cp2.getColorEnabledButton());
+								cprefCopy.setColorEnabledHoverButton(cp2.getColorEnabledHoverButton());
+								cprefCopy.setColorText(cp2.getColorText());
+								cprefCopy.setDisabledColorText(cp2.getDisabledColorText());
+
+								apButtonDisabled
+										.setColor(new Color(Integer.parseInt(cp2.getColorDisabledButton(), 16)));
+								apButtonEnabled.setColor(new Color(Integer.parseInt(cp2.getColorEnabledButton(), 16)));
+								apButtonEnabledHover
+										.setColor(new Color(Integer.parseInt(cp2.getColorEnabledHoverButton(), 16)));
+								apButtonText.setColor(new Color(Integer.parseInt(cp2.getColorText(), 16)));
+								apButtonTextDisabled
+										.setColor(new Color(Integer.parseInt(cp2.getDisabledColorText(), 16)));
+								sampleButton.repaint();
+								sampleDisabledButton.repaint();
+							});
+
+							Box apButtonSettingsSamples = Box.createHorizontalBox();
+							apButtonSettingsSamples.add(sampleButton);
+							apButtonSettingsSamples.add(sampleDisabledButton);
+
+							apButtonSettingsFull.add(apButtonSettingsSP);
+							apButtonSettingsFull.add(apButtonSettingsSamples);
+
+							apButtonSettings.alignAll();
+
+							apPane.addTab("Buttons", apButtonSettingsFull);
+
+							jtp.add("Appearance", apPane);
 							jtp.add("Tray", trBox);
 							jtp.add("Resource Packs", rsBox);
 							jtp.add("Skins", skBox);
@@ -882,9 +1010,17 @@ public class Main {
 								up.setTrayMessageMode((String) trMessagesMode.getSelectedItem());
 								up.setTrayShowDisconnectMessages(showDMessages.isSelected());
 
+								ColorPreferences cp2 = up.getColorPreferences();
+								cp2.setColorDisabledButton(SwingUtils.getHexRGB(apButtonDisabled.getColor()));
+								cp2.setColorEnabledButton(SwingUtils.getHexRGB(apButtonEnabled.getColor()));
+								cp2.setColorEnabledHoverButton(SwingUtils.getHexRGB(apButtonEnabledHover.getColor()));
+								cp2.setColorText(SwingUtils.getHexRGB(apButtonText.getColor()));
+								cp2.setDisabledColorText(SwingUtils.getHexRGB(apButtonTextDisabled.getColor()));
+
 								upSaveRunnable.run();
 								PlayerSkinCache.getSkincache().clear();
 								od.dispose();
+								win.repaint();
 							});
 
 							sCancel.addActionListener(ev2 -> {
@@ -918,6 +1054,7 @@ public class Main {
 		win.pack();
 		SwingUtils.centerWindow(win);
 		win.setVisible(true);
+
 	}
 
 	private JSplitPane createServerPane(final ServerEntry entry, final String username) {
