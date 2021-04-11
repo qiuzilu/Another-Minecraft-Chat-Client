@@ -21,9 +21,10 @@ You can download latest executable version [Here](https://github.com/Defective4/
   - [ ] Exporting player skins
 - [x] LAN games
 - [x] Basic player actions (sneaking, sprinting)
-- [x] Health updates and automatical respawing
+- [x] Health updates and automatical respawning
 - [x] Appearance settings
+- [x] Movement
+- [x] Statistics (1.8 - 1.12.2)
 - [ ] Inventory handling
-- [ ] Movement
 - [ ] Graphical map with entity rendering
 - [ ] Plugins (?)

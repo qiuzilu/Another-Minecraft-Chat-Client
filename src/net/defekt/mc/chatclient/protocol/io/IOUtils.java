@@ -190,4 +190,19 @@ public class IOUtils {
 		g2.drawImage(img, 0, 0, w, h, x, y, x + w, y + h, null);
 		return br;
 	}
+
+	/**
+	 * Pads a string with provided character
+	 * 
+	 * @param string       string to pad
+	 * @param len          string's target length
+	 * @param padCharacter characters used in padding
+	 * @return padded string
+	 */
+	public static String padString(String string, int len, String padCharacter) {
+		String s = string;
+		while (s.length() < len)
+			s += padCharacter;
+		return s;
+	}
 }

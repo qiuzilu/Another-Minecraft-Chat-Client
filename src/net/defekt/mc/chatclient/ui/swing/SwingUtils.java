@@ -2,18 +2,30 @@ package net.defekt.mc.chatclient.ui.swing;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.Window;
+import java.awt.Desktop.Action;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.List;
 
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
+import javax.swing.JSpinner.DefaultEditor;
 import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
@@ -45,6 +57,16 @@ public class SwingUtils {
 				| UnsupportedLookAndFeelException e) {
 			e.printStackTrace();
 		}
+	}
+
+	/**
+	 * Aligns spinner's text field to the left side
+	 * 
+	 * @param spinner spinner to align
+	 */
+	public static void alignSpinner(JSpinner spinner) {
+		DefaultEditor editor = (DefaultEditor) spinner.getEditor();
+		editor.getTextField().setHorizontalAlignment(JTextField.LEFT);
 	}
 
 	/**
@@ -173,6 +195,119 @@ public class SwingUtils {
 			}
 		}
 		return new Color(r, g, b);
+	}
+
+	/**
+	 * Creates an version information dialog.<br>
+	 * Used when there is an update available
+	 * 
+	 * @param oldVersion  current version of application
+	 * @param newVersion  new version
+	 * @param difference  version difference
+	 * @param versionType version difference type.<br>
+	 *                    Options used:<br>
+	 *                    "major"<br>
+	 *                    "minor"<br>
+	 *                    "fix"
+	 * @param changesList list of changes
+	 */
+	public static void showVersionDialog(String oldVersion, String newVersion, int difference, String versionType,
+			List<String> changesList) {
+		JFrame win = new JFrame();
+		win.setTitle("New version available!");
+		win.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+		Box message = Box.createVerticalBox();
+		message.add(new JLabel("<html><font style=\"font-weight:bold;\">A new update is available!</font><br><br>"
+				+ "An update is available to download!<br><br>" + "Current version: <font style=\"font-weight:bold;\">"
+				+ oldVersion + "</font><br>" + "New version: <font style=\"font-weight:bold;\">" + newVersion
+				+ "</font><br><br>" + "You are <font style=\"font-weight:bold;\">" + Integer.toString(difference)
+				+ "</font> " + versionType + " versions behind!</html>"));
+
+		for (Component ct : message.getComponents()) {
+			if (ct instanceof JComponent)
+				((JComponent) ct).setAlignmentX(JComponent.LEFT_ALIGNMENT);
+		}
+
+		JButton ok = new JButton("Ok");
+		ok.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				synchronized (win) {
+					win.notify();
+				}
+			}
+		});
+
+		JButton changes = new JButton("Show changes");
+		changes.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+
+				String msg = "";
+				for (String line : changesList) {
+					if (line.startsWith("["))
+						msg += "<font style=\"font-weight: bold;\">";
+					msg += line + "<br>";
+					if (line.startsWith("["))
+						msg += "</font>";
+				}
+
+				JLabel message = new JLabel("<html>" + msg + "</html>");
+				JScrollPane jsp = new JScrollPane(message);
+				jsp.setPreferredSize(win.getSize());
+				JOptionPane.showOptionDialog(win, jsp, "Changes in " + newVersion, JOptionPane.DEFAULT_OPTION,
+						JOptionPane.PLAIN_MESSAGE, null, new String[] { "Ok"
+				}, 0);
+			}
+		});
+		JButton update = new JButton("Update");
+		update.setEnabled(Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Action.BROWSE));
+		update.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				try {
+					Desktop.getDesktop().browse(
+							new URI("https://github.com/Defective4/Another-Minecraft-Chat-Client/releases/latest"));
+				} catch (IOException | URISyntaxException e1) {
+					e1.printStackTrace();
+				}
+			}
+		});
+
+		JButton exit = new JButton("Exit");
+		exit.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				System.exit(0);
+			}
+		});
+
+		JOptionPane pane = new JOptionPane(message, JOptionPane.INFORMATION_MESSAGE, JOptionPane.DEFAULT_OPTION, null,
+				new Object[] { ok, changes, update, exit
+				});
+
+		win.setContentPane(pane);
+		win.pack();
+		win.setResizable(false);
+		centerWindow(win);
+		win.setVisible(true);
+		win.toFront();
+
+		synchronized (win) {
+			try {
+				win.wait();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+
+		}
+
+		win.dispose();
 	}
 
 	private static void showExceptionDetails(Window parent, Exception ex) {

@@ -15,8 +15,26 @@ import java.util.Map;
  */
 @SuppressWarnings("serial")
 public abstract class PacketRegistry {
+
+	/**
+	 * Indicates packets game state
+	 * 
+	 * @author Defective4
+	 *
+	 */
 	public enum State {
-		LOGIN, IN, OUT
+		/**
+		 * Used for Login state packets
+		 */
+		LOGIN,
+		/**
+		 * Used for Play clientbound packets
+		 */
+		IN,
+		/**
+		 * Used for Play serverbound packets
+		 */
+		OUT
 	}
 
 	/**

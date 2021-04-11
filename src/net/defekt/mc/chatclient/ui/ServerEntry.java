@@ -20,10 +20,13 @@ public class ServerEntry implements Serializable {
 
 	private String version = "Auto";
 
-	private StatusInfo info = null;
+	private transient StatusInfo info = null;
 	private String icon = null;
 
-	protected boolean refreshing = false;
+	/**
+	 * Indicates if server is pinged for status data
+	 */
+	protected transient boolean refreshing = false;
 
 	/**
 	 * Creates new server entry

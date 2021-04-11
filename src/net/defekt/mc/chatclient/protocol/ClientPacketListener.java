@@ -3,6 +3,7 @@ package net.defekt.mc.chatclient.protocol;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 import net.defekt.mc.chatclient.protocol.data.ChatMessage;
@@ -13,7 +14,9 @@ import net.defekt.mc.chatclient.protocol.packets.PacketRegistry;
 import net.defekt.mc.chatclient.protocol.packets.PacketRegistry.State;
 import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.ServerChatMessagePacket.Position;
 import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.ServerPlayerListItemPacket.Action;
+import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.ServerPlayerPositionAndLookPacket;
 import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.ClientResourcePackStatusPacket.Status;
+import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.ClientTeleportConfirmPacket;
 import net.defekt.mc.chatclient.ui.Main;
 import net.defekt.mc.chatclient.ui.UserPreferences;
 
@@ -45,10 +48,17 @@ public class ClientPacketListener implements InternalPacketListener {
 		this.protocol = cl.getProtocol();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void packetReceived(Packet packet, PacketRegistry registry) {
 		try {
 			switch (packet.getClass().getSimpleName()) {
+				case "ServerStatisticsPacket": {
+					Map<String, Integer> values = (Map<String, Integer>) packet.accessPacketMethod("getValues");
+					for (ClientListener l : cl.getClientListeners())
+						l.statisticsReceived(values);
+					break;
+				}
 				case "ServerPlayerListItemPacket": {
 					HashMap<UUID, PlayerInfo> playersTabList = cl.getPlayersTabList();
 					Action action = (Action) packet.accessPacketMethod("getAction");
@@ -102,11 +112,15 @@ public class ClientPacketListener implements InternalPacketListener {
 					os.write(PacketFactory
 							.constructPacket(registry, "ClientPluginMessagePacket", cname, up.getBrand().getBytes())
 							.getData(cl.isCompressionEnabled()));
+					os.write(PacketFactory.constructPacket(registry, "ClientStatusPacket", 0)
+							.getData(cl.isCompressionEnabled()));
+					os.write(PacketFactory.constructPacket(registry, "ClientStatusPacket", 1)
+							.getData(cl.isCompressionEnabled()));
 					break;
 				}
 				case "ServerUpdateHealthPacket": {
 					if (((float) packet.accessPacketMethod("getHealth") <= 0))
-						os.write(PacketFactory.constructPacket(registry, "ClientRespawnPacket")
+						os.write(PacketFactory.constructPacket(registry, "ClientStatusPacket", 0)
 								.getData(cl.isCompressionEnabled()));
 					float hp = (float) packet.accessPacketMethod("getHealth");
 					int food = (int) packet.accessPacketMethod("getFood");
@@ -121,15 +135,26 @@ public class ClientPacketListener implements InternalPacketListener {
 				case "ServerKeepAlivePacket": {
 					if (up.isIgnoreKeepAlive())
 						break;
-					if (protocol >= 339) {
-						long id = (long) packet.accessPacketMethod("getId");
-						os.write(PacketFactory.constructPacket(registry, "ClientKeepAlivePacket", id)
-								.getData(cl.isCompressionEnabled()));
-					} else {
-						int id = (int) packet.accessPacketMethod("getId");
-						os.write(PacketFactory.constructPacket(registry, "ClientKeepAlivePacket", id)
-								.getData(cl.isCompressionEnabled()));
-					}
+					new Thread(new Runnable() {
+
+						@Override
+						public void run() {
+							try {
+								Thread.sleep(up.getAdditionalPing());
+								if (protocol >= 339) {
+									long id = (long) packet.accessPacketMethod("getId");
+									os.write(PacketFactory.constructPacket(registry, "ClientKeepAlivePacket", id)
+											.getData(cl.isCompressionEnabled()));
+								} else {
+									int id = (int) packet.accessPacketMethod("getId");
+									os.write(PacketFactory.constructPacket(registry, "ClientKeepAlivePacket", id)
+											.getData(cl.isCompressionEnabled()));
+								}
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+						}
+					}).start();
 					break;
 				}
 				case "ServerChatMessagePacket": {
@@ -145,10 +170,24 @@ public class ClientPacketListener implements InternalPacketListener {
 					double x = (double) packet.accessPacketMethod("getX");
 					double y = (double) packet.accessPacketMethod("getY");
 					double z = (double) packet.accessPacketMethod("getZ");
+					float yaw = (float) packet.accessPacketMethod("getYaw");
+					float pitch = (float) packet.accessPacketMethod("getPitch");
 
 					cl.setX(x);
 					cl.setY(y);
 					cl.setZ(z);
+					cl.setYaw(yaw);
+					cl.setPitch(pitch);
+
+					if (packet instanceof ServerPlayerPositionAndLookPacket) {
+						int teleportID = (int) packet.accessPacketMethod("getTeleportID");
+						os.write(new ClientTeleportConfirmPacket(registry, teleportID)
+								.getData(cl.isCompressionEnabled()));
+					}
+
+					os.write(PacketFactory
+							.constructPacket(registry, "ClientPlayerPositionAndLookPacket", x, y, z, yaw, pitch, true)
+							.getData(cl.isCompressionEnabled()));
 
 					synchronized (cl.getLock()) {
 						cl.getLock().notify();

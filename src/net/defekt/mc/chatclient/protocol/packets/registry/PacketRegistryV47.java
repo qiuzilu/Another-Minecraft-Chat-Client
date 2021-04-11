@@ -12,12 +12,15 @@ import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.Server
 import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.ServerPlayerListItemPacket;
 import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.ServerPluginMessagePacket;
 import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.ServerResourcePackSendPacket;
+import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.ServerStatisticsPacket;
 import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.ServerUpdateHealthPacket;
 import net.defekt.mc.chatclient.protocol.packets.general.serverbound.login.ClientLoginRequestPacket;
 import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.ClientChatMessagePacket;
 import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.ClientEntityActionPacket;
+import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.ClientPlayerPositionAndLookPacket;
+import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.ClientPlayerPositionPacket;
 import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.ClientPluginMessagePacket;
-import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.ClientRespawnPacket;
+import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.ClientStatusPacket;
 import net.defekt.mc.chatclient.protocol.packets.v47.clientbound.play.ServerKeepAlivePacket;
 import net.defekt.mc.chatclient.protocol.packets.v47.clientbound.play.ServerPlayerPositionAndLookPacket;
 import net.defekt.mc.chatclient.protocol.packets.v47.serverbound.play.ClientKeepAlivePacket;
@@ -50,8 +53,10 @@ public class PacketRegistryV47 extends PacketRegistry {
 				put(0x01, ClientChatMessagePacket.class);
 				put(0x19, ClientResourcePackStatusPacket.class);
 				put(0x17, ClientPluginMessagePacket.class);
-				put(0x16, ClientRespawnPacket.class);
+				put(0x16, ClientStatusPacket.class);
 				put(0x0B, ClientEntityActionPacket.class);
+				put(0x04, ClientPlayerPositionPacket.class);
+				put(0x06, ClientPlayerPositionAndLookPacket.class);
 			}
 		};
 	}
@@ -70,6 +75,7 @@ public class PacketRegistryV47 extends PacketRegistry {
 				put(0x06, ServerUpdateHealthPacket.class);
 				put(0x01, ServerJoinGamePacket.class);
 				put(0x38, ServerPlayerListItemPacket.class);
+				put(0x37, ServerStatisticsPacket.class);
 			}
 		};
 	}

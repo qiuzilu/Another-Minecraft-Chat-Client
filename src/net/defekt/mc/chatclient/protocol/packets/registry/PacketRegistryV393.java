@@ -19,9 +19,11 @@ import net.defekt.mc.chatclient.protocol.packets.general.serverbound.login.Clien
 import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.ClientChatMessagePacket;
 import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.ClientEntityActionPacket;
 import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.ClientKeepAlivePacket;
+import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.ClientPlayerPositionAndLookPacket;
+import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.ClientPlayerPositionPacket;
 import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.ClientPluginMessagePacket;
 import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.ClientResourcePackStatusPacket;
-import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.ClientRespawnPacket;
+import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.ClientStatusPacket;
 
 /**
  * A packet registry implementation for protocol 393
@@ -50,8 +52,10 @@ public class PacketRegistryV393 extends PacketRegistry {
 				put(0x02, ClientChatMessagePacket.class);
 				put(0x1D, ClientResourcePackStatusPacket.class);
 				put(0x0A, ClientPluginMessagePacket.class);
-				put(0x03, ClientRespawnPacket.class);
+				put(0x03, ClientStatusPacket.class);
 				put(0x19, ClientEntityActionPacket.class);
+				put(0x10, ClientPlayerPositionPacket.class);
+				put(0x11, ClientPlayerPositionAndLookPacket.class);
 			}
 		};
 	}

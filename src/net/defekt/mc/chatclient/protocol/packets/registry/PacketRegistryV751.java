@@ -18,9 +18,11 @@ import net.defekt.mc.chatclient.protocol.packets.general.serverbound.login.Clien
 import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.ClientChatMessagePacket;
 import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.ClientEntityActionPacket;
 import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.ClientKeepAlivePacket;
+import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.ClientPlayerPositionAndLookPacket;
+import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.ClientPlayerPositionPacket;
 import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.ClientPluginMessagePacket;
 import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.ClientResourcePackStatusPacket;
-import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.ClientRespawnPacket;
+import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.ClientStatusPacket;
 
 /**
  * A packet registry implementation for protocol 751
@@ -48,8 +50,10 @@ public class PacketRegistryV751 extends PacketRegistry {
 				put(0x03, ClientChatMessagePacket.class);
 				put(0x21, ClientResourcePackStatusPacket.class);
 				put(0x0B, ClientPluginMessagePacket.class);
-				put(0x04, ClientRespawnPacket.class);
+				put(0x04, ClientStatusPacket.class);
 				put(0x1C, ClientEntityActionPacket.class);
+				put(0x12, ClientPlayerPositionPacket.class);
+				put(0x13, ClientPlayerPositionAndLookPacket.class);
 			}
 		};
 	}

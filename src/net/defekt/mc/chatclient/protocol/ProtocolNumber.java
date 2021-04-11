@@ -7,6 +7,7 @@ package net.defekt.mc.chatclient.protocol;
  * @author Defective4
  *
  */
+@SuppressWarnings("javadoc")
 public enum ProtocolNumber {
 	V1_16_4(754, "1.16.4"), V1_16_3(753, "1.16.3"),
 //	V1_16_2(736, "1.16.2"),

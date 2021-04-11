@@ -20,6 +20,7 @@ import net.defekt.mc.chatclient.protocol.packets.Packet;
 import net.defekt.mc.chatclient.protocol.packets.PacketFactory;
 import net.defekt.mc.chatclient.protocol.packets.PacketRegistry;
 import net.defekt.mc.chatclient.protocol.packets.PacketRegistry.State;
+import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.ServerStatisticsPacket;
 import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.ClientEntityActionPacket.EntityAction;
 
 /**
@@ -41,9 +42,11 @@ public class MinecraftClient {
 
 	private String username = "";
 
-	private double x = 0;
+	private double x = Integer.MIN_VALUE;
 	private double y = 0;
 	private double z = 0;
+	private float yaw = 0;
+	private float pitch = 0;
 
 	private int entityID = 0;
 
@@ -64,6 +67,7 @@ public class MinecraftClient {
 	private List<ClientListener> clientListeners = new ArrayList<ClientListener>();
 
 	private Thread packetReaderThread = null;
+	private Thread playerPositionThread = null;
 
 	/**
 	 * Add a client listener to receive client events
@@ -121,6 +125,8 @@ public class MinecraftClient {
 				soc.close();
 				if (packetReaderThread != null)
 					packetReaderThread.interrupt();
+				if (playerPositionThread != null)
+					playerPositionThread.interrupt();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -255,6 +261,32 @@ public class MinecraftClient {
 					e.printStackTrace();
 				}
 			}
+			playerPositionThread = new Thread(new Runnable() {
+
+				@Override
+				public void run() {
+					try {
+						while (true) {
+							Thread.sleep(1000);
+							if (x == Integer.MIN_VALUE)
+								continue;
+							try {
+								if (soc.isClosed()) {
+									close();
+									return;
+								}
+								Packet playerPositionPacket = PacketFactory.constructPacket(reg,
+										"ClientPlayerPositionPacket", x, y, z, true);
+								os.write(playerPositionPacket.getData(isCompressionEnabled()));
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+						}
+					} catch (InterruptedException e) {
+					}
+				}
+			});
+			playerPositionThread.start();
 
 		} catch (IOException ex) {
 			close();
@@ -289,6 +321,7 @@ public class MinecraftClient {
 		return cTreshold;
 	}
 
+	@SuppressWarnings("javadoc")
 	protected Object getLock() {
 		return lock;
 	}
@@ -328,6 +361,8 @@ public class MinecraftClient {
 	 */
 	protected void setX(double x) {
 		this.x = x;
+		for (ClientListener cl : clientListeners)
+			cl.positionChanged(this.x, this.y, this.z);
 	}
 
 	/**
@@ -338,6 +373,8 @@ public class MinecraftClient {
 	 */
 	protected void setY(double y) {
 		this.y = y;
+		for (ClientListener cl : clientListeners)
+			cl.positionChanged(this.x, this.y, this.z);
 	}
 
 	/**
@@ -348,6 +385,8 @@ public class MinecraftClient {
 	 */
 	protected void setZ(double z) {
 		this.z = z;
+		for (ClientListener cl : clientListeners)
+			cl.positionChanged(this.x, this.y, this.z);
 	}
 
 	/**
@@ -487,5 +526,175 @@ public class MinecraftClient {
 	 */
 	protected OutputStream getOutputStream() {
 		return os;
+	}
+
+	/**
+	 * Get client's yaw
+	 * 
+	 * @return client's yaw
+	 */
+	public float getYaw() {
+		return yaw;
+	}
+
+	/**
+	 * Get client's yaw
+	 * 
+	 * @return client's yaw
+	 */
+	public float getPitch() {
+		return pitch;
+	}
+
+	/**
+	 * Set client's yaw. This method only sets internal variable, it does NOT change
+	 * client's position on server.
+	 * 
+	 * @param yaw new yaw value
+	 */
+	protected void setYaw(float yaw) {
+		this.yaw = yaw;
+	}
+
+	/**
+	 * Set client's pitch. This method only sets internal variable, it does NOT
+	 * change client's position on server.
+	 * 
+	 * @param pitch new pitch value
+	 */
+	protected void setPitch(float pitch) {
+		this.pitch = pitch;
+	}
+
+	private Thread movingThread = null;
+
+	/**
+	 * Set client's look on server.
+	 * 
+	 * @param direction player's look
+	 */
+	public void setLook(float direction) {
+		try {
+			this.yaw = direction;
+			os.write(PacketFactory
+					.constructPacket(reg, "ClientPlayerPositionAndLookPacket", x, y, z, direction, 0f, true)
+					.getData(isCompressionEnabled()));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Move client on server.
+	 * 
+	 * @param direction    direction to move to from 0 to 7
+	 * @param speed        walking speed, from 0 to 1. Too high values may cause
+	 *                     client to be kicked or even banned from server.
+	 * @param blocks       distance to move
+	 * @param lockPosition if set to true, client will only look in target position
+	 *                     without moving
+	 */
+	public void move(final int direction, final double speed, final double blocks, final boolean lockPosition) {
+		if (movingThread == null || !movingThread.isAlive()) {
+			movingThread = new Thread(new Runnable() {
+				private final double speedModifier = speed;
+
+				@Override
+				public void run() {
+					for (int x = 0; x < (1 / speedModifier) * blocks; x++) {
+						try {
+							Thread.sleep(1000 / 20);
+						} catch (InterruptedException e1) {
+							e1.printStackTrace();
+						}
+						if (MinecraftClient.this.x == Integer.MIN_VALUE)
+							return;
+						double tx = MinecraftClient.this.x;
+						double tz = MinecraftClient.this.z;
+						float nyaw = 0;
+						switch (direction) {
+							case 0: {
+								tz += speedModifier;
+								nyaw = 0;
+								break;
+							}
+							case 1: {
+								tz += speedModifier;
+								tx += speedModifier;
+								nyaw = -45;
+								break;
+							}
+							case 2: {
+								tx += speedModifier;
+								nyaw = -90;
+								break;
+							}
+							case 3: {
+								tz -= speedModifier;
+								tx += speedModifier;
+								nyaw = -135;
+								break;
+							}
+							case 4: {
+								tz -= speedModifier;
+								nyaw = 180;
+								break;
+							}
+							case 5: {
+								tz -= speedModifier;
+								tx -= speedModifier;
+								nyaw = 135;
+								break;
+							}
+							case 6: {
+								tx -= speedModifier;
+								nyaw = 90;
+								break;
+							}
+							case 7: {
+								tz += speedModifier;
+								tx -= speedModifier;
+								nyaw = 45;
+								break;
+							}
+							default: {
+								break;
+							}
+						}
+
+						setLook(nyaw);
+						if (lockPosition)
+							return;
+						try {
+							setX(tx);
+							setZ(tz);
+							os.write(PacketFactory
+									.constructPacket(reg, "ClientPlayerPositionAndLookPacket", tx,
+											MinecraftClient.this.y, tz, MinecraftClient.this.yaw, 0f, true)
+									.getData(isCompressionEnabled()));
+
+						} catch (Exception e) {
+
+						}
+
+					}
+				}
+			});
+			movingThread.start();
+		}
+	}
+
+	/**
+	 * Request statistics update from server.<br>
+	 * Server will respond with Statistics (see {@link ServerStatisticsPacket}), but
+	 * it may not respond at all if another request was made recently.
+	 * 
+	 * @throws IOException thrown when there was an error sending packet.
+	 */
+	public void refreshStatistics() throws IOException {
+		if (connected && soc != null && !soc.isClosed()) {
+			os.write(PacketFactory.constructPacket(reg, "ClientStatusPacket", 1).getData(isCompressionEnabled()));
+		} else
+			throw new IOException("Not connected!");
 	}
 }

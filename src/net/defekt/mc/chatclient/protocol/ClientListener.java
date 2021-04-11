@@ -1,5 +1,7 @@
 package net.defekt.mc.chatclient.protocol;
 
+import java.util.Map;
+
 import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.ServerChatMessagePacket.Position;
 
 /**
@@ -33,4 +35,20 @@ public interface ClientListener {
 	 * @param food   client's new hunger
 	 */
 	public void healthUpdate(float health, int food);
+
+	/**
+	 * Invoked when client's position on server is updated.
+	 * 
+	 * @param x new X position
+	 * @param y new Y position
+	 * @param z new Z position
+	 */
+	public void positionChanged(double x, double y, double z);
+
+	/**
+	 * Invoked when client receives statistics after ClientStatus packet
+	 * 
+	 * @param values map of received values
+	 */
+	public void statisticsReceived(Map<String, Integer> values);
 }

@@ -18,8 +18,30 @@ public class ClientEntityActionPacket extends Packet {
 	 *
 	 */
 	public enum EntityAction {
-		START_SNEAKING(0), STOP_SNEAKING(1), LEAVE_BED(2), START_SPRINTING(3), STOP_SPRINTING(4);
+		/**
+		 * Client will start sneaking.
+		 */
+		START_SNEAKING(0),
+		/**
+		 * Client will stop sneaking.
+		 */
+		STOP_SNEAKING(1),
+		/**
+		 * Client has to leave bed.
+		 */
+		LEAVE_BED(2),
+		/**
+		 * Client will start sprinting.
+		 */
+		START_SPRINTING(3),
+		/**
+		 * Client will stop sprinting.
+		 */
+		STOP_SPRINTING(4);
 
+		/**
+		 * Action ID
+		 */
 		protected final int id;
 
 		private EntityAction(int id) {

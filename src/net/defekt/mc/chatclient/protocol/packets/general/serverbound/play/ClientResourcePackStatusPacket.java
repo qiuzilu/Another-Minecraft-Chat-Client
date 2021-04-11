@@ -18,8 +18,26 @@ public class ClientResourcePackStatusPacket extends Packet {
 	 *
 	 */
 	public enum Status {
-		DECLINED(1), ACCEPTED(3), LOADED(0), FAILED(2);
+		/**
+		 * Incoming resource pack will be declined
+		 */
+		DECLINED(1),
+		/**
+		 * Incoming resource pack will be accepted
+		 */
+		ACCEPTED(3),
+		/**
+		 * Incoming resource pack will be loaded
+		 */
+		LOADED(0),
+		/**
+		 * Incoming resource pack will fail to load
+		 */
+		FAILED(2);
 
+		/**
+		 * Status number
+		 */
 		public final int num;
 
 		private Status(int num) {

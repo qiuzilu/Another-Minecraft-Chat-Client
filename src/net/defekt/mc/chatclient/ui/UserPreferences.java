@@ -19,6 +19,7 @@ import net.defekt.mc.chatclient.ui.swing.SwingUtils;
  * @author Defective4
  *
  */
+@SuppressWarnings("javadoc")
 public class UserPreferences implements Serializable {
 
 	private static final long serialVersionUID = 5064975536053236721L;
@@ -26,8 +27,25 @@ public class UserPreferences implements Serializable {
 	private UserPreferences() {
 	}
 
-	public enum SkinRule {
-		SERVER, MOJANG_API, NONE
+	/**
+	 * Skin rules are used to adjust skin cache behavior
+	 * 
+	 * @author Defective4
+	 *
+	 */
+	public static enum SkinRule {
+		/**
+		 * Indicates that skins should be fetched from server
+		 */
+		SERVER,
+		/**
+		 * Indicates that skins should be downloaded using Mojang API
+		 */
+		MOJANG_API,
+		/**
+		 * Skins won't be fetched
+		 */
+		NONE
 	}
 
 	public static class Constants {
@@ -107,6 +125,7 @@ public class UserPreferences implements Serializable {
 	private SkinRule skinFetchRule = SkinRule.SERVER;
 
 	private boolean ignoreKeepAlive = false;
+	private int additionalPing = 0;
 	private boolean sendMCBrand = true;
 	private String brand = "vanilla";
 
@@ -225,5 +244,13 @@ public class UserPreferences implements Serializable {
 		if (colorPreferences == null)
 			colorPreferences = new ColorPreferences();
 		return colorPreferences;
+	}
+
+	public int getAdditionalPing() {
+		return additionalPing;
+	}
+
+	public void setAdditionalPing(int additionalPing) {
+		this.additionalPing = additionalPing;
 	}
 }

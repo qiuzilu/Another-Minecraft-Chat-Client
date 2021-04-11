@@ -44,6 +44,9 @@ public class ServerPlayerListItemPacket extends Packet {
 		 */
 		REMOVE_PLAYER(4);
 
+		/**
+		 * Action number
+		 */
 		protected final int number;
 
 		private Action(int num) {

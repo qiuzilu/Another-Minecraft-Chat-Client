@@ -7,6 +7,7 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.Menu;
 import java.awt.MenuComponent;
@@ -28,11 +29,14 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.awt.image.RescaleOp;
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
@@ -60,13 +64,17 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.plaf.basic.BasicArrowButton;
 
 import net.defekt.mc.chatclient.protocol.ClientListener;
 import net.defekt.mc.chatclient.protocol.MinecraftClient;
@@ -75,6 +83,7 @@ import net.defekt.mc.chatclient.protocol.ProtocolNumber;
 import net.defekt.mc.chatclient.protocol.data.ChatMessage;
 import net.defekt.mc.chatclient.protocol.data.PlayerInfo;
 import net.defekt.mc.chatclient.protocol.data.PlayerSkinCache;
+import net.defekt.mc.chatclient.protocol.data.TranslationUtils;
 import net.defekt.mc.chatclient.protocol.io.IOUtils;
 import net.defekt.mc.chatclient.protocol.io.ListenerHashMap.MapChangeListener;
 import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.ServerChatMessagePacket.Position;
@@ -91,17 +100,84 @@ import net.defekt.mc.chatclient.ui.swing.JPlaceholderField;
 import net.defekt.mc.chatclient.ui.swing.JVBoxPanel;
 import net.defekt.mc.chatclient.ui.swing.SwingUtils;
 
-@SuppressWarnings("serial")
+@SuppressWarnings({ "serial", "javadoc"
+})
 public class Main {
 
 	public static final BufferedImage bgImage = new BufferedImage(64, 64, BufferedImage.TYPE_INT_ARGB);
 	private static BufferedImage logoImage = null;
 
+	public static final String version = "1.0.0";
+	private static final String changelogURL = "https://raw.githubusercontent.com/Defective4/Another-Minecraft-Chat-Client/master/Changes";
+
 	public static Font mcFont = Font.decode(null);
 
-	public static void main(String[] args) {
+	private static void checkForUpdates() {
+		try (BufferedReader br = new BufferedReader(new InputStreamReader(new URL(changelogURL).openStream()))) {
+			List<String> cgLines = new ArrayList<String>();
+			String line;
+			while ((line = br.readLine()) != null) {
+				cgLines.add(line);
+			}
 
+			if (cgLines.size() > 1 && cgLines.get(0).equals("AMCC Change Log")) {
+				String newVersionString = IOUtils.padString(cgLines.get(1).substring(1).replace(".", ""), 3, "0");
+				String thisVersionString = IOUtils.padString(version.replace(".", ""), 3, "0");
+
+				int newVersion = Integer.parseInt(newVersionString);
+				int thisVersion = Integer.parseInt(thisVersionString);
+
+				if (newVersion > thisVersion) {
+					String newVersionSm = cgLines.get(1).substring(1);
+					String oldVersionSm = version;
+
+					if (newVersionSm.length() - newVersionSm.replace(".", "").length() < 2) {
+						newVersionSm += ".0";
+					}
+					if (oldVersionSm.length() - oldVersionSm.replace(".", "").length() < 2) {
+						oldVersionSm += ".0";
+					}
+
+					int nMajor = Integer.parseInt(newVersionSm.substring(0, newVersionSm.indexOf(".")));
+					int nMinor = Integer.parseInt(
+							newVersionSm.substring(newVersionSm.indexOf(".") + 1, newVersionSm.lastIndexOf(".")));
+					int nFix = Integer.parseInt(newVersionSm.substring(newVersionSm.lastIndexOf(".") + 1));
+
+					int oMajor = Integer.parseInt(oldVersionSm.substring(0, oldVersionSm.indexOf(".")));
+					int oMinor = Integer.parseInt(
+							oldVersionSm.substring(oldVersionSm.indexOf(".") + 1, oldVersionSm.lastIndexOf(".")));
+					int oFix = Integer.parseInt(oldVersionSm.substring(oldVersionSm.lastIndexOf(".") + 1));
+
+					int diff = 0;
+					String vtype = "major";
+
+					if (oFix != nFix) {
+						diff = nFix - oFix;
+						vtype = "fix";
+					}
+					if (oMinor != nMinor) {
+						diff = nMinor - oMinor;
+						vtype = "minor";
+					}
+					if (oMajor != nMajor) {
+						diff = nMajor - oMajor;
+						vtype = "major";
+					}
+
+					cgLines.remove(0);
+					cgLines.remove(0);
+
+					SwingUtils.showVersionDialog("v" + version, "v" + newVersionSm, diff, vtype, cgLines);
+				}
+			}
+
+		} catch (Exception e) {
+		}
+	}
+
+	public static void main(String[] args) {
 		SwingUtils.setNativeLook();
+		checkForUpdates();
 		try {
 			mcFont = Font
 					.createFont(Font.TRUETYPE_FONT,
@@ -414,7 +490,7 @@ public class Main {
 			}
 		});
 
-		win.setTitle("Another Minecraft Chat Client v0.9");
+		win.setTitle("Another Minecraft Chat Client v" + version);
 		if (logoImage != null)
 			win.setIconImage(logoImage);
 
@@ -813,9 +889,19 @@ public class Main {
 								brandField.setOpaque(true);
 							});
 
+							JSpinner pingField = new JSpinner(new SpinnerNumberModel(0, 0, Integer.MAX_VALUE, 1));
+							pingField.setValue(up.getAdditionalPing());
+							SwingUtils.alignSpinner(pingField);
+
 							pkBox.add(ignoreKAPackets);
+							pkBox.add(new JLabel(" "));
+							pkBox.add(new JLabel("Additional ping value"));
+							pkBox.add(new JLabel("(Too high values may disconnect client with Timed Out reason)"));
+							pkBox.add(pingField);
+							pkBox.add(new JLabel(" "));
 							pkBox.add(new JLabel("Minecraft Brand (empty = do not send brand info)"));
 							pkBox.add(brandField);
+
 							pkBox.add(new JTextPane() {
 								{
 									setEditable(false);
@@ -912,7 +998,7 @@ public class Main {
 								if (apButtonLockColors.isSelected()) {
 									Color hover = SwingUtils.brighten(c, 51);
 									Color disabled = SwingUtils.brighten(c,
-											(int) -(((c.getRed() + c.getGreen() + c.getBlue()) / 3)/1.3));
+											(int) -(((c.getRed() + c.getGreen() + c.getBlue()) / 3) / 1.3));
 									cprefCopy.setColorEnabledHoverButton(SwingUtils.getHexRGB(hover));
 									cprefCopy.setColorDisabledButton(SwingUtils.getHexRGB(disabled));
 									apButtonEnabledHover.setColor(hover);
@@ -1004,6 +1090,7 @@ public class Main {
 								up.setSkinFetchRule(skinFetchRule);
 
 								up.setIgnoreKeepAlive(ignoreKeepAlive);
+								up.setAdditionalPing((int) pingField.getValue());
 								up.setBrand(brand);
 								up.setSendMCBrand(sendMCBrand);
 
@@ -1106,7 +1193,8 @@ public class Main {
 			}
 		});
 
-		Box playerBox = Box.createVerticalBox();
+		JVBoxPanel playerBox = new JVBoxPanel();
+		JPanel statisticsContainer = new JPanel();
 
 		final JCheckBox toggleSneak = new JCheckBox("Toggle sneak");
 		toggleSneak.addActionListener(ev -> {
@@ -1139,10 +1227,102 @@ public class Main {
 		healthBar.setString("Health");
 		foodBar.setString("Food");
 
+		JButton[] movementButtons = new JButton[] { new BasicArrowButton(SwingConstants.NORTH),
+				new BasicArrowButton(SwingConstants.SOUTH_WEST), new BasicArrowButton(SwingConstants.WEST),
+				new BasicArrowButton(SwingConstants.NORTH_WEST), new BasicArrowButton(SwingConstants.SOUTH),
+				new BasicArrowButton(SwingConstants.NORTH_EAST), new BasicArrowButton(SwingConstants.EAST),
+				new BasicArrowButton(SwingConstants.SOUTH_EAST)
+		};
+
+		JButton jumpButton = new BasicArrowButton(SwingConstants.NORTH_EAST);
+		jumpButton.setEnabled(false);
+
+		final JCheckBox lockPos = new JCheckBox("Lock position");
+		final JSpinner speed = new JSpinner(new SpinnerNumberModel(0.3, 0.1, 1, 0.1));
+		final JSpinner blocks = new JSpinner(new SpinnerNumberModel(1, 0, 1000, 0.1));
+
+		SwingUtils.alignSpinner(speed);
+		SwingUtils.alignSpinner(blocks);
+
+		Box speedBox = Box.createHorizontalBox();
+		Box blocksBox = Box.createHorizontalBox();
+
+		speedBox.add(new JLabel("Movement speed: "));
+		blocksBox.add(new JLabel("Distance to walk: "));
+		speedBox.add(speed);
+		blocksBox.add(blocks);
+
+		for (final Component ct : speedBox.getComponents()) {
+			SwingUtilities.invokeLater(new Runnable() {
+
+				@Override
+				public void run() {
+					ct.setMaximumSize(new Dimension(ct.getWidth(), 20));
+				}
+			});
+		}
+		for (final Component ct : blocksBox.getComponents()) {
+			SwingUtilities.invokeLater(new Runnable() {
+
+				@Override
+				public void run() {
+					ct.setMaximumSize(new Dimension(ct.getWidth(), 20));
+				}
+			});
+		}
+
+		for (int x = 0; x < movementButtons.length; x++) {
+			final int direction = x;
+			movementButtons[x].addActionListener(new ActionListener() {
+				final int directionL = direction;
+
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					try {
+						MinecraftClient cl = clients.get(fPane);
+						cl.move(directionL, (double) speed.getValue(), (double) blocks.getValue(),
+								lockPos.isSelected());
+					} catch (Exception e1) {
+					}
+				}
+			});
+		}
+
+		JPanel movementPanel = new JPanel(new GridLayout(3, 3));
+		movementPanel.add(movementButtons[1]);
+		movementPanel.add(movementButtons[0]);
+		movementPanel.add(movementButtons[7]);
+		movementPanel.add(movementButtons[2]);
+		movementPanel.add(jumpButton);
+		movementPanel.add(movementButtons[6]);
+		movementPanel.add(movementButtons[3]);
+		movementPanel.add(movementButtons[4]);
+		movementPanel.add(movementButtons[5]);
+
+		movementPanel.setMaximumSize(new Dimension(180, 180));
+
+		final JLabel xLabel = new JLabel("X: 0");
+		final JLabel yLabel = new JLabel("Y: 0");
+		final JLabel zLabel = new JLabel("Z: 0");
+
 		playerBox.add(toggleSneak);
 		playerBox.add(toggleSprint);
 		playerBox.add(healthBar);
 		playerBox.add(foodBar);
+		playerBox.add(new JLabel(" "));
+		playerBox.add(new JLabel("Player position"));
+		playerBox.add(xLabel);
+		playerBox.add(yLabel);
+		playerBox.add(zLabel);
+		playerBox.add(new JLabel(" "));
+		playerBox.add(new JLabel("Player movement"));
+		playerBox.add(lockPos);
+		playerBox.add(new JLabel(" "));
+		playerBox.add(speedBox);
+		playerBox.add(blocksBox);
+		playerBox.add(new JLabel(" "));
+		playerBox.add(movementPanel);
+		playerBox.alignAll();
 
 		Box playerListBox = Box.createVerticalBox();
 
@@ -1166,8 +1346,31 @@ public class Main {
 		playerListBox.add(filterField);
 		playerListBox.add(playerListPane);
 
+		JVBoxPanel statisticsBox = new JVBoxPanel();
+		JScrollPane statisticsPane = new JScrollPane(statisticsBox);
+
+		JButton refreshStats = new JButton("Refresh");
+		refreshStats.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				MinecraftClient cl = clients.get(fPane);
+				if (cl != null)
+					try {
+						cl.refreshStatistics();
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					}
+			}
+		});
+
+		statisticsBox.add(refreshStats);
+		statisticsBox.add(statisticsContainer);
+		statisticsBox.alignAll();
+
 		controlsTabPane.addTab("Player List", playerListBox);
 		controlsTabPane.addTab("Player", playerBox);
+		controlsTabPane.addTab("Statistics", statisticsPane);
+
 		fPane.add(box);
 		fPane.add(controlsScrollPane);
 		SwingUtilities.invokeLater(new Runnable() {
@@ -1236,6 +1439,8 @@ public class Main {
 				if (protocol != -1) {
 					final int iprotocol = protocol;
 					try {
+						if (iprotocol >= 393)
+							controlsTabPane.setEnabledAt(2, false);
 						final MinecraftClient cl = new MinecraftClient(host, port, iprotocol);
 						clients.put(fPane, cl);
 						cl.getPlayersTabList().addChangeListener(new MapChangeListener<UUID, PlayerInfo>() {
@@ -1276,7 +1481,6 @@ public class Main {
 
 							@Override
 							public void messageReceived(final String message, Position pos) {
-
 								if (pos == Position.HOTBAR) {
 									hjtp.setText("");
 									SwingUtils.appendColoredText(message, hjtp);
@@ -1377,6 +1581,48 @@ public class Main {
 								foodBar.setString("Food (" + Integer.toString(food) + "/"
 										+ Integer.toString(foodBar.getMaximum()) + ")");
 							}
+
+							@Override
+							public void positionChanged(double x, double y, double z) {
+								String sx = Double.toString(x);
+								String sy = Double.toString(y);
+								String sz = Double.toString(z);
+								if (sx.contains("."))
+									sx = sx.substring(0, sx.lastIndexOf(".") + 2);
+								if (sy.contains("."))
+									sy = sy.substring(0, sy.lastIndexOf(".") + 2);
+								if (sz.contains("."))
+									sz = sz.substring(0, sz.lastIndexOf(".") + 2);
+
+								xLabel.setText("X: " + sx);
+								yLabel.setText("Y: " + sy);
+								zLabel.setText("Z: " + sz);
+							}
+
+							Map<String, Integer> trueValues = new HashMap<String, Integer>();
+
+							@Override
+							public void statisticsReceived(Map<String, Integer> values) {
+								if (values.size() == 0)
+									return;
+								statisticsContainer.removeAll();
+								for (String key : values.keySet()) {
+									String tkey = TranslationUtils.translateKey(key);
+									if (tkey == key)
+										continue;
+									trueValues.put(tkey, values.get(key));
+								}
+
+								statisticsContainer.setLayout(new GridLayout(trueValues.size(), 2));
+								for (String key : trueValues.keySet()) {
+									statisticsContainer.add(new JLabel(key));
+									statisticsContainer.add(new JLabel("   " + Integer.toString(trueValues.get(key))));
+								}
+								statisticsContainer.revalidate();
+								statisticsContainer.repaint();
+								// TODO
+							}
+
 						});
 						cl.connect(username);
 						playerList.setMcl(cl);

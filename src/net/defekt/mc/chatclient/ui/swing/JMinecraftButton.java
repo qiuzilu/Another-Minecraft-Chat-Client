@@ -111,10 +111,20 @@ public class JMinecraftButton extends JButton {
 		g2.fill(glyph.getOutline(x, y));
 	}
 
+	/**
+	 * Get current color preferences used to draw this button.
+	 * 
+	 * @return color preferences
+	 */
 	public ColorPreferences getCp() {
 		return cp;
 	}
 
+	/**
+	 * Set color preferences used to draw this button.
+	 * 
+	 * @param cp color preferences
+	 */
 	public void setCp(ColorPreferences cp) {
 		this.cp = cp;
 	}

@@ -18,6 +18,9 @@ import net.defekt.mc.chatclient.protocol.io.VarOutputStream;
  */
 public class Packet {
 
+	/**
+	 * Packet's current ID determined by its entry in provide {@link PacketRegistry}
+	 */
 	protected int id = -1;
 
 	private final ByteArrayOutputStream rawBuffer = new ByteArrayOutputStream();
@@ -95,6 +98,45 @@ public class Packet {
 	protected void putLong(long v) {
 		try {
 			varBuffer.writeLong(v);
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
+		}
+	}
+
+	/**
+	 * Put a Float to this packet
+	 * 
+	 * @param v value
+	 */
+	protected void putFloat(float v) {
+		try {
+			varBuffer.writeFloat(v);
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
+		}
+	}
+
+	/**
+	 * Put a Boolean to this packet
+	 * 
+	 * @param v value
+	 */
+	protected void putBoolean(boolean v) {
+		try {
+			varBuffer.writeBoolean(v);
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
+		}
+	}
+
+	/**
+	 * Put a Double to this packet
+	 * 
+	 * @param v value
+	 */
+	protected void putDouble(double v) {
+		try {
+			varBuffer.writeDouble(v);
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}

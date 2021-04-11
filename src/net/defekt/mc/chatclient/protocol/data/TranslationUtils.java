@@ -43,7 +43,7 @@ public class TranslationUtils {
 	 * @param key key
 	 * @return translated string
 	 */
-	protected static String translateKey(String key) {
+	public static String translateKey(String key) {
 		return translationKeys.containsKey(key) ? translationKeys.get(key).replace("%s", "\u00A7%s") : key;
 	}
 }

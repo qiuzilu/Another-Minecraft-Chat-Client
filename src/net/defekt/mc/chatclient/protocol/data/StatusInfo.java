@@ -87,7 +87,7 @@ public class StatusInfo implements Serializable {
 	/**
 	 * Get server icon
 	 * 
-	 * @return server icon
+	 * @return server icon icon encoded as Base64 string
 	 */
 	public String getIcon() {
 		if (icon == null)
@@ -95,6 +95,11 @@ public class StatusInfo implements Serializable {
 		return icon.substring(icon.indexOf(",") + 1);
 	}
 
+	/**
+	 * Set server icon
+	 * 
+	 * @param icon server icon encoded as Base64 string
+	 */
 	public void setIcon(String icon) {
 		this.icon = icon;
 	}
