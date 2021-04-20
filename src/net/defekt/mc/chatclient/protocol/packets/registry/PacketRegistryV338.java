@@ -5,6 +5,8 @@ import java.util.Map;
 
 import net.defekt.mc.chatclient.protocol.packets.Packet;
 import net.defekt.mc.chatclient.protocol.packets.PacketRegistry;
+import net.defekt.mc.chatclient.protocol.packets.alternate.clientbound.play.ServerKeepAlivePacket;
+import net.defekt.mc.chatclient.protocol.packets.alternate.serverbound.play.ClientKeepAlivePacket;
 import net.defekt.mc.chatclient.protocol.packets.general.clientbound.login.ServerLoginSuccessPacket;
 import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.ServerChatMessagePacket;
 import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.ServerDisconnectPacket;
@@ -13,6 +15,7 @@ import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.Server
 import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.ServerPlayerPositionAndLookPacket;
 import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.ServerPluginMessagePacket;
 import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.ServerResourcePackSendPacket;
+import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.ServerSetSlotPacket;
 import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.ServerStatisticsPacket;
 import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.ServerUpdateHealthPacket;
 import net.defekt.mc.chatclient.protocol.packets.general.serverbound.login.ClientLoginRequestPacket;
@@ -23,8 +26,6 @@ import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.Client
 import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.ClientPluginMessagePacket;
 import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.ClientResourcePackStatusPacket;
 import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.ClientStatusPacket;
-import net.defekt.mc.chatclient.protocol.packets.v47.clientbound.play.ServerKeepAlivePacket;
-import net.defekt.mc.chatclient.protocol.packets.v47.serverbound.play.ClientKeepAlivePacket;
 
 /**
  * A packet registry implementation for protocol 338
@@ -76,6 +77,7 @@ public class PacketRegistryV338 extends PacketRegistry {
 				put(0x23, ServerJoinGamePacket.class);
 				put(0x2E, ServerPlayerListItemPacket.class);
 				put(0x07, ServerStatisticsPacket.class);
+				put(0x16, ServerSetSlotPacket.class);
 			}
 		};
 	}

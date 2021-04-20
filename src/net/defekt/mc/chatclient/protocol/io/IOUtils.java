@@ -26,15 +26,20 @@ public class IOUtils {
 	 * @return byte array read from stream
 	 * @throws IOException thrown when there was an error reading from stream
 	 */
-	public static byte[] readFully(InputStream is) throws IOException {
+	public static byte[] readFully(InputStream is, boolean autoClose) throws IOException {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		byte[] buffer = new byte[1024];
 		int num = 0;
 		while ((num = is.read(buffer)) > 0) {
 			bos.write(buffer, 0, num);
 		}
-		is.close();
+		if (autoClose)
+			is.close();
 		return bos.toByteArray();
+	}
+
+	public static byte[] readFully(InputStream is) throws IOException {
+		return readFully(is, true);
 	}
 
 	/**

@@ -116,6 +116,8 @@ public class UserPreferences implements Serializable {
 	}
 
 	private ColorPreferences colorPreferences = new ColorPreferences();
+	private List<String> lastUsernames = new ArrayList<String>();
+	private transient boolean usernameAlertSeen = false;
 
 	private Status resourcePackBehavior = Status.LOADED;
 	private boolean showResourcePackMessages = true;
@@ -252,5 +254,31 @@ public class UserPreferences implements Serializable {
 
 	public void setAdditionalPing(int additionalPing) {
 		this.additionalPing = additionalPing;
+	}
+
+	public void putUserName(String username) {
+		if (lastUsernames.contains(username))
+			lastUsernames.remove(username);
+		if (!lastUsernames.contains(username)) {
+			lastUsernames.add(" ");
+			for (int x = lastUsernames.size() - 1; x > 0; x--) {
+				lastUsernames.set(x, lastUsernames.get(x - 1));
+			}
+			lastUsernames.set(0, username);
+		}
+	}
+
+	public List<String> getLastUserNames() {
+		if (lastUsernames == null)
+			lastUsernames = new ArrayList<String>();
+		return new ArrayList<String>(lastUsernames);
+	}
+
+	public boolean isUsernameAlertSeen() {
+		return usernameAlertSeen;
+	}
+
+	public void setUsernameAlertSeen(boolean usernameAlertSeen) {
+		this.usernameAlertSeen = usernameAlertSeen;
 	}
 }

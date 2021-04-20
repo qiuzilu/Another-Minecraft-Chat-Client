@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 
+import net.defekt.mc.chatclient.protocol.data.ItemStack;
 import net.defekt.mc.chatclient.protocol.io.VarInputStream;
 import net.defekt.mc.chatclient.protocol.io.VarOutputStream;
 
@@ -25,6 +26,7 @@ public class Packet {
 
 	private final ByteArrayOutputStream rawBuffer = new ByteArrayOutputStream();
 	private final VarOutputStream varBuffer = new VarOutputStream(rawBuffer);
+	private final PacketRegistry reg;
 
 	/**
 	 * Constructs a packet (serverbound)<br>
@@ -34,6 +36,7 @@ public class Packet {
 	 */
 	protected Packet(PacketRegistry reg) {
 		id = reg.getPacketID(this.getClass());
+		this.reg = reg;
 	}
 
 	/**
@@ -47,6 +50,7 @@ public class Packet {
 	protected Packet(PacketRegistry reg, byte[] data) throws IOException {
 		id = reg.getPacketID(this.getClass());
 		varBuffer.write(data);
+		this.reg = reg;
 	}
 
 	/**
@@ -85,6 +89,32 @@ public class Packet {
 	protected void putVarInt(int v) {
 		try {
 			varBuffer.writeVarInt(v);
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
+		}
+	}
+
+	/**
+	 * Put slot data to this packet
+	 * 
+	 * @param v VarInt value
+	 */
+	protected void putSlotData(ItemStack v) {
+		try {
+			varBuffer.writeSlotData(v, PacketFactory.getProtocolFor(reg));
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
+		}
+	}
+
+	/**
+	 * Put a byte to this packet
+	 * 
+	 * @param v VarInt value
+	 */
+	protected void putByte(int v) {
+		try {
+			varBuffer.writeByte(v);
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}

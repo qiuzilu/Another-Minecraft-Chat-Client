@@ -1,4 +1,4 @@
-package net.defekt.mc.chatclient.protocol.packets.v47.serverbound.play;
+package net.defekt.mc.chatclient.protocol.packets.alternate.serverbound.play;
 
 import net.defekt.mc.chatclient.protocol.packets.Packet;
 import net.defekt.mc.chatclient.protocol.packets.PacketRegistry;

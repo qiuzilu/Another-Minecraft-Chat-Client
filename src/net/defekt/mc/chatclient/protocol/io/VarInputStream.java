@@ -6,7 +6,11 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
+import com.flowpowered.nbt.Tag;
+import com.flowpowered.nbt.stream.NBTInputStream;
+
 import net.defekt.mc.chatclient.protocol.MinecraftClient;
+import net.defekt.mc.chatclient.protocol.data.ItemStack;
 
 /**
  * An extension of {@link DataInputStream} with methods to read Minecraft's data
@@ -81,4 +85,26 @@ public class VarInputStream extends DataInputStream {
 		return result;
 	}
 
+	@SuppressWarnings("resource")
+	public ItemStack readSlotData(int protocol) throws IOException {
+		if (protocol >= 477)
+			if (!readBoolean())
+				return new ItemStack((short) 0, 0, (short) 0, null);
+		int id = protocol >= 477 ? readVarInt() : readShort();
+		int count = 0;
+		short damage = 0;
+		Tag<?> tag = null;
+		if (id != -1) {
+			count = readByte();
+			damage = protocol <= 340 ? readShort() : 0;
+			try {
+				NBTInputStream is = new NBTInputStream(this, false);
+				tag = is.readTag();
+			} catch (Exception e) {
+				tag = null;
+			}
+		}
+		return new ItemStack(id == -1 ? 0 : id, count, damage, tag);
+
+	}
 }

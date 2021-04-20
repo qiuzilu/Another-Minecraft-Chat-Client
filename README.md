@@ -25,6 +25,6 @@ You can download latest executable version [Here](https://github.com/Defective4/
 - [x] Appearance settings
 - [x] Movement
 - [x] Statistics (1.8 - 1.12.2)
-- [ ] Inventory handling
+- [x] Inventory handling (experimental)
 - [ ] Graphical map with entity rendering
 - [ ] Plugins

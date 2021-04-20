@@ -6,6 +6,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 
+import com.flowpowered.nbt.stream.NBTOutputStream;
+
+import net.defekt.mc.chatclient.protocol.data.ItemStack;
 import net.defekt.mc.chatclient.protocol.packets.Packet;
 
 /**
@@ -22,7 +25,7 @@ public class VarOutputStream extends DataOutputStream {
 	/**
 	 * Wrap output stream in {@link VarOutputStream}
 	 * 
-	 * @param out output stream to wrap 
+	 * @param out output stream to wrap
 	 */
 	public VarOutputStream(OutputStream out) {
 		super(out);
@@ -56,6 +59,25 @@ public class VarOutputStream extends DataOutputStream {
 			throw new IllegalStateException(e);
 		}
 		return bos.size();
+	}
+
+	@SuppressWarnings("resource")
+	public void writeSlotData(ItemStack is, int protocol) throws IOException {
+		if (protocol >= 477) {
+			writeBoolean(is.getId() != 0);
+			writeVarInt(is.getId());
+		} else {
+			writeShort(is.getId());
+			if (is.getId() == -1)
+				return;
+		}
+		writeByte(is.getCount());
+		if (protocol < 393)
+			writeShort(is.getDamage());
+		if (is.getNbt() == null)
+			writeByte(0);
+		else
+			new NBTOutputStream(this).writeTag(is.getNbt());
 	}
 
 	/**

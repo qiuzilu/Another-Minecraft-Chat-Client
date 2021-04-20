@@ -3,16 +3,20 @@ package net.defekt.mc.chatclient.protocol;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import net.defekt.mc.chatclient.protocol.data.ChatMessage;
+import net.defekt.mc.chatclient.protocol.data.ItemStack;
+import net.defekt.mc.chatclient.protocol.data.ItemsWindow;
 import net.defekt.mc.chatclient.protocol.data.PlayerInfo;
 import net.defekt.mc.chatclient.protocol.packets.Packet;
 import net.defekt.mc.chatclient.protocol.packets.PacketFactory;
 import net.defekt.mc.chatclient.protocol.packets.PacketRegistry;
 import net.defekt.mc.chatclient.protocol.packets.PacketRegistry.State;
 import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.ServerChatMessagePacket.Position;
+import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.ServerOpenWindowPacket;
 import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.ServerPlayerListItemPacket.Action;
 import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.ServerPlayerPositionAndLookPacket;
 import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.ClientResourcePackStatusPacket.Status;
@@ -53,6 +57,60 @@ public class ClientPacketListener implements InternalPacketListener {
 	public void packetReceived(Packet packet, PacketRegistry registry) {
 		try {
 			switch (packet.getClass().getSimpleName()) {
+				case "ServerSetSlotPacket": {
+					int windowID = (int) packet.accessPacketMethod("getWindowID");
+					if (windowID == 0)
+						break;
+
+					short slot = (short) packet.accessPacketMethod("getSlot");
+					ItemStack item = (ItemStack) packet.accessPacketMethod("getItem");
+					if (cl.getOpenWindows().containsKey(windowID) && cl.getOpenWindows().get(windowID) != null) {
+						ItemsWindow iWin = cl.getOpenWindows().get(windowID);
+						iWin.putItem(slot, item);
+					}
+					break;
+				}
+				case "ServerCloseWindowPacket": {
+					int windowID = (int) packet.accessPacketMethod("getWindowID");
+					if (cl.getOpenWindows().containsKey(windowID) && cl.getOpenWindows().get(windowID) != null)
+						cl.getOpenWindows().get(windowID).closeWindow();
+					break;
+				}
+				case "ServerWindowItemsPacket": {
+					int windowID = (int) packet.accessPacketMethod("getWindowID");
+					if (windowID == 0)
+						break;
+					List<ItemStack> items = (List<ItemStack>) packet.accessPacketMethod("getItems");
+					if (cl.getOpenWindows().containsKey(windowID) && cl.getOpenWindows().get(windowID) != null) {
+						ItemsWindow iWin = cl.getOpenWindows().get(windowID);
+						for (int x = 0; x < items.size(); x++) {
+							iWin.putItem(x, items.get(x));
+						}
+					}
+					break;
+				}
+				case "ServerOpenWindowPacket": {
+					int windowID = (int) packet.accessPacketMethod("getWindowID");
+					String windowTitle = ChatMessage
+							.removeColors(ChatMessage.parse((String) packet.accessPacketMethod("getWindowTitle")));
+					int slots = 0;
+					if (packet instanceof ServerOpenWindowPacket)
+						slots = ((int) packet.accessPacketMethod("getSlots"));
+					else {
+						int windowType = (int) packet.accessPacketMethod("getWindowType");
+						if (windowID <= 5) {
+							slots = (windowType + 1) * 9;
+						} else
+							break;
+					}
+
+					ItemsWindow win = new ItemsWindow(windowTitle, slots, windowID, cl, registry);
+					cl.setOpenWindow(windowID, win);
+					for (ClientListener l : cl.getClientListeners())
+						l.windowOpened(windowID, win);
+
+					break;
+				}
 				case "ServerStatisticsPacket": {
 					Map<String, Integer> values = (Map<String, Integer>) packet.accessPacketMethod("getValues");
 					for (ClientListener l : cl.getClientListeners())

@@ -81,6 +81,7 @@ import net.defekt.mc.chatclient.protocol.MinecraftClient;
 import net.defekt.mc.chatclient.protocol.MinecraftStat;
 import net.defekt.mc.chatclient.protocol.ProtocolNumber;
 import net.defekt.mc.chatclient.protocol.data.ChatMessage;
+import net.defekt.mc.chatclient.protocol.data.ItemsWindow;
 import net.defekt.mc.chatclient.protocol.data.PlayerInfo;
 import net.defekt.mc.chatclient.protocol.data.PlayerSkinCache;
 import net.defekt.mc.chatclient.protocol.data.TranslationUtils;
@@ -103,6 +104,10 @@ import net.defekt.mc.chatclient.ui.swing.SwingUtils;
 @SuppressWarnings({ "serial", "javadoc"
 })
 public class Main {
+
+	private Main() {
+
+	}
 
 	public static final BufferedImage bgImage = new BufferedImage(64, 64, BufferedImage.TYPE_INT_ARGB);
 	private static BufferedImage logoImage = null;
@@ -149,15 +154,15 @@ public class Main {
 					int oFix = Integer.parseInt(oldVersionSm.substring(oldVersionSm.lastIndexOf(".") + 1));
 
 					int diff = 0;
-					String vtype = "major";
+					String vtype = "";
 
 					if (oFix != nFix) {
 						diff = nFix - oFix;
-						vtype = "fix";
+						vtype = "minor";
 					}
 					if (oMinor != nMinor) {
 						diff = nMinor - oMinor;
-						vtype = "minor";
+						vtype = "major";
 					}
 					if (oMajor != nMajor) {
 						diff = nMajor - oMajor;
@@ -204,6 +209,32 @@ public class Main {
 			g2.fillRect(0, 0, 64, 64);
 		}
 
+		JFrame win = new JFrame("Initializing...");
+		win.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+		JVBoxPanel message = new JVBoxPanel();
+		message.add(new JLabel("Loading textures..."));
+
+		JLabel currentItem = new JLabel(" ");
+		JProgressBar progress = new JProgressBar(0, 0);
+		message.add(currentItem);
+		message.alignAll();
+
+		JOptionPane ppane = new JOptionPane(message, JOptionPane.PLAIN_MESSAGE, JOptionPane.DEFAULT_OPTION, null,
+				new Component[] { progress
+				});
+
+		win.setContentPane(ppane);
+		win.pack();
+		win.setResizable(false);
+		SwingUtils.centerWindow(win);
+		win.setVisible(true);
+		win.toFront();
+		win.setAlwaysOnTop(true);
+
+		ItemsWindow.initTextures(new Main(), currentItem, progress);
+
+		win.dispose();
 		new Main().init();
 	}
 
@@ -613,8 +644,11 @@ public class Main {
 				Box box = Box.createVerticalBox();
 				box.add(new JLabel("Enter your username:"));
 
-				JTextField unameField = new JPlaceholderField("User name");
+				JComboBox<String> unameField = new JComboBox<>();
+				unameField.setEditable(true);
 				unameField.setAlignmentX(Component.LEFT_ALIGNMENT);
+				for (String uname : up.getLastUserNames())
+					unameField.addItem(uname);
 				box.add(unameField);
 
 				do {
@@ -623,18 +657,33 @@ public class Main {
 					if (response != JOptionPane.OK_OPTION)
 						return;
 
-					String uname = unameField.getText();
+					String uname = (String) unameField.getSelectedItem();
+					if (!up.isUsernameAlertSeen() && !uname.replaceAll("[^a-zA-Z0-9]", "").equals(uname)) {
+						int alResp = JOptionPane.showOptionDialog(win,
+								"Your nickname (" + uname
+										+ ") contains characters that may not be allowed on some servers.\r\n"
+										+ "Do you want to continue?",
+								"Unsafe username", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, null,
+								new Object[] { "Yes", "No"
+						}, 0);
+						if (alResp == 0) {
+							up.setUsernameAlertSeen(true);
+							break;
+						} else
+							continue;
+					}
 					if (!uname.isEmpty())
 						break;
 				} while (true);
 
-				final JSplitPane b = createServerPane(et, unameField.getText());
+				final String uname = (String) unameField.getSelectedItem();
+				final JSplitPane b = createServerPane(et, uname);
 
 				tabPane.addTab("", b);
 				tabPane.setSelectedComponent(b);
 
 				Box b2 = Box.createHorizontalBox();
-				b2.setName(et.getHost() + "_" + et.getName() + "_" + unameField.getText());
+				b2.setName(et.getHost() + "_" + et.getName() + "_" + uname);
 				int pxh = et.getIcon() == null ? 0 : 16;
 
 				BufferedImage bicon = null;
@@ -662,7 +711,7 @@ public class Main {
 					}
 				});
 
-				b2.add(new JLabel(" " + et.getName() + " (" + unameField.getText() + ")"));
+				b2.add(new JLabel(" " + et.getName() + " (" + (String) unameField.getSelectedItem() + ")"));
 
 				JButton close = new JButton("x");
 				close.setMargin(new Insets(0, 5, 0, 5));
@@ -685,7 +734,7 @@ public class Main {
 				});
 
 				b2.add(close);
-
+				up.putUserName(uname);
 				tabPane.setTabComponentAt(tabPane.getSelectedIndex(), b2);
 			}
 		};
@@ -1163,6 +1212,7 @@ public class Main {
 
 		final JTextField chatInput = new JMinecraftField("Enter chat message...");
 		chatInput.setEnabled(false);
+
 		final JButton chatSend = new JMinecraftButton("Send");
 		chatSend.setEnabled(false);
 		chatSend.setMargin(new Insets(5, 5, 5, 5));
@@ -1621,6 +1671,11 @@ public class Main {
 								statisticsContainer.revalidate();
 								statisticsContainer.repaint();
 								// TODO
+							}
+
+							@Override
+							public void windowOpened(int id, ItemsWindow win) {
+								win.openWindow(Main.this.win);
 							}
 
 						});

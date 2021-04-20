@@ -6,11 +6,14 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.zip.Inflater;
 
 import net.defekt.mc.chatclient.protocol.data.ChatMessage;
+import net.defekt.mc.chatclient.protocol.data.ItemsWindow;
 import net.defekt.mc.chatclient.protocol.data.PlayerInfo;
 import net.defekt.mc.chatclient.protocol.io.ListenerHashMap;
 import net.defekt.mc.chatclient.protocol.io.VarInputStream;
@@ -65,6 +68,8 @@ public class MinecraftClient {
 
 	private ClientPacketListener listener;
 	private List<ClientListener> clientListeners = new ArrayList<ClientListener>();
+
+	private final Map<Integer, ItemsWindow> openWindows = new HashMap<Integer, ItemsWindow>();
 
 	private Thread packetReaderThread = null;
 	private Thread playerPositionThread = null;
@@ -122,6 +127,12 @@ public class MinecraftClient {
 		if (soc != null && !soc.isClosed())
 			try {
 				connected = false;
+				try {
+					for (ItemsWindow win : openWindows.values())
+						win.closeWindow();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 				soc.close();
 				if (packetReaderThread != null)
 					packetReaderThread.interrupt();
@@ -431,6 +442,13 @@ public class MinecraftClient {
 			throw new IOException("Not connected!");
 	}
 
+	public void sendPacket(Packet packet) throws IOException {
+		if (connected && soc != null && !soc.isClosed()) {
+			os.write(packet.getData(compression));
+		} else
+			throw new IOException("Not connected!");
+	}
+
 	/**
 	 * Send chat message to server
 	 * 
@@ -696,5 +714,16 @@ public class MinecraftClient {
 			os.write(PacketFactory.constructPacket(reg, "ClientStatusPacket", 1).getData(isCompressionEnabled()));
 		} else
 			throw new IOException("Not connected!");
+	}
+
+	protected void setOpenWindow(int id, ItemsWindow win) {
+		for (ItemsWindow window : openWindows.values())
+			window.closeWindow();
+		openWindows.clear();
+		openWindows.put(id, win);
+	}
+
+	public Map<Integer, ItemsWindow> getOpenWindows() {
+		return new HashMap<Integer, ItemsWindow>(openWindows);
 	}
 }

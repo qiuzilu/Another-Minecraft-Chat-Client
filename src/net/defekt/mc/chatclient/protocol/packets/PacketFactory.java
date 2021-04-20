@@ -15,7 +15,7 @@ import net.defekt.mc.chatclient.protocol.packets.registry.PacketRegistryV47;
 import net.defekt.mc.chatclient.protocol.packets.registry.PacketRegistryV477;
 import net.defekt.mc.chatclient.protocol.packets.registry.PacketRegistryV573;
 import net.defekt.mc.chatclient.protocol.packets.registry.PacketRegistryV735;
-import net.defekt.mc.chatclient.protocol.packets.registry.PacketRegistryV751;
+import net.defekt.mc.chatclient.protocol.packets.registry.PacketRegistryV753;
 
 /**
  * A class used to construct packets according to their name
@@ -43,9 +43,8 @@ public class PacketFactory {
 			put(498, 477);
 			put(575, 573);
 			put(578, 573);
-			put(736, 735);
-			put(753, 751);
-			put(754, 751);
+			put(735, 735);
+			put(754, 753);
 		}
 	};
 
@@ -59,11 +58,10 @@ public class PacketFactory {
 				put(338, new PacketRegistryV338());
 				put(393, new PacketRegistryV393());
 				put(340, new PacketRegistryV340());
-				put(393, new PacketRegistryV393());
 				put(477, new PacketRegistryV477());
 				put(573, new PacketRegistryV573());
 				put(735, new PacketRegistryV735());
-				put(751, new PacketRegistryV751());
+				put(753, new PacketRegistryV753());
 			} catch (NoClassDefFoundError e) {
 				e.printStackTrace();
 			}
@@ -119,5 +117,16 @@ public class PacketFactory {
 			throw new IOException("No such packet: " + name);
 		}
 
+	}
+
+	public static int getProtocolFor(PacketRegistry reg) {
+		for (int protocol : packetRegistries.keySet())
+			if (packetRegistries.get(protocol).getClass().equals(reg.getClass()))
+				return protocol;
+		return -1;
+	}
+
+	public static Map<Integer, Integer> getProtocolBinds() {
+		return new HashMap<Integer, Integer>(protocolBinds);
 	}
 }

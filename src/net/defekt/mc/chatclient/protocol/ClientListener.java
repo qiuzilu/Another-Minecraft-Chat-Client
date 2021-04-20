@@ -2,6 +2,7 @@ package net.defekt.mc.chatclient.protocol;
 
 import java.util.Map;
 
+import net.defekt.mc.chatclient.protocol.data.ItemsWindow;
 import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.ServerChatMessagePacket.Position;
 
 /**
@@ -51,4 +52,6 @@ public interface ClientListener {
 	 * @param values map of received values
 	 */
 	public void statisticsReceived(Map<String, Integer> values);
+
+	public void windowOpened(int id, ItemsWindow win);
 }
