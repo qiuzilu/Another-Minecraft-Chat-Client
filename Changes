@@ -1,16 +1,4 @@
 AMCC Change Log
-v1.0.0
+v1.1.0
 [+] Added
-- Basic player movement (in "Player" tab after joining a server)
-
-- "Statistics" tab. It shows player's statistics received from server.
-  Currently this feature works only on Minecraft versions 1.8 to 1.16.5
-  
-- Update notifications. 
-  When starting application, a window will be shown if there is a new version available.
-  You can even check changes between versions from there.
-  
-[+] Fixed
-- Client will now send packets with its position every 20 ticks
-  and will respond to position packets with teleport confirm and position packets.
-  Some servers kicked client when it was not sending these packets.
+- Experimental inventory handling (currently only windows opened by server)  
