@@ -12,6 +12,12 @@ AMCC is a GUI application that lets you join a Minecraft server and chat freely 
 * :clipboard: Tray support.
 * :gear: My own lightweight implementation of Minecraft protocol, supporting versions 1.8 to 1.16.5.
 
+## My goals
+This project is my take on implementing Minecraft's protocol from scratch.<br>
+It started as a simple command line chat client and was quickly wrapped in a GUI.<br>
+Now my primary goal is to implement as many features from Minecraft's original protocol as I can
+without using any other third-party libraries.
+
 ## Downloads
 You can download latest executable version [Here](https://github.com/Defective4/Minecraft-Chat-Client/releases)
 
