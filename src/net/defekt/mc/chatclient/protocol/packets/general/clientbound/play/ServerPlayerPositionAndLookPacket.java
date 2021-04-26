@@ -23,7 +23,7 @@ public class ServerPlayerPositionAndLookPacket extends Packet {
 	private final int teleportID;
 
 	/**
-	 * Contructs {@link ServerPlayerPositionAndLookPacket}
+	 * constructs {@link ServerPlayerPositionAndLookPacket}
 	 * 
 	 * @param reg  packet registry used to construct this packet
 	 * @param data packet's data

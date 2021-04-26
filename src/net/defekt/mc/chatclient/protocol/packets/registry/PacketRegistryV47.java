@@ -12,6 +12,7 @@ import net.defekt.mc.chatclient.protocol.packets.alternate.serverbound.play.Clie
 import net.defekt.mc.chatclient.protocol.packets.general.clientbound.login.ServerLoginSuccessPacket;
 import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.ServerChatMessagePacket;
 import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.ServerCloseWindowPacket;
+import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.ServerConfirmTransactionPacket;
 import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.ServerDisconnectPacket;
 import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.ServerJoinGamePacket;
 import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.ServerOpenWindowPacket;
@@ -25,7 +26,9 @@ import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.Server
 import net.defekt.mc.chatclient.protocol.packets.general.serverbound.login.ClientLoginRequestPacket;
 import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.ClientChatMessagePacket;
 import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.ClientCloseWindowPacket;
+import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.ClientConfirmTransactionPacket;
 import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.ClientEntityActionPacket;
+import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.ClientHeldItemChangePacket;
 import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.ClientPlayerPositionAndLookPacket;
 import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.ClientPlayerPositionPacket;
 import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.ClientPluginMessagePacket;
@@ -65,6 +68,8 @@ public class PacketRegistryV47 extends PacketRegistry {
 				put(0x06, ClientPlayerPositionAndLookPacket.class);
 				put(0x0E, ClientWindowClickPacket.class);
 				put(0x0D, ClientCloseWindowPacket.class);
+				put(0x09, ClientHeldItemChangePacket.class);
+				put(0x0F, ClientConfirmTransactionPacket.class);
 			}
 		};
 	}
@@ -88,6 +93,7 @@ public class PacketRegistryV47 extends PacketRegistry {
 				put(0x2D, ServerOpenWindowPacket.class);
 				put(0x30, ServerWindowItemsPacket.class);
 				put(0x2F, ServerSetSlotPacket.class);
+				put(0x23, ServerConfirmTransactionPacket.class);
 			}
 		};
 	}

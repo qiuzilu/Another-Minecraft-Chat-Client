@@ -57,32 +57,65 @@ public class ClientPacketListener implements InternalPacketListener {
 	public void packetReceived(Packet packet, PacketRegistry registry) {
 		try {
 			switch (packet.getClass().getSimpleName()) {
-				case "ServerSetSlotPacket": {
+				case "ServerConfirmTransactionPacket": {
+					if (!up.isEnableInventoryHandling())
+						return;
+
 					int windowID = (int) packet.accessPacketMethod("getWindowID");
-					if (windowID == 0)
-						break;
+					short actionID = (short) packet.accessPacketMethod("getActionID");
+					boolean accepted = (boolean) packet.accessPacketMethod("isAccepted");
+
+					ItemsWindow win = windowID == 0 ? cl.getInventory()
+							: cl.getOpenWindows().containsKey(windowID) ? cl.getOpenWindows().get(windowID) : null;
+
+					if (win != null) {
+						if (accepted)
+							win.finishTransaction(actionID);
+						else
+							win.cancelTransaction(actionID);
+					}
+
+					if (!accepted)
+						cl.sendPacket(PacketFactory.constructPacket(registry, "ClientConfirmTransactionPacket",
+								(byte) windowID, actionID, accepted));
+
+					break;
+				}
+				case "ServerSetSlotPacket": {
+					if (!up.isEnableInventoryHandling())
+						return;
+
+					int windowID = (int) packet.accessPacketMethod("getWindowID");
 
 					short slot = (short) packet.accessPacketMethod("getSlot");
 					ItemStack item = (ItemStack) packet.accessPacketMethod("getItem");
-					if (cl.getOpenWindows().containsKey(windowID) && cl.getOpenWindows().get(windowID) != null) {
-						ItemsWindow iWin = cl.getOpenWindows().get(windowID);
+					if (windowID == 0 || (cl.getOpenWindows().containsKey(windowID)
+							&& cl.getOpenWindows().get(windowID) != null)) {
+						ItemsWindow iWin = windowID == 0 ? cl.getInventory() : cl.getOpenWindows().get(windowID);
 						iWin.putItem(slot, item);
 					}
 					break;
 				}
 				case "ServerCloseWindowPacket": {
+					if (!up.isEnableInventoryHandling())
+						return;
+
 					int windowID = (int) packet.accessPacketMethod("getWindowID");
 					if (cl.getOpenWindows().containsKey(windowID) && cl.getOpenWindows().get(windowID) != null)
 						cl.getOpenWindows().get(windowID).closeWindow();
+					else if (windowID == 0)
+						cl.getInventory().closeWindow();
 					break;
 				}
 				case "ServerWindowItemsPacket": {
+					if (!up.isEnableInventoryHandling())
+						return;
+
 					int windowID = (int) packet.accessPacketMethod("getWindowID");
-					if (windowID == 0)
-						break;
 					List<ItemStack> items = (List<ItemStack>) packet.accessPacketMethod("getItems");
-					if (cl.getOpenWindows().containsKey(windowID) && cl.getOpenWindows().get(windowID) != null) {
-						ItemsWindow iWin = cl.getOpenWindows().get(windowID);
+					if (windowID == 0 || (cl.getOpenWindows().containsKey(windowID)
+							&& cl.getOpenWindows().get(windowID) != null)) {
+						ItemsWindow iWin = windowID == 0 ? cl.getInventory() : cl.getOpenWindows().get(windowID);
 						for (int x = 0; x < items.size(); x++) {
 							iWin.putItem(x, items.get(x));
 						}
@@ -90,6 +123,9 @@ public class ClientPacketListener implements InternalPacketListener {
 					break;
 				}
 				case "ServerOpenWindowPacket": {
+					if (!up.isEnableInventoryHandling())
+						return;
+
 					int windowID = (int) packet.accessPacketMethod("getWindowID");
 					String windowTitle = ChatMessage
 							.removeColors(ChatMessage.parse((String) packet.accessPacketMethod("getWindowTitle")));
@@ -107,7 +143,7 @@ public class ClientPacketListener implements InternalPacketListener {
 					ItemsWindow win = new ItemsWindow(windowTitle, slots, windowID, cl, registry);
 					cl.setOpenWindow(windowID, win);
 					for (ClientListener l : cl.getClientListeners())
-						l.windowOpened(windowID, win);
+						l.windowOpened(windowID, win, registry);
 
 					break;
 				}
@@ -167,13 +203,16 @@ public class ClientPacketListener implements InternalPacketListener {
 
 					String cname = protocol > 340 ? "minecraft:brand" : "MC|Brand";
 
+					for (int x = 0; x < cl.getInventory().getSize(); x++)
+						cl.getInventory().putItem(x, new ItemStack((short) 0, 1, (short) 0, null));
+
 					os.write(PacketFactory
 							.constructPacket(registry, "ClientPluginMessagePacket", cname, up.getBrand().getBytes())
 							.getData(cl.isCompressionEnabled()));
-					os.write(PacketFactory.constructPacket(registry, "ClientStatusPacket", 0)
-							.getData(cl.isCompressionEnabled()));
-					os.write(PacketFactory.constructPacket(registry, "ClientStatusPacket", 1)
-							.getData(cl.isCompressionEnabled()));
+
+					for (int x = 0; x <= 1; x++)
+						os.write(PacketFactory.constructPacket(registry, "ClientStatusPacket", x)
+								.getData(cl.isCompressionEnabled()));
 					break;
 				}
 				case "ServerUpdateHealthPacket": {

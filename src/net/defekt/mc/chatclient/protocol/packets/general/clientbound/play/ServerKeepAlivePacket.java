@@ -17,7 +17,7 @@ public class ServerKeepAlivePacket extends Packet {
 	private final long id;
 
 	/**
-	 * Contructs {@link ServerKeepAlivePacket}
+	 * constructs {@link ServerKeepAlivePacket}
 	 * 
 	 * @param reg  packet registry used to construct this packet
 	 * @param data packet's data

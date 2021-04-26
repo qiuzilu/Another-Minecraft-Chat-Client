@@ -1,6 +1,7 @@
 package net.defekt.mc.chatclient.protocol.data;
 
 import java.io.BufferedReader;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,6 +15,9 @@ import com.google.gson.JsonParser;
 
 import net.defekt.mc.chatclient.protocol.ProtocolNumber;
 import net.defekt.mc.chatclient.protocol.packets.PacketFactory;
+import net.defekt.mc.chatclient.ui.Main;
+import net.defekt.mc.chatclient.ui.UserPreferences;
+import net.defekt.mc.chatclient.ui.UserPreferences.Language;
 
 /**
  * This class contains translation keys used by Minecraft chat messages.<br>
@@ -28,21 +32,28 @@ public class TranslationUtils {
 	private TranslationUtils() {
 	}
 
-	private static final Map<String, String> translationKeys = new HashMap<String, String>() {
+	private static final Map<Language, Map<String, String>> translationKeys = new HashMap<UserPreferences.Language, Map<String, String>>() {
 		{
-			try (BufferedReader br = new BufferedReader(
-					new InputStreamReader(TranslationUtils.class.getResourceAsStream("/resources/en_us.lang")))) {
-				String line;
-				while ((line = br.readLine()) != null) {
-					if (line.contains("=") && line.split("=").length > 1) {
-						String[] ags = line.split("=");
-						put(ags[0], ags[1]);
+			for (Language lang : Language.values()) {
+				InputStream is = TranslationUtils.class
+						.getResourceAsStream("/resources/lang/minecraft/" + lang.getCode().toLowerCase() + ".lang");
+				if (is == null)
+					continue;
+				Map<String, String> kMap = new HashMap<String, String>();
+				try (BufferedReader br = new BufferedReader(new InputStreamReader(is))) {
+					String line;
+					while ((line = br.readLine()) != null) {
+						if (line.contains("=") && line.split("=").length > 1) {
+							String[] ags = line.split("=");
+							kMap.put(ags[0], ags[1]);
+						}
 					}
-				}
 
-				br.close();
-			} catch (Exception e) {
-				e.printStackTrace();
+					br.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				put(lang, kMap);
 			}
 		}
 	};
@@ -95,6 +106,13 @@ public class TranslationUtils {
 		}
 	};
 
+	/**
+	 * Get an item info from its id and protocol
+	 * 
+	 * @param id       item's ID
+	 * @param protocol protocol of this item
+	 * @return item information
+	 */
 	public static ItemInfo getItemForID(int id, int protocol) {
 		if (PacketFactory.getProtocolBinds().containsKey(protocol))
 			protocol = PacketFactory.getProtocolBinds().get(protocol);
@@ -114,6 +132,10 @@ public class TranslationUtils {
 	 * @return translated string
 	 */
 	public static String translateKey(String key) {
-		return translationKeys.containsKey(key) ? translationKeys.get(key).replace("%s", "\u00A7%s") : key;
+		Language lang = translationKeys.containsKey(Main.up.getAppLanguage()) ? Main.up.getAppLanguage() : Language.English;
+		Map<String, String> kMap = translationKeys.get(lang);
+		if (kMap.containsKey(key))
+			return kMap.get(key).replace("%s", "\u00A7%s");
+		return key;
 	}
 }

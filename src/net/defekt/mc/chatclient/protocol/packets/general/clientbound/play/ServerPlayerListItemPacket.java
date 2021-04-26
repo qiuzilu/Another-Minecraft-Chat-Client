@@ -77,7 +77,7 @@ public class ServerPlayerListItemPacket extends Packet {
 	private int ping = -1;
 
 	/**
-	 * Contructs {@link ServerPlayerListItemPacket}
+	 * constructs {@link ServerPlayerListItemPacket}
 	 * 
 	 * @param reg  packet registry used to construct this packet
 	 * @param data packet's data

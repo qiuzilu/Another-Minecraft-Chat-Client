@@ -4,11 +4,15 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Window;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JColorChooser;
+
+import net.defekt.mc.chatclient.ui.Messages;
 
 /**
  * A special button allowing you to choose a color when clicking on it.<br>
@@ -94,15 +98,23 @@ public class JColorChooserButton extends JButton {
 	 *                     parent.
 	 */
 	public JColorChooserButton(Color initialColor, Window parent) {
-		setText(" ");
+		setText(" "); //$NON-NLS-1$
 		currentColor = initialColor;
-		addActionListener(ev -> {
-			Color tc = JColorChooser.showDialog(parent, "Choose color", JColorChooserButton.this.currentColor);
-			if (tc == null)
-				return;
-			currentColor = tc;
-			for (ColorChangeListener ccl : colorChangeListeners)
-				ccl.colorChanged(currentColor);
+		addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				{
+					Color tc = JColorChooser.showDialog(parent,
+							Messages.getString("JColorChooserButton.colorChooserDialogTitle"), //$NON-NLS-1$
+							JColorChooserButton.this.currentColor);
+					if (tc == null)
+						return;
+					currentColor = tc;
+					for (ColorChangeListener ccl : colorChangeListeners)
+						ccl.colorChanged(currentColor);
+				}
+			}
 		});
 	}
 

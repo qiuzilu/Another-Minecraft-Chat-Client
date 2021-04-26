@@ -50,7 +50,8 @@ public class MinecraftPlayerListRenderer extends DefaultListCellRenderer {
 	};
 
 	/**
-	 * <img src="doc-files/5.png" height="16" alt="5"> Full connection indicator image
+	 * <img src="doc-files/5.png" height="16" alt="5"> Full connection indicator
+	 * image
 	 */
 	public final static BufferedImage bar5 = new BufferedImage(40, 28, BufferedImage.TYPE_INT_ARGB) {
 		{
@@ -66,7 +67,8 @@ public class MinecraftPlayerListRenderer extends DefaultListCellRenderer {
 	};
 
 	/**
-	 * <img src="doc-files/1.png" height="16" alt="1"> One bar connection indicator image
+	 * <img src="doc-files/1.png" height="16" alt="1"> One bar connection indicator
+	 * image
 	 */
 	public final static BufferedImage bar1 = new BufferedImage(40, 28, BufferedImage.TYPE_INT_ARGB) {
 		{
@@ -82,7 +84,8 @@ public class MinecraftPlayerListRenderer extends DefaultListCellRenderer {
 	};
 
 	/**
-	 * <img src="doc-files/2.png" height="16" alt="2"> Two bar connection indicator image
+	 * <img src="doc-files/2.png" height="16" alt="2"> Two bar connection indicator
+	 * image
 	 */
 	public final static BufferedImage bar2 = new BufferedImage(40, 28, BufferedImage.TYPE_INT_ARGB) {
 		{
@@ -98,7 +101,8 @@ public class MinecraftPlayerListRenderer extends DefaultListCellRenderer {
 	};
 
 	/**
-	 * <img src="doc-files/3.png" height="16" alt="3"> Three bar connection indicator image
+	 * <img src="doc-files/3.png" height="16" alt="3"> Three bar connection
+	 * indicator image
 	 */
 	public final static BufferedImage bar3 = new BufferedImage(40, 28, BufferedImage.TYPE_INT_ARGB) {
 		{
@@ -114,7 +118,8 @@ public class MinecraftPlayerListRenderer extends DefaultListCellRenderer {
 	};
 
 	/**
-	 * <img src="doc-files/4.png" height="16" alt="4"> Four bar connection indicator image
+	 * <img src="doc-files/4.png" height="16" alt="4"> Four bar connection indicator
+	 * image
 	 */
 	public final static BufferedImage bar4 = new BufferedImage(40, 28, BufferedImage.TYPE_INT_ARGB) {
 		{
@@ -147,11 +152,15 @@ public class MinecraftPlayerListRenderer extends DefaultListCellRenderer {
 					while (true) {
 						Thread.sleep(3000);
 						synchronized (MinecraftPlayerListRenderer.this) {
-							SwingUtilities.invokeLater(() -> {
-								int ind = playerList.getSelectedIndex();
-								playerList.setListData(playerList.getListData());
-								playerList.setSelectedIndex(ind);
-								playerList.repaint();
+							SwingUtilities.invokeLater(new Runnable() {
+
+								@Override
+								public void run() {
+									int ind = playerList.getSelectedIndex();
+									playerList.setListData(playerList.getListData());
+									playerList.setSelectedIndex(ind);
+									playerList.repaint();
+								}
 							});
 						}
 					}

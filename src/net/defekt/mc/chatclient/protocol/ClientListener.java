@@ -3,6 +3,7 @@ package net.defekt.mc.chatclient.protocol;
 import java.util.Map;
 
 import net.defekt.mc.chatclient.protocol.data.ItemsWindow;
+import net.defekt.mc.chatclient.protocol.packets.PacketRegistry;
 import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.ServerChatMessagePacket.Position;
 
 /**
@@ -53,5 +54,13 @@ public interface ClientListener {
 	 */
 	public void statisticsReceived(Map<String, Integer> values);
 
-	public void windowOpened(int id, ItemsWindow win);
+	/**
+	 * Invoked when server shows a window to client (a enderchest, interactive GUI,
+	 * etc.)
+	 * 
+	 * @param id  opened window's ID
+	 * @param win opened window
+	 * @param reg client's packet registry
+	 */
+	public void windowOpened(int id, ItemsWindow win, PacketRegistry reg);
 }

@@ -18,7 +18,7 @@ public class ServerResourcePackSendPacket extends Packet {
 	private final String hash;
 
 	/**
-	 * Contructs {@link ServerResourcePackSendPacket}
+	 * constructs {@link ServerResourcePackSendPacket}
 	 * 
 	 * @param reg  packet registry used to construct this packet
 	 * @param data packet's data

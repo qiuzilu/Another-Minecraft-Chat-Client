@@ -20,9 +20,10 @@ import net.defekt.mc.chatclient.protocol.data.PlayerSkinCache;
 public class IOUtils {
 
 	/**
-	 * Read all bytes from stream and close it
+	 * Read all bytes from stream
 	 * 
-	 * @param is input stream to read from
+	 * @param is        input stream to read from
+	 * @param autoClose close stream after reading all bytes
 	 * @return byte array read from stream
 	 * @throws IOException thrown when there was an error reading from stream
 	 */
@@ -38,6 +39,13 @@ public class IOUtils {
 		return bos.toByteArray();
 	}
 
+	/**
+	 * Read all bytes from stream and close it
+	 * 
+	 * @param is input stream to read from
+	 * @return byte array read from stream
+	 * @throws IOException thrown when there was an error reading from stream
+	 */
 	public static byte[] readFully(InputStream is) throws IOException {
 		return readFully(is, true);
 	}

@@ -18,7 +18,7 @@ public class ServerEntry implements Serializable {
 	private final int port;
 	private String name;
 
-	private String version = "Auto";
+	private String version = "Auto"; //$NON-NLS-1$
 
 	private transient StatusInfo info = null;
 	private String icon = null;
@@ -57,7 +57,7 @@ public class ServerEntry implements Serializable {
 					try {
 						info = MinecraftStat.serverListPing(host, port);
 					} catch (Exception e) {
-						info = new StatusInfo("\u00A74Can't connect to server", -1, -1, "", -1, null);
+						info = new StatusInfo(Messages.getString("ServerEntry.serverEntryCantConnect"), -1, -1, "", -1, null); //$NON-NLS-1$ //$NON-NLS-2$
 					}
 					if (info != null && info.getProtocol() != -1)
 						icon = info.getIcon();

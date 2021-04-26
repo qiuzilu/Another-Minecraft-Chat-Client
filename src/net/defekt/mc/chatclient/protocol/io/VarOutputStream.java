@@ -61,6 +61,13 @@ public class VarOutputStream extends DataOutputStream {
 		return bos.size();
 	}
 
+	/**
+	 * Writes item data to stream
+	 * 
+	 * @param is       item stack to write
+	 * @param protocol protocol determining slot data used
+	 * @throws IOException thrown when there was an error writing to stream
+	 */
 	@SuppressWarnings("resource")
 	public void writeSlotData(ItemStack is, int protocol) throws IOException {
 		if (protocol >= 477) {
@@ -85,7 +92,7 @@ public class VarOutputStream extends DataOutputStream {
 	 * <a href="https://wiki.vg/Protocol#VarInt_and_VarLong">wiki.vg</a>
 	 * 
 	 * @param value VarInt value
-	 * @throws IOException thrown when there was an error writting to stream
+	 * @throws IOException thrown when there was an error writing to stream
 	 */
 	public void writeVarInt(int value) throws IOException {
 		do {

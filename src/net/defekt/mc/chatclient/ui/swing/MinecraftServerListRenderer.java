@@ -21,6 +21,7 @@ import javax.swing.SwingUtilities;
 import net.defekt.mc.chatclient.protocol.data.ChatColor;
 import net.defekt.mc.chatclient.protocol.data.StatusInfo;
 import net.defekt.mc.chatclient.ui.Main;
+import net.defekt.mc.chatclient.ui.Messages;
 import net.defekt.mc.chatclient.ui.ServerEntry;
 
 /**
@@ -46,33 +47,33 @@ public class MinecraftServerListRenderer extends DefaultListCellRenderer {
 		Box serverBox = Box.createVerticalBox();
 		serverBox.setMinimumSize(new Dimension(list.getMinimumSize().width, 100));
 
-		JLabel name = new JLabel(" " + entry.getName());
+		JLabel name = new JLabel(" " + entry.getName()); //$NON-NLS-1$
 		JTextPane version = new JTextPane();
-		version.setText("???");
-		JLabel players = new JLabel(" ?/? Players (version " + entry.getVersion() + ")");
+		version.setText("???"); //$NON-NLS-1$
+		JLabel players = new JLabel(Messages.getString("MinecraftServerListRenderer.serverListPlayersLabel") + entry.getVersion() + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 		JTextPane description = new JTextPane();
-		description.setText(" Pinging...");
+		description.setText(Messages.getString("MinecraftServerListRenderer.serverListStatusPinging")); //$NON-NLS-1$
 
 		serverBox.add(name);
 		serverBox.add(players);
 		serverBox.add(version);
 		serverBox.add(description);
-		serverBox.add(new JLabel(" "));
+		serverBox.add(new JLabel(" ")); //$NON-NLS-1$
 
 		for (Component ct : serverBox.getComponents()) {
 			ct.setFont(Main.mcFont);
 			ct.setForeground(Color.white);
 			if (ct instanceof JTextPane) {
 				JTextPane jtp = (JTextPane) ct;
-				jtp.setForeground(ChatColor.translateColorCode("7"));
+				jtp.setForeground(ChatColor.translateColorCode("7")); //$NON-NLS-1$
 				jtp.setOpaque(false);
 				jtp.setEditable(false);
 				jtp.setAlignmentX(Component.LEFT_ALIGNMENT);
 			}
 		}
 
-		version.setForeground(ChatColor.translateColorCode("7"));
-		players.setForeground(ChatColor.translateColorCode("7"));
+		version.setForeground(ChatColor.translateColorCode("7")); //$NON-NLS-1$
+		players.setForeground(ChatColor.translateColorCode("7")); //$NON-NLS-1$
 		serverBox.setOpaque(isSelected);
 		serverBox.setBackground(isSelected ? new Color(0, 0, 0, 155) : new Color(0, 0, 0, 0));
 
@@ -81,12 +82,12 @@ public class MinecraftServerListRenderer extends DefaultListCellRenderer {
 		if (entry.getInfo() != null) {
 			StatusInfo inf = entry.getInfo();
 			if (inf.getOnlinePlayers() != -1)
-				players.setText(" " + Integer.toString(inf.getOnlinePlayers()) + "/"
-						+ Integer.toString(inf.getMaxPlayers()) + " Players (version " + entry.getVersion() + ")");
-			description.setText("");
-			SwingUtils.appendColoredText(" " + inf.getDescription().replace("\n", "\n "), description);
-			version.setText(inf.getVersionName().isEmpty() ? " ???" : "");
-			SwingUtils.appendColoredText(" " + inf.getVersionName(), version);
+				players.setText(" " + Integer.toString(inf.getOnlinePlayers()) + "/" //$NON-NLS-1$ //$NON-NLS-2$
+						+ Integer.toString(inf.getMaxPlayers()) + Messages.getString("MinecraftServerListRenderer.serverListPlayersLabel2") + entry.getVersion() + ")"); //$NON-NLS-1$ //$NON-NLS-2$
+			description.setText(""); //$NON-NLS-1$
+			SwingUtils.appendColoredText(" " + inf.getDescription().replace("\n", "\n "), description); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			version.setText(inf.getVersionName().isEmpty() ? " ???" : ""); //$NON-NLS-1$ //$NON-NLS-2$
+			SwingUtils.appendColoredText(" " + inf.getVersionName(), version); //$NON-NLS-1$
 
 		}
 		if (entry.getIcon() != null) {
@@ -98,13 +99,21 @@ public class MinecraftServerListRenderer extends DefaultListCellRenderer {
 			}
 		}
 
-		SwingUtilities.invokeLater(() -> {
-			list.repaint();
+		SwingUtilities.invokeLater(new Runnable() {
+
+			@Override
+			public void run() {
+				list.repaint();
+			}
 		});
 
-		SwingUtilities.invokeLater(() -> {
-			serverBox.repaint();
-			serverBox.revalidate();
+		SwingUtilities.invokeLater(new Runnable() {
+
+			@Override
+			public void run() {
+				serverBox.repaint();
+				serverBox.revalidate();
+			}
 		});
 
 		if (list instanceof JMinecraftServerList) {

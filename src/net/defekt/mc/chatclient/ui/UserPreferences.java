@@ -24,6 +24,9 @@ public class UserPreferences implements Serializable {
 
 	private static final long serialVersionUID = 5064975536053236721L;
 
+	@SuppressWarnings("unused")
+	private final int prefsVersion = 1;
+
 	private UserPreferences() {
 	}
 
@@ -48,10 +51,30 @@ public class UserPreferences implements Serializable {
 		NONE
 	}
 
+	/**
+	 * Language enum is used to set application's language
+	 * 
+	 * @author Defective4
+	 *
+	 */
+	public static enum Language {
+		English("EN"), Polish("PL");
+
+		private final String code;
+
+		private Language(String code) {
+			this.code = code;
+		}
+
+		public String getCode() {
+			return code;
+		}
+	}
+
 	public static class Constants {
-		public static final String TRAY_MESSAGES_KEY_ALWAYS = "Always";
-		public static final String TRAY_MESSAGES_KEY_MENTION = "When mentioned";
-		public static final String TRAY_MESSAGES_KEY_NEVER = "Never";
+		public static final String TRAY_MESSAGES_KEY_ALWAYS = "Always"; //$NON-NLS-1$
+		public static final String TRAY_MESSAGES_KEY_MENTION = "On mention"; //$NON-NLS-1$
+		public static final String TRAY_MESSAGES_KEY_NEVER = "Never"; //$NON-NLS-1$
 
 		public static final int WINDOW_CLOSE_ALWAYS_ASK = 0;
 		public static final int WINDOW_CLOSE_TO_TRAY = 1;
@@ -65,9 +88,9 @@ public class UserPreferences implements Serializable {
 	public static class ColorPreferences implements Serializable {
 
 		private static final long serialVersionUID = 1L;
-		private String colorEnabledButton = "6f6f6f";
-		private String colorEnabledHoverButton = "7c86be";
-		private String colorDisabledButton = "2d2d2d";
+		private String colorEnabledButton = "6f6f6f"; //$NON-NLS-1$
+		private String colorEnabledHoverButton = "7c86be"; //$NON-NLS-1$
+		private String colorDisabledButton = "2d2d2d"; //$NON-NLS-1$
 		private String colorText = SwingUtils.getHexRGB(Color.white);
 		private String disabledColorText = SwingUtils.getHexRGB(Color.lightGray);
 
@@ -115,6 +138,9 @@ public class UserPreferences implements Serializable {
 		}
 	}
 
+	private Language appLanguage = Language.English;
+	private boolean wasLangSet = false;
+
 	private ColorPreferences colorPreferences = new ColorPreferences();
 	private List<String> lastUsernames = new ArrayList<String>();
 	private transient boolean usernameAlertSeen = false;
@@ -129,17 +155,25 @@ public class UserPreferences implements Serializable {
 	private boolean ignoreKeepAlive = false;
 	private int additionalPing = 0;
 	private boolean sendMCBrand = true;
-	private String brand = "vanilla";
+	private String brand = "vanilla"; //$NON-NLS-1$
 
 	private String trayMessageMode = Constants.TRAY_MESSAGES_KEY_MENTION;
 	private boolean trayShowDisconnectMessages = true;
 	private int closeMode = Constants.WINDOW_CLOSE_ALWAYS_ASK;
+
+	private boolean enableInventoryHandling = true;
+	private boolean hideIncomingWindows = false;
+	private boolean hiddenWindowsResponse = true;
+	private boolean loadInventoryTextures = true;
+	private boolean showWindowsInTray = true;
+	private boolean sendWindowClosePackets = true;
 
 	protected static UserPreferences load() {
 		try {
 			if (Main.serverFile.exists()) {
 				try (ObjectInputStream is = new ObjectInputStream(new FileInputStream(Main.serverFile))) {
 					UserPreferences prefs = (UserPreferences) is.readObject();
+
 					return prefs;
 				}
 			} else
@@ -260,7 +294,7 @@ public class UserPreferences implements Serializable {
 		if (lastUsernames.contains(username))
 			lastUsernames.remove(username);
 		if (!lastUsernames.contains(username)) {
-			lastUsernames.add(" ");
+			lastUsernames.add(" "); //$NON-NLS-1$
 			for (int x = lastUsernames.size() - 1; x > 0; x--) {
 				lastUsernames.set(x, lastUsernames.get(x - 1));
 			}
@@ -280,5 +314,66 @@ public class UserPreferences implements Serializable {
 
 	public void setUsernameAlertSeen(boolean usernameAlertSeen) {
 		this.usernameAlertSeen = usernameAlertSeen;
+	}
+
+	public boolean isEnableInventoryHandling() {
+		return enableInventoryHandling;
+	}
+
+	public boolean isLoadInventoryTextures() {
+		return loadInventoryTextures;
+	}
+
+	public boolean isShowWindowsInTray() {
+		return showWindowsInTray;
+	}
+
+	public void setEnableInventoryHandling(boolean enableInventoryHandling) {
+		this.enableInventoryHandling = enableInventoryHandling;
+	}
+
+	public void setLoadInventoryTextures(boolean loadInventoryTextures) {
+		this.loadInventoryTextures = loadInventoryTextures;
+	}
+
+	public void setShowWindowsInTray(boolean showWindowsInTray) {
+		this.showWindowsInTray = showWindowsInTray;
+	}
+
+	public boolean isSendWindowClosePackets() {
+		return sendWindowClosePackets;
+	}
+
+	public void setSendWindowClosePackets(boolean sendWindowClosePackets) {
+		this.sendWindowClosePackets = sendWindowClosePackets;
+	}
+
+	public boolean isHideIncomingWindows() {
+		return hideIncomingWindows;
+	}
+
+	public boolean isHiddenWindowsResponse() {
+		return hiddenWindowsResponse;
+	}
+
+	public void setHideIncomingWindows(boolean hideIncomingWindows) {
+		this.hideIncomingWindows = hideIncomingWindows;
+	}
+
+	public void setHiddenWindowsResponse(boolean hiddenWindowsResponse) {
+		this.hiddenWindowsResponse = hiddenWindowsResponse;
+	}
+
+	public Language getAppLanguage() {
+		return appLanguage;
+	}
+
+	public void setAppLanguage(Language appLanguage) {
+		this.appLanguage = appLanguage;
+		wasLangSet = true;
+	}
+
+	public boolean isWasLangSet() {
+		return wasLangSet;
 	}
 }

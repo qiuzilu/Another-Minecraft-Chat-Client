@@ -17,7 +17,7 @@ public class ServerDisconnectPacket extends Packet {
 	private final String reason;
 
 	/**
-	 * Contructs {@link ServerDisconnectPacket}
+	 * Constructs {@link ServerDisconnectPacket}
 	 * 
 	 * @param reg  packet registry used to construct this packet
 	 * @param data packet's data

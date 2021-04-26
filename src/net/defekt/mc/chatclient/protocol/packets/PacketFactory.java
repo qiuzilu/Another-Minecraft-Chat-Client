@@ -16,6 +16,7 @@ import net.defekt.mc.chatclient.protocol.packets.registry.PacketRegistryV477;
 import net.defekt.mc.chatclient.protocol.packets.registry.PacketRegistryV573;
 import net.defekt.mc.chatclient.protocol.packets.registry.PacketRegistryV735;
 import net.defekt.mc.chatclient.protocol.packets.registry.PacketRegistryV753;
+import net.defekt.mc.chatclient.ui.Messages;
 
 /**
  * A class used to construct packets according to their name
@@ -82,7 +83,7 @@ public class PacketFactory {
 		if (packetRegistries.containsKey(protocol))
 			return packetRegistries.get(protocol);
 		else
-			throw new IOException("Protocol not implemented: " + Integer.toString(protocol));
+			throw new IOException(Messages.getString("PacketFactory.regInitProtocolNotImplemented") + Integer.toString(protocol)); //$NON-NLS-1$
 	}
 
 	/**
@@ -114,11 +115,17 @@ public class PacketFactory {
 
 			e.printStackTrace();
 
-			throw new IOException("No such packet: " + name);
+			throw new IOException(Messages.getString("PacketFactory.packetInitNoSuchPacket") + name); //$NON-NLS-1$
 		}
 
 	}
 
+	/**
+	 * Get protocol for given packet registry
+	 * 
+	 * @param reg packet registry to use
+	 * @return registry's protocol
+	 */
 	public static int getProtocolFor(PacketRegistry reg) {
 		for (int protocol : packetRegistries.keySet())
 			if (packetRegistries.get(protocol).getClass().equals(reg.getClass()))
@@ -126,6 +133,11 @@ public class PacketFactory {
 		return -1;
 	}
 
+	/**
+	 * Get protocol binds
+	 * 
+	 * @return map containing protocol binds
+	 */
 	public static Map<Integer, Integer> getProtocolBinds() {
 		return new HashMap<Integer, Integer>(protocolBinds);
 	}

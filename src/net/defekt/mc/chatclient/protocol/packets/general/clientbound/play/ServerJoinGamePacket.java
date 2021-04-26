@@ -16,7 +16,7 @@ public class ServerJoinGamePacket extends Packet {
 	private final int entityID;
 
 	/**
-	 * Contructs {@link ServerJoinGamePacket}
+	 * Constructs {@link ServerJoinGamePacket}
 	 * 
 	 * @param reg  packet registry used to construct this packet
 	 * @param data packet's data

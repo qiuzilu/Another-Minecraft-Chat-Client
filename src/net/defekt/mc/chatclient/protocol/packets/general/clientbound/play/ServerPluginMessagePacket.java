@@ -19,7 +19,7 @@ public class ServerPluginMessagePacket extends Packet {
 	private final byte[] data;
 
 	/**
-	 * Contructs {@link ServerPluginMessagePacket}
+	 * constructs {@link ServerPluginMessagePacket}
 	 * 
 	 * @param reg  packet registry used to construct this packet
 	 * @param data packet's data

@@ -19,7 +19,7 @@ public class ServerUpdateHealthPacket extends Packet {
 	private final float saturation;
 
 	/**
-	 * Contructs {@link ServerUpdateHealthPacket}
+	 * constructs {@link ServerUpdateHealthPacket}
 	 * 
 	 * @param reg  packet registry used to construct this packet
 	 * @param data packet's data

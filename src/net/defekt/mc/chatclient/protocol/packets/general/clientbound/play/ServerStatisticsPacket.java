@@ -21,7 +21,7 @@ public class ServerStatisticsPacket extends Packet {
 	private final Map<String, Integer> values = new HashMap<String, Integer>();
 
 	/**
-	 * Contructs {@link ServerJoinGamePacket}
+	 * constructs {@link ServerJoinGamePacket}
 	 * 
 	 * @param reg  packet registry used to construct this packet
 	 * @param data packet's data

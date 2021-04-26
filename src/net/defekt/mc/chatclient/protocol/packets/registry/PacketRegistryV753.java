@@ -8,6 +8,7 @@ import net.defekt.mc.chatclient.protocol.packets.PacketRegistry;
 import net.defekt.mc.chatclient.protocol.packets.alternate.clientbound.play.ServerOpenWindowPacket;
 import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.ServerChatMessagePacket;
 import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.ServerCloseWindowPacket;
+import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.ServerConfirmTransactionPacket;
 import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.ServerDisconnectPacket;
 import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.ServerJoinGamePacket;
 import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.ServerKeepAlivePacket;
@@ -21,13 +22,17 @@ import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.Server
 import net.defekt.mc.chatclient.protocol.packets.general.serverbound.login.ClientLoginRequestPacket;
 import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.ClientChatMessagePacket;
 import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.ClientCloseWindowPacket;
+import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.ClientConfirmTransactionPacket;
 import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.ClientEntityActionPacket;
+import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.ClientHeldItemChangePacket;
 import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.ClientKeepAlivePacket;
+import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.ClientPlayerDiggingPacket;
 import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.ClientPlayerPositionAndLookPacket;
 import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.ClientPlayerPositionPacket;
 import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.ClientPluginMessagePacket;
 import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.ClientResourcePackStatusPacket;
 import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.ClientStatusPacket;
+import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.ClientUseItemPacket;
 import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.ClientWindowClickPacket;
 
 /**
@@ -62,6 +67,10 @@ public class PacketRegistryV753 extends PacketRegistry {
 				put(0x13, ClientPlayerPositionAndLookPacket.class);
 				put(0x09, ClientWindowClickPacket.class);
 				put(0x0A, ClientCloseWindowPacket.class);
+				put(0x25, ClientHeldItemChangePacket.class);
+				put(0x1B, ClientPlayerDiggingPacket.class);
+				put(0x2F, ClientUseItemPacket.class);
+				put(0x07, ClientConfirmTransactionPacket.class);
 			}
 		};
 	}
@@ -84,6 +93,7 @@ public class PacketRegistryV753 extends PacketRegistry {
 				put(0x2D, ServerOpenWindowPacket.class);
 				put(0x13, ServerWindowItemsPacket.class);
 				put(0x15, ServerSetSlotPacket.class);
+				put(0x11, ServerConfirmTransactionPacket.class);
 			}
 		};
 	}

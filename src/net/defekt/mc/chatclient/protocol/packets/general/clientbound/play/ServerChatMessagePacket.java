@@ -39,7 +39,7 @@ public class ServerChatMessagePacket extends Packet {
 	private final byte position;
 
 	/**
-	 * Contructs {@link ServerChatMessagePacket}
+	 * Constructs {@link ServerChatMessagePacket}
 	 * 
 	 * @param reg  packet registry used to construct this packet
 	 * @param data packet's data

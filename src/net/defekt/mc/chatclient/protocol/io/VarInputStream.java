@@ -85,6 +85,13 @@ public class VarInputStream extends DataInputStream {
 		return result;
 	}
 
+	/**
+	 * Read item data from stream
+	 * 
+	 * @param protocol protocol determining slot data format
+	 * @return read item stack
+	 * @throws IOException thrown when there was an error reading from stream
+	 */
 	@SuppressWarnings("resource")
 	public ItemStack readSlotData(int protocol) throws IOException {
 		if (protocol >= 477)
