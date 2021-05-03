@@ -79,7 +79,7 @@ public class PlayerSkinCache {
 						BufferedImage skin = ImageIO.read(new URL(skUrl));
 						skinCache.put(uid, new PlayerSkinInfo(skin, skUrl));
 					} catch (Exception e) {
-
+						e.printStackTrace();
 					} finally {
 						pending.remove(uid);
 					}

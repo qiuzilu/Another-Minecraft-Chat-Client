@@ -439,8 +439,10 @@ public class ItemsWindow {
 			case 45: {
 				return itemTextures.get("empty_armor_slot_shield"); //$NON-NLS-1$
 			}
+			default: {
+				return null;
+			}
 		}
-		return null;
 	}
 
 	/**
@@ -617,6 +619,7 @@ public class ItemsWindow {
 					try {
 						client.sendPacket(PacketFactory.constructPacket(registry, "ClientCloseWindowPacket", windowID)); //$NON-NLS-1$
 					} catch (Exception e2) {
+						return;
 					}
 				else
 					closeSilently = false;

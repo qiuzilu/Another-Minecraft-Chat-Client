@@ -130,7 +130,7 @@ public class JMinecraftPlayerList extends JMemList<PlayerInfo> {
 
 								try {
 									switch (ext) {
-										case "csv": { //$NON-NLS-1$
+										default: {
 											PrintWriter pw = new PrintWriter(new FileOutputStream(sel));
 											pw.println(Messages.getString("JMinecraftPlayerList.exportFileColumns")); //$NON-NLS-1$
 											for (UUID uid : mcl.getPlayersTabList().keySet()) {

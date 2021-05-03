@@ -44,7 +44,7 @@ public class MinecraftPlayerListRenderer extends DefaultListCellRenderer {
 						.read(MinecraftPlayerListRenderer.class.getResourceAsStream("/resources/ping/0.png"));
 				g2.drawImage(img, 0, 0, getWidth(), getHeight(), null);
 			} catch (Exception e) {
-
+				e.printStackTrace();
 			}
 		}
 	};
@@ -61,7 +61,7 @@ public class MinecraftPlayerListRenderer extends DefaultListCellRenderer {
 						.read(MinecraftPlayerListRenderer.class.getResourceAsStream("/resources/ping/5.png"));
 				g2.drawImage(img, 0, 0, getWidth(), getHeight(), null);
 			} catch (Exception e) {
-
+				e.printStackTrace();
 			}
 		}
 	};
@@ -78,7 +78,7 @@ public class MinecraftPlayerListRenderer extends DefaultListCellRenderer {
 						.read(MinecraftPlayerListRenderer.class.getResourceAsStream("/resources/ping/1.png"));
 				g2.drawImage(img, 0, 0, getWidth(), getHeight(), null);
 			} catch (Exception e) {
-
+				e.printStackTrace();
 			}
 		}
 	};
@@ -95,7 +95,7 @@ public class MinecraftPlayerListRenderer extends DefaultListCellRenderer {
 						.read(MinecraftPlayerListRenderer.class.getResourceAsStream("/resources/ping/2.png"));
 				g2.drawImage(img, 0, 0, getWidth(), getHeight(), null);
 			} catch (Exception e) {
-
+				e.printStackTrace();
 			}
 		}
 	};
@@ -112,7 +112,7 @@ public class MinecraftPlayerListRenderer extends DefaultListCellRenderer {
 						.read(MinecraftPlayerListRenderer.class.getResourceAsStream("/resources/ping/3.png"));
 				g2.drawImage(img, 0, 0, getWidth(), getHeight(), null);
 			} catch (Exception e) {
-
+				e.printStackTrace();
 			}
 		}
 	};
@@ -129,7 +129,7 @@ public class MinecraftPlayerListRenderer extends DefaultListCellRenderer {
 						.read(MinecraftPlayerListRenderer.class.getResourceAsStream("/resources/ping/4.png"));
 				g2.drawImage(img, 0, 0, getWidth(), getHeight(), null);
 			} catch (Exception e) {
-
+				e.printStackTrace();
 			}
 		}
 	};

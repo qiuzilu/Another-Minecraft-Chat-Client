@@ -1,16 +1,5 @@
 AMCC Change Log
-v1.2.0
-[+] Added:
-- Inventory handling and item using (still experimental).
-  You can now almost freely manage and use items in your own inventory.
-  Detailed description in Inventory section of README.md
-
-- Multi-language support. See Translations section of README.md
+v1.2.1
 
 [⬆️] Improvements:
-- Improved nickname entering dialog (from v1.1.0).
-  It will now remember every username you enter, and allow you to reuse it later.
-
-- You can join a server by double-clicking it on server list
-
-- Double clicking a player name on player list will add it to chat input
+- Minor code changes

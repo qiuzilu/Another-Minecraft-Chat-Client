@@ -120,7 +120,7 @@ public class Main {
 	public static final BufferedImage bgImage = new BufferedImage(64, 64, BufferedImage.TYPE_INT_ARGB);
 	private static BufferedImage logoImage = null;
 
-	public static final String version = "1.2.0"; //$NON-NLS-1$
+	public static final String version = "1.2.1"; //$NON-NLS-1$
 	private static final String changelogURL = "https://raw.githubusercontent.com/Defective4/Another-Minecraft-Chat-Client/master/Changes"; //$NON-NLS-1$
 
 	public static Font mcFont = Font.decode(null);
@@ -185,6 +185,7 @@ public class Main {
 			}
 
 		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -939,12 +940,12 @@ public class Main {
 												txt = Messages.getString("Main.rsBehaviorDecline"); //$NON-NLS-1$
 												break;
 											}
-											default: {
-												txt = Messages.getString("Main.rsBehaviorFail"); //$NON-NLS-1$
-												break;
-											}
 											case LOADED: {
 												txt = Messages.getString("Main.rsBehaviorAcceptLoad"); //$NON-NLS-1$
+												break;
+											}
+											default: {
+												txt = Messages.getString("Main.rsBehaviorFail"); //$NON-NLS-1$
 												break;
 											}
 										}
@@ -1597,6 +1598,7 @@ public class Main {
 				cl.toggleSneaking();
 				toggleSneak.setSelected(cl.isSneaking());
 			} catch (Exception e1) {
+				e1.printStackTrace();
 			}
 		});
 
@@ -1609,6 +1611,7 @@ public class Main {
 				cl.toggleSprinting();
 				toggleSprint.setSelected(cl.isSprinting());
 			} catch (Exception e1) {
+				e1.printStackTrace();
 			}
 		});
 
@@ -1677,6 +1680,7 @@ public class Main {
 						cl.move(directionL, (double) speed.getValue(), (double) blocks.getValue(),
 								lockPos.isSelected());
 					} catch (Exception e1) {
+						e1.printStackTrace();
 					}
 				}
 			});

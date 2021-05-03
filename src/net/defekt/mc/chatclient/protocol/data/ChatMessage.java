@@ -19,6 +19,8 @@ import net.defekt.mc.chatclient.protocol.ClientListener;
  */
 public class ChatMessage {
 
+	private static final String pChar = "\u00A7";
+
 	private ChatMessage() {
 	}
 
@@ -29,7 +31,7 @@ public class ChatMessage {
 	 * @return parsed text
 	 */
 	public static String parse(String json) {
-		json = json.replace("\u00A7k", "").replace("\u00A7l", "").replace("\u00A7m", "").replace("\u00A7n", "");
+		json = json.replace(pChar + "k", "").replace(pChar + "l", "").replace(pChar + "m", "").replace(pChar + "n", "");
 		try {
 			JsonElement el = new JsonParser().parse(json);
 			JsonObject root;
@@ -42,7 +44,7 @@ public class ChatMessage {
 
 			recursiveParse(root, strRef);
 
-			if (strRef.get().contains("\u00A7")) {
+			if (strRef.get().contains(pChar)) {
 				if (root.has("translate"))
 					strRef.set(root.get("translate").getAsString());
 			}
@@ -56,8 +58,8 @@ public class ChatMessage {
 
 		if (ob.isJsonPrimitive()) {
 			if (!ob.getAsString().isEmpty()) {
-				if (str.get().contains("\u00A7%s")) {
-					str.set(str.get().replaceFirst("\u00A7%s", ob.getAsString()));
+				if (str.get().contains(pChar + "%s")) {
+					str.set(str.get().replaceFirst(pChar + "%s", ob.getAsString()));
 				} else {
 
 					str.set(str.get() + ob.getAsString());
@@ -86,14 +88,13 @@ public class ChatMessage {
 
 					case "text": {
 						if (!value.getAsString().isEmpty()) {
-							if (str.get().contains("\u00A7%s")) {
-								str.set(str.get().replaceFirst("\u00A7%s", value.getAsString()));
+							if (str.get().contains(pChar + "%s")) {
+								str.set(str.get().replaceFirst(pChar + "%s", value.getAsString()));
 							} else {
 
 								String colorAppend = "";
 								if (obj.has("color")) {
-									colorAppend = "\u00A7"
-											+ ChatColor.translateColorName(obj.get("color").getAsString());
+									colorAppend = pChar + ChatColor.translateColorName(obj.get("color").getAsString());
 								}
 
 								str.set(str.get() + colorAppend + value.getAsString());
@@ -107,6 +108,9 @@ public class ChatMessage {
 					}
 					case "extra": {
 						recursiveParse(value, str);
+						break;
+					}
+					default: {
 						break;
 					}
 
@@ -126,7 +130,7 @@ public class ChatMessage {
 		String colorless = "";
 		char[] chs = message.toCharArray();
 		for (int x = 0; x < chs.length; x++) {
-			if (chs[x] == "\u00A7".charAt(0))
+			if (chs[x] == pChar.charAt(0))
 				x++;
 			else
 				colorless += chs[x];
