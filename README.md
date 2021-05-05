@@ -59,8 +59,7 @@ These are bugs I that are to be solved in future releases:
     I am not sure what causes this yet<br><br>
   * Every "shift click" and "drop" action relies on Confirm Transaction packets sent from server.<br>
     If server responds to client's action, affected item will be updated in GUI, otherwise it won't.<br>
-    It is to ensure that client's inventory stays in sync with server version of it, but ironically it may cause sync issues if server does  
-    NOT send Confirm Transaction packets.<br>
+    It is to ensure that client's inventory stays in sync with server version of it, but it may cause sync issues if server does NOT send Confirm Transaction packets.<br>
     In case you notice that your inventory is not synchronized with server, try to reconnect your client.<br>
     
 If you encounter a bug that disconnects your client or breaks it in a way that it is hard to use, you can disable inventory handling system in settings.
@@ -69,7 +68,7 @@ If you encounter a bug that disconnects your client or breaks it in a way that i
 Since v1.2.0 most of client's GUI and messages can now be translated to other languages.
 
 ### 📖 I want to translate!
-If you want to translate AMCC to your own language, take [this file](https://raw.githubusercontent.com/Defective4/Another-Minecraft-Chat-Client/master/src/resources/lang/EN.properties), translate every line in it (or at least most of them), rename it to match the code of your language (for example PL.properties), open a new issue with label `translation`, and attach your file in it.<br>
+If you want to translate AMCC to your own language, take [this file](https://raw.githubusercontent.com/Defective4/Another-Minecraft-Chat-Client/master/src/resources/lang/EN.properties), translate every line in it (or at least most of them), rename it to match the code of your language (for example PL.properties), open a new issue as "Translation request", and attach your file in it.<br>
 If you done everything correctly, your translation will probably be added in next release, and I will give you a credit in section below.
 
 ### Current translations

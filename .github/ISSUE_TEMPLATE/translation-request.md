@@ -7,4 +7,10 @@ assignees: ''
 
 ---
 
+**Please answer all questions below**
 
+**What is the name of your language?**
+For example Polish, English, etc.
+
+**Is this a full translation?**
+Yes/No
