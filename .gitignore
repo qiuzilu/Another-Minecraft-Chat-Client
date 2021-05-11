@@ -2,3 +2,10 @@
 /bin/*
 /bin/
 /target/
+/.git/
+/build/
+.classpath
+.project
+/.settings/
+/.gradle/
+/.gradle/
