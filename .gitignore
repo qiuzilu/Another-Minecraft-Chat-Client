@@ -1,3 +1,4 @@
 *.prefs
 /bin/*
 /bin/
+/target/
