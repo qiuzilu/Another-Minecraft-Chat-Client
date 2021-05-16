@@ -69,7 +69,7 @@ If you encounter a bug that disconnects your client or breaks it in a way that i
 Since v1.2.0 most of client's GUI and messages can now be translated to other languages.
 
 ### 📖 I want to translate!
-If you want to translate AMCC to your own language, take [this file](https://raw.githubusercontent.com/Defective4/Another-Minecraft-Chat-Client/master/src/resources/lang/EN.properties), translate every line in it (or at least most of them), rename it to match the code of your language (for example PL.properties), open a new issue as "Translation request", and attach your file in it.<br>
+If you want to translate AMCC to your own language, take [this file](https://raw.githubusercontent.com/Defective4/Another-Minecraft-Chat-Client/master/src/main/resources/resources/lang/EN.properties), translate every line in it (or at least most of them), rename it to match the code of your language (for example PL.properties), open a new issue as "Translation request", and attach your file in it.<br>
 If you done everything correctly, your translation will probably be added in next release, and I will give you a credit in section below.
 
 ### Current translations
