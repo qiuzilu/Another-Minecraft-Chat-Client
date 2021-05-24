@@ -79,40 +79,40 @@ public class ChatMessage {
 				JsonElement value = entry.getValue();
 
 				switch (key) {
-					case "translate": {
+				case "translate": {
 
-						String translated = TranslationUtils.translateKey(value.getAsString());
-						str.set(str.get() + translated);
-						break;
-					}
+					String translated = TranslationUtils.translateKey(value.getAsString());
+					str.set(str.get() + translated);
+					break;
+				}
 
-					case "text": {
-						if (!value.getAsString().isEmpty()) {
-							if (str.get().contains(pChar + "%s")) {
-								str.set(str.get().replaceFirst(pChar + "%s", value.getAsString()));
-							} else {
+				case "text": {
+					if (!value.getAsString().isEmpty()) {
+						if (str.get().contains(pChar + "%s")) {
+							str.set(str.get().replaceFirst(pChar + "%s", value.getAsString()));
+						} else {
 
-								String colorAppend = "";
-								if (obj.has("color")) {
-									colorAppend = pChar + ChatColor.translateColorName(obj.get("color").getAsString());
-								}
-
-								str.set(str.get() + colorAppend + value.getAsString());
+							String colorAppend = "";
+							if (obj.has("color")) {
+								colorAppend = pChar + ChatColor.translateColorName(obj.get("color").getAsString());
 							}
+
+							str.set(str.get() + colorAppend + value.getAsString());
 						}
-						break;
 					}
-					case "with": {
-						recursiveParse(value, str);
-						break;
-					}
-					case "extra": {
-						recursiveParse(value, str);
-						break;
-					}
-					default: {
-						break;
-					}
+					break;
+				}
+				case "with": {
+					recursiveParse(value, str);
+					break;
+				}
+				case "extra": {
+					recursiveParse(value, str);
+					break;
+				}
+				default: {
+					break;
+				}
 
 				}
 			}

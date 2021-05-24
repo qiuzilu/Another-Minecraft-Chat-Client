@@ -58,7 +58,7 @@ public class MinecraftClient {
 	private OutputStream os = null;
 
 	private boolean compression = false;
-	private int cTreshold = -1;
+	private int cThreshold = -1;
 
 	private boolean sneaking = false;
 	private boolean sprinting = false;
@@ -191,23 +191,24 @@ public class MinecraftClient {
 
 			int len = is.readVarInt();
 			if (len < 0)
-				throw new IOException(Messages.getString("MinecraftClient.clientErrorInvalidPacketLen") + Integer.toString(len)); //$NON-NLS-1$
+				throw new IOException(
+						Messages.getString("MinecraftClient.clientErrorInvalidPacketLen") + Integer.toString(len)); //$NON-NLS-1$
 
 			int id = is.readVarInt();
 			switch (id) {
-				case 0x01: {
-					throw new IOException(Messages.getString("MinecraftClient.clientErrorDisconnectedNoAuth")); //$NON-NLS-1$
-				}
-				case 0x00: {
-					String reason = ChatMessage.parse(is.readString());
-					throw new IOException(Messages.getString("MinecraftClient.clientErrorDisconnected") + reason); //$NON-NLS-1$
-				}
-				case 0x03: {
-					cTreshold = is.readVarInt();
-					if (cTreshold > -1)
-						compression = true;
-					break;
-				}
+			case 0x01: {
+				throw new IOException(Messages.getString("MinecraftClient.clientErrorDisconnectedNoAuth")); //$NON-NLS-1$
+			}
+			case 0x00: {
+				String reason = ChatMessage.parse(is.readString());
+				throw new IOException(Messages.getString("MinecraftClient.clientErrorDisconnected") + reason); //$NON-NLS-1$
+			}
+			case 0x03: {
+				cThreshold = is.readVarInt();
+				if (cThreshold > -1)
+					compression = true;
+				break;
+			}
 			}
 
 			packetReaderThread = new Thread(new Runnable() {
@@ -330,12 +331,12 @@ public class MinecraftClient {
 	}
 
 	/**
-	 * Get compression treshold
+	 * Get compression threshold
 	 * 
-	 * @return compression treshold sent by server. -1 if none
+	 * @return compression threshold sent by server. -1 if none
 	 */
-	protected int getCTreshold() {
-		return cTreshold;
+	protected int getCThreshold() {
+		return cThreshold;
 	}
 
 	@SuppressWarnings("javadoc")
@@ -632,53 +633,53 @@ public class MinecraftClient {
 						double tz = MinecraftClient.this.z;
 						float nyaw = 0;
 						switch (direction) {
-							case 0: {
-								tz += speedModifier;
-								nyaw = 0;
-								break;
-							}
-							case 1: {
-								tz += speedModifier;
-								tx += speedModifier;
-								nyaw = -45;
-								break;
-							}
-							case 2: {
-								tx += speedModifier;
-								nyaw = -90;
-								break;
-							}
-							case 3: {
-								tz -= speedModifier;
-								tx += speedModifier;
-								nyaw = -135;
-								break;
-							}
-							case 4: {
-								tz -= speedModifier;
-								nyaw = 180;
-								break;
-							}
-							case 5: {
-								tz -= speedModifier;
-								tx -= speedModifier;
-								nyaw = 135;
-								break;
-							}
-							case 6: {
-								tx -= speedModifier;
-								nyaw = 90;
-								break;
-							}
-							case 7: {
-								tz += speedModifier;
-								tx -= speedModifier;
-								nyaw = 45;
-								break;
-							}
-							default: {
-								break;
-							}
+						case 0: {
+							tz += speedModifier;
+							nyaw = 0;
+							break;
+						}
+						case 1: {
+							tz += speedModifier;
+							tx += speedModifier;
+							nyaw = -45;
+							break;
+						}
+						case 2: {
+							tx += speedModifier;
+							nyaw = -90;
+							break;
+						}
+						case 3: {
+							tz -= speedModifier;
+							tx += speedModifier;
+							nyaw = -135;
+							break;
+						}
+						case 4: {
+							tz -= speedModifier;
+							nyaw = 180;
+							break;
+						}
+						case 5: {
+							tz -= speedModifier;
+							tx -= speedModifier;
+							nyaw = 135;
+							break;
+						}
+						case 6: {
+							tx -= speedModifier;
+							nyaw = 90;
+							break;
+						}
+						case 7: {
+							tz += speedModifier;
+							tx -= speedModifier;
+							nyaw = 45;
+							break;
+						}
+						default: {
+							break;
+						}
 						}
 
 						setLook(nyaw);

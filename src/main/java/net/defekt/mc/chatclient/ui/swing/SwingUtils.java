@@ -25,8 +25,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JSpinner.DefaultEditor;
 import javax.swing.JTextArea;
-import javax.swing.JTextField;
 import javax.swing.JTextPane;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
@@ -67,7 +67,7 @@ public class SwingUtils {
 	 */
 	public static void alignSpinner(JSpinner spinner) {
 		DefaultEditor editor = (DefaultEditor) spinner.getEditor();
-		editor.getTextField().setHorizontalAlignment(JTextField.LEFT);
+		editor.getTextField().setHorizontalAlignment(SwingConstants.LEFT);
 	}
 
 	/**
@@ -148,8 +148,7 @@ public class SwingUtils {
 							showExceptionDetails(parent, ex);
 						});
 					}
-				}
-				});
+				} });
 
 		errDial.setContentPane(jop);
 		errDial.pack();
@@ -227,7 +226,7 @@ public class SwingUtils {
 
 		for (Component ct : message.getComponents()) {
 			if (ct instanceof JComponent)
-				((JComponent) ct).setAlignmentX(JComponent.LEFT_ALIGNMENT);
+				((JComponent) ct).setAlignmentX(Component.LEFT_ALIGNMENT);
 		}
 
 		JButton ok = new JButton(Messages.getString("SwingUtils.updateDialogOptionOk")); //$NON-NLS-1$
@@ -255,8 +254,10 @@ public class SwingUtils {
 				JLabel message = new JLabel("<html>" + msg + "</html>"); //$NON-NLS-1$ //$NON-NLS-2$
 				JScrollPane jsp = new JScrollPane(message);
 				jsp.setPreferredSize(win.getSize());
-				JOptionPane.showOptionDialog(win, jsp, Messages.getString("SwingUtils.updateDialogChangesTitle") + newVersion, JOptionPane.DEFAULT_OPTION, //$NON-NLS-1$
-						JOptionPane.PLAIN_MESSAGE, null, new String[] { Messages.getString("SwingUtils.updateDialogChangesOptionOk") //$NON-NLS-1$
+				JOptionPane.showOptionDialog(win, jsp,
+						Messages.getString("SwingUtils.updateDialogChangesTitle") + newVersion, //$NON-NLS-1$
+						JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null,
+						new String[] { Messages.getString("SwingUtils.updateDialogChangesOptionOk") //$NON-NLS-1$
 				}, 0);
 			}
 		});
@@ -281,8 +282,7 @@ public class SwingUtils {
 		});
 
 		JOptionPane pane = new JOptionPane(message, JOptionPane.INFORMATION_MESSAGE, JOptionPane.DEFAULT_OPTION, null,
-				new Object[] { ok, changes, update, exit
-				});
+				new Object[] { ok, changes, update, exit });
 
 		win.setContentPane(pane);
 		win.pack();
@@ -324,7 +324,7 @@ public class SwingUtils {
 
 		for (Component ct : box.getComponents()) {
 			if (ct instanceof JComponent) {
-				((JComponent) ct).setAlignmentX(JComponent.LEFT_ALIGNMENT);
+				((JComponent) ct).setAlignmentX(Component.LEFT_ALIGNMENT);
 			}
 			if (ct instanceof JScrollPane)
 				SwingUtilities.invokeLater(new Runnable() {
@@ -336,8 +336,9 @@ public class SwingUtils {
 				});
 		}
 
-		JOptionPane.showOptionDialog(parent, box, Messages.getString("SwingUtils.exceptionDetailsDialogTitle"), JOptionPane.DEFAULT_OPTION, //$NON-NLS-1$
-				JOptionPane.PLAIN_MESSAGE, null, new Object[] { Messages.getString("SwingUtils.exceptionDetailsDialogOptionOk") //$NON-NLS-1$
+		JOptionPane.showOptionDialog(parent, box, Messages.getString("SwingUtils.exceptionDetailsDialogTitle"), //$NON-NLS-1$
+				JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null,
+				new Object[] { Messages.getString("SwingUtils.exceptionDetailsDialogOptionOk") //$NON-NLS-1$
 				}, 0);
 	}
 }

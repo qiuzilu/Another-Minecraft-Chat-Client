@@ -50,12 +50,12 @@ In your player inventory you have more control over items:
    * "Drop" - will drop the item instantly<br><br>
    **In hotbar (the last 9 slots on the bottom)**:<br>
    * "Set slot" - will change client's held slot to selected item
-   * "Use" - will chane client's held slot and use selected item. For example if you select food, it will be eaten.
-   * "Stop using" - will stop client from using current item. For example you charged a bow, it will be shot.
+   * "Use" - will change client's held slot and use selected item. For example if you select food, it will be eaten.
+   * "Stop using" - will stop client from using current item. For example if you charged a bow, it will be shot.
    * "Swap items in hand" - will swap items in selected slot and your second hand.
    
 ### 🔥 Bugs
-These are bugs I that are to be solved in future releases:
+These are bugs that will be solved in future releases:
   * Items in versions higher than 1.12.2 may not always display properly. They will have names and textures of other item.<br>
     I am not sure what causes this yet<br><br>
   * Every "shift click" and "drop" action relies on Confirm Transaction packets sent from server.<br>

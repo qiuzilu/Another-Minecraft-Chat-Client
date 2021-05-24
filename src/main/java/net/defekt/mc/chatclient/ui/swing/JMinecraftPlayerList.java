@@ -29,6 +29,7 @@ import javax.swing.JSeparator;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
+import javax.swing.WindowConstants;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import net.defekt.mc.chatclient.protocol.MinecraftClient;
@@ -130,30 +131,26 @@ public class JMinecraftPlayerList extends JMemList<PlayerInfo> {
 
 								try {
 									switch (ext) {
-										default: {
-											PrintWriter pw = new PrintWriter(new FileOutputStream(sel));
-											pw.println(Messages.getString("JMinecraftPlayerList.exportFileColumns")); //$NON-NLS-1$
-											for (UUID uid : mcl.getPlayersTabList().keySet()) {
-												PlayerInfo pinf = mcl.getPlayersTabList().get(uid);
-												String name = pinf.getName();
-												String dname = pinf.getDisplayName() == null ? "N/A" //$NON-NLS-1$
-														: ChatMessage
-																.removeColors(ChatMessage.parse(pinf.getDisplayName()));
-												String uuid = pinf.getUUID().toString();
-												String ping = pinf.getPing() > 0 ? Integer.toString(pinf.getPing())
-														: "?"; //$NON-NLS-1$
-												String skurl = PlayerSkinCache.getSkincache()
-														.containsKey(pinf.getUUID())
-																? PlayerSkinCache.getSkincache().get(pinf.getUUID())
-																		.getUrl()
-																: "N/A"; //$NON-NLS-1$
+									default: {
+										PrintWriter pw = new PrintWriter(new FileOutputStream(sel));
+										pw.println(Messages.getString("JMinecraftPlayerList.exportFileColumns")); //$NON-NLS-1$
+										for (UUID uid : mcl.getPlayersTabList().keySet()) {
+											PlayerInfo pinf = mcl.getPlayersTabList().get(uid);
+											String name = pinf.getName();
+											String dname = pinf.getDisplayName() == null ? "N/A" //$NON-NLS-1$
+													: ChatMessage
+															.removeColors(ChatMessage.parse(pinf.getDisplayName()));
+											String uuid = pinf.getUUID().toString();
+											String ping = pinf.getPing() > 0 ? Integer.toString(pinf.getPing()) : "?"; //$NON-NLS-1$
+											String skurl = PlayerSkinCache.getSkincache().containsKey(pinf.getUUID())
+													? PlayerSkinCache.getSkincache().get(pinf.getUUID()).getUrl()
+													: "N/A"; //$NON-NLS-1$
 
-												pw.println(
-														name + "; " + dname + "; " + uuid + "; " + ping + "; " + skurl); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-											}
-											pw.close();
-											break;
+											pw.println(name + "; " + dname + "; " + uuid + "; " + ping + "; " + skurl); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 										}
+										pw.close();
+										break;
+									}
 									}
 								} catch (Exception e2) {
 									SwingUtils.showErrorDialog(win,
@@ -183,7 +180,7 @@ public class JMinecraftPlayerList extends JMemList<PlayerInfo> {
 	private void showUserInfo(PlayerInfo info) {
 		JFrame diag = new JFrame(Messages.getString("JMinecraftPlayerList.userInfoDialogTitle") + info.getName()); //$NON-NLS-1$
 		diag.setAlwaysOnTop(true);
-		diag.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		diag.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
 		Box box = Box.createVerticalBox();
 
@@ -283,16 +280,14 @@ public class JMinecraftPlayerList extends JMemList<PlayerInfo> {
 						BufferedImage p1 = IOUtils.renderPlayerSkin(skin, 0);
 						BufferedImage p2 = IOUtils.renderPlayerSkin(skin, 1);
 
-						BufferedImage[] igs = new BufferedImage[] { p1, p2, skin
-						};
+						BufferedImage[] igs = new BufferedImage[] { p1, p2, skin };
 
-						final int[] inRef = new int[] { 0
-						};
+						final int[] inRef = new int[] { 0 };
 
 						JFrame win = new JFrame(
 								Messages.getString("JMinecraftPlayerList.userSkinDialogTitle") + info.getName()); //$NON-NLS-1$
 						win.setAlwaysOnTop(true);
-						win.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+						win.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
 						Box box = Box.createVerticalBox();
 						JPanel jp = new JPanel() {
@@ -354,7 +349,7 @@ public class JMinecraftPlayerList extends JMemList<PlayerInfo> {
 
 		for (Component ct : box.getComponents()) {
 			if (ct instanceof JComponent)
-				((JComponent) ct).setAlignmentX(JComponent.LEFT_ALIGNMENT);
+				((JComponent) ct).setAlignmentX(Component.LEFT_ALIGNMENT);
 		}
 
 		diag.setContentPane(box);

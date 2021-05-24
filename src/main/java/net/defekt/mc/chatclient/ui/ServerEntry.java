@@ -57,7 +57,8 @@ public class ServerEntry implements Serializable {
 					try {
 						info = MinecraftStat.serverListPing(host, port);
 					} catch (Exception e) {
-						info = new StatusInfo(Messages.getString("ServerEntry.serverEntryCantConnect"), -1, -1, "", -1, null); //$NON-NLS-1$ //$NON-NLS-2$
+						info = new StatusInfo(Messages.getString("ServerEntry.serverEntryCantConnect"), -1, -1, "", -1, //$NON-NLS-1$ //$NON-NLS-2$
+								null);
 					}
 					if (info != null && info.getProtocol() != -1)
 						icon = info.getIcon();

@@ -33,6 +33,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JProgressBar;
+import javax.swing.WindowConstants;
 
 import com.flowpowered.nbt.CompoundMap;
 import com.flowpowered.nbt.StringTag;
@@ -340,7 +341,7 @@ public class ItemsWindow {
 	 */
 	public static void initTextures(Main main, boolean preStart) {
 		JFrame win = new JFrame(Messages.getString("ItemsWindow.itemWindowItemLoadDialogTitle")); //$NON-NLS-1$
-		win.setDefaultCloseOperation(preStart ? JFrame.EXIT_ON_CLOSE : JFrame.DO_NOTHING_ON_CLOSE);
+		win.setDefaultCloseOperation(preStart ? JFrame.EXIT_ON_CLOSE : WindowConstants.DO_NOTHING_ON_CLOSE);
 
 		JVBoxPanel message = new JVBoxPanel();
 		message.add(new JLabel(Messages.getString("ItemsWindow.itemWindowItemLoadDialogLabel"))); //$NON-NLS-1$
@@ -351,8 +352,7 @@ public class ItemsWindow {
 		message.alignAll();
 
 		JOptionPane ppane = new JOptionPane(message, JOptionPane.PLAIN_MESSAGE, JOptionPane.DEFAULT_OPTION, null,
-				new Component[] { jpb
-				});
+				new Component[] { jpb });
 
 		win.setContentPane(ppane);
 		win.pack();
@@ -424,24 +424,24 @@ public class ItemsWindow {
 	 */
 	private BufferedImage getPlaceholderIcon(int index) {
 		switch (index) {
-			case 5: {
-				return itemTextures.get("empty_armor_slot_helmet"); //$NON-NLS-1$
-			}
-			case 6: {
-				return itemTextures.get("empty_armor_slot_chestplate"); //$NON-NLS-1$
-			}
-			case 7: {
-				return itemTextures.get("empty_armor_slot_leggings"); //$NON-NLS-1$
-			}
-			case 8: {
-				return itemTextures.get("empty_armor_slot_boots"); //$NON-NLS-1$
-			}
-			case 45: {
-				return itemTextures.get("empty_armor_slot_shield"); //$NON-NLS-1$
-			}
-			default: {
-				return null;
-			}
+		case 5: {
+			return itemTextures.get("empty_armor_slot_helmet"); //$NON-NLS-1$
+		}
+		case 6: {
+			return itemTextures.get("empty_armor_slot_chestplate"); //$NON-NLS-1$
+		}
+		case 7: {
+			return itemTextures.get("empty_armor_slot_leggings"); //$NON-NLS-1$
+		}
+		case 8: {
+			return itemTextures.get("empty_armor_slot_boots"); //$NON-NLS-1$
+		}
+		case 45: {
+			return itemTextures.get("empty_armor_slot_shield"); //$NON-NLS-1$
+		}
+		default: {
+			return null;
+		}
 		}
 	}
 
@@ -606,7 +606,7 @@ public class ItemsWindow {
 		if (isShowing)
 			return;
 		dialog = new JDialog(parent);
-		dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+		dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		dialog.addWindowListener(new WindowAdapter() {
 			final boolean sendClosePacketsL = sendClosePackets;
 

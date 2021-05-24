@@ -74,6 +74,7 @@ public class UserPreferences implements Serializable {
 	public static class Constants {
 		public static final String TRAY_MESSAGES_KEY_ALWAYS = "Always"; //$NON-NLS-1$
 		public static final String TRAY_MESSAGES_KEY_MENTION = "On mention"; //$NON-NLS-1$
+		public static final String TRAY_MESSAGES_KEY_KEYWORD = "On keyword"; //$NON-NLS-1$
 		public static final String TRAY_MESSAGES_KEY_NEVER = "Never"; //$NON-NLS-1$
 
 		public static final int WINDOW_CLOSE_ALWAYS_ASK = 0;
@@ -160,6 +161,7 @@ public class UserPreferences implements Serializable {
 	private String trayMessageMode = Constants.TRAY_MESSAGES_KEY_MENTION;
 	private boolean trayShowDisconnectMessages = true;
 	private int closeMode = Constants.WINDOW_CLOSE_ALWAYS_ASK;
+	private String[] trayKeyWords = new String[0];
 
 	private boolean enableInventoryHandling = true;
 	private boolean hideIncomingWindows = false;
@@ -182,6 +184,14 @@ public class UserPreferences implements Serializable {
 			e.printStackTrace();
 			return new UserPreferences();
 		}
+	}
+
+	public String[] getTrayKeyWords() {
+		return trayKeyWords;
+	}
+
+	public void setTrayKeyWords(String[] trayKeyWords) {
+		this.trayKeyWords = trayKeyWords;
 	}
 
 	public List<ServerEntry> getServers() {

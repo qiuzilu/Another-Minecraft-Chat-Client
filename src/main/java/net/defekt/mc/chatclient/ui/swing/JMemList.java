@@ -24,6 +24,7 @@ public class JMemList<E> extends JList<E> {
 
 	/**
 	 * Get stored list data
+	 * 
 	 * @return list data contained in this object
 	 */
 	public E[] getListData() {

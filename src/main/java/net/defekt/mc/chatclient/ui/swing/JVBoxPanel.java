@@ -28,7 +28,7 @@ public class JVBoxPanel extends JPanel {
 		for (Component ct : getComponents()) {
 			if (ct instanceof JComponent) {
 				JComponent jct = (JComponent) ct;
-				jct.setAlignmentX(JComponent.LEFT_ALIGNMENT);
+				jct.setAlignmentX(Component.LEFT_ALIGNMENT);
 				jct.setOpaque(false);
 			}
 		}

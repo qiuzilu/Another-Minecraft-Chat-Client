@@ -208,7 +208,7 @@ public class MinecraftPlayerListRenderer extends DefaultListCellRenderer {
 
 		JTextPane nameField = new JTextPane();
 		nameField.setEditable(false);
-		nameField.setFont(Main.mcFont.deriveFont((float) 13.5f));
+		nameField.setFont(Main.mcFont.deriveFont(13.5f));
 		nameField.setOpaque(false);
 		nameField.setForeground(Color.white);
 

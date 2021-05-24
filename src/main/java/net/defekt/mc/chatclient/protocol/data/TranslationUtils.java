@@ -132,7 +132,8 @@ public class TranslationUtils {
 	 * @return translated string
 	 */
 	public static String translateKey(String key) {
-		Language lang = translationKeys.containsKey(Main.up.getAppLanguage()) ? Main.up.getAppLanguage() : Language.English;
+		Language lang = translationKeys.containsKey(Main.up.getAppLanguage()) ? Main.up.getAppLanguage()
+				: Language.English;
 		Map<String, String> kMap = translationKeys.get(lang);
 		if (kMap.containsKey(key))
 			return kMap.get(key).replace("%s", "\u00A7%s");

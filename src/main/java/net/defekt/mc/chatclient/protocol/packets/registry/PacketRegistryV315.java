@@ -37,7 +37,6 @@ import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.Client
 import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.ClientUseItemPacket;
 import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.ClientWindowClickPacket;
 
-
 /**
  * A packet registry implementation for protocol 315
  * 

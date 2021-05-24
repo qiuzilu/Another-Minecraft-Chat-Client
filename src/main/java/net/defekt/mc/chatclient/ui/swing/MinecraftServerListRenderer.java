@@ -50,7 +50,8 @@ public class MinecraftServerListRenderer extends DefaultListCellRenderer {
 		JLabel name = new JLabel(" " + entry.getName()); //$NON-NLS-1$
 		JTextPane version = new JTextPane();
 		version.setText("???"); //$NON-NLS-1$
-		JLabel players = new JLabel(Messages.getString("MinecraftServerListRenderer.serverListPlayersLabel") + entry.getVersion() + ")"); //$NON-NLS-1$ //$NON-NLS-2$
+		JLabel players = new JLabel(
+				Messages.getString("MinecraftServerListRenderer.serverListPlayersLabel") + entry.getVersion() + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 		JTextPane description = new JTextPane();
 		description.setText(Messages.getString("MinecraftServerListRenderer.serverListStatusPinging")); //$NON-NLS-1$
 
@@ -83,7 +84,9 @@ public class MinecraftServerListRenderer extends DefaultListCellRenderer {
 			StatusInfo inf = entry.getInfo();
 			if (inf.getOnlinePlayers() != -1)
 				players.setText(" " + Integer.toString(inf.getOnlinePlayers()) + "/" //$NON-NLS-1$ //$NON-NLS-2$
-						+ Integer.toString(inf.getMaxPlayers()) + Messages.getString("MinecraftServerListRenderer.serverListPlayersLabel2") + entry.getVersion() + ")"); //$NON-NLS-1$ //$NON-NLS-2$
+						+ Integer.toString(inf.getMaxPlayers())
+						+ Messages.getString("MinecraftServerListRenderer.serverListPlayersLabel2") + entry.getVersion() //$NON-NLS-1$
+						+ ")"); //$NON-NLS-1$
 			description.setText(""); //$NON-NLS-1$
 			SwingUtils.appendColoredText(" " + inf.getDescription().replace("\n", "\n "), description); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			version.setText(inf.getVersionName().isEmpty() ? " ???" : ""); //$NON-NLS-1$ //$NON-NLS-2$

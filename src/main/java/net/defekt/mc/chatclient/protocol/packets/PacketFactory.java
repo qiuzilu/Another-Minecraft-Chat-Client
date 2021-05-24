@@ -83,7 +83,8 @@ public class PacketFactory {
 		if (packetRegistries.containsKey(protocol))
 			return packetRegistries.get(protocol);
 		else
-			throw new IOException(Messages.getString("PacketFactory.regInitProtocolNotImplemented") + Integer.toString(protocol)); //$NON-NLS-1$
+			throw new IOException(
+					Messages.getString("PacketFactory.regInitProtocolNotImplemented") + Integer.toString(protocol)); //$NON-NLS-1$
 	}
 
 	/**

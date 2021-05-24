@@ -1,5 +1,11 @@
 AMCC Change Log
-v1.2.1
+v1.2.2
 
-[+] Improvements:
-- Minor code changes
+[+] Added:
+- New tray message rule "On keyword".
+  It will display a message pop-up only if incoming message contains user defined phrase.
+  
+- Application options and user's inventory are now accessible from tray icon.
+
+[+] Improved:
+- Changed how client will handle incoming packets.

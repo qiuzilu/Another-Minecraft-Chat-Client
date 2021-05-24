@@ -72,9 +72,12 @@ import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
+import javax.swing.ListSelectionModel;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.WindowConstants;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.plaf.basic.BasicArrowButton;
@@ -100,6 +103,7 @@ import net.defekt.mc.chatclient.ui.UserPreferences.Constants;
 import net.defekt.mc.chatclient.ui.UserPreferences.Language;
 import net.defekt.mc.chatclient.ui.UserPreferences.SkinRule;
 import net.defekt.mc.chatclient.ui.swing.JColorChooserButton;
+import net.defekt.mc.chatclient.ui.swing.JMemList;
 import net.defekt.mc.chatclient.ui.swing.JColorChooserButton.ColorChangeListener;
 import net.defekt.mc.chatclient.ui.swing.JMinecraftButton;
 import net.defekt.mc.chatclient.ui.swing.JMinecraftField;
@@ -109,8 +113,7 @@ import net.defekt.mc.chatclient.ui.swing.JPlaceholderField;
 import net.defekt.mc.chatclient.ui.swing.JVBoxPanel;
 import net.defekt.mc.chatclient.ui.swing.SwingUtils;
 
-@SuppressWarnings({ "serial", "javadoc"
-})
+@SuppressWarnings({ "serial", "javadoc" })
 public class Main {
 
 	private Main() {
@@ -120,7 +123,7 @@ public class Main {
 	public static final BufferedImage bgImage = new BufferedImage(64, 64, BufferedImage.TYPE_INT_ARGB);
 	private static BufferedImage logoImage = null;
 
-	public static final String version = "1.2.1"; //$NON-NLS-1$
+	public static final String version = "1.2.2"; //$NON-NLS-1$
 	private static final String changelogURL = "https://raw.githubusercontent.com/Defective4/Another-Minecraft-Chat-Client/master/Changes"; //$NON-NLS-1$
 
 	public static Font mcFont = Font.decode(null);
@@ -211,9 +214,8 @@ public class Main {
 				}
 			});
 
-			JOptionPane cp = new JOptionPane(new Object[] { "Choose your language", languages
-			}, JOptionPane.QUESTION_MESSAGE, JOptionPane.OK_OPTION, null, new Object[] { ct
-			});
+			JOptionPane cp = new JOptionPane(new Object[] { "Choose your language", languages },
+					JOptionPane.QUESTION_MESSAGE, JOptionPane.OK_OPTION, null, new Object[] { ct });
 
 			win.setContentPane(cp);
 			win.pack();
@@ -383,7 +385,7 @@ public class Main {
 		serverListComponent.setListData(entries);
 		Runtime.getRuntime().addShutdownHook(new Thread(upSaveRunnable));
 
-		win.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		win.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 
 		win.addWindowListener(new WindowAdapter() {
 			@Override
@@ -410,6 +412,7 @@ public class Main {
 					});
 
 					toTray.addActionListener(new ActionListener() {
+						@Override
 						public void actionPerformed(ActionEvent ev) {
 							if (rememberOp.isSelected())
 								up.setCloseMode(Constants.WINDOW_CLOSE_TO_TRAY);
@@ -417,7 +420,8 @@ public class Main {
 								return;
 							diag.dispose();
 							SystemTray tray = SystemTray.getSystemTray();
-							trayIcon = new TrayIcon(IOUtils.scaleImage(logoImage, 0.5), "Another Chat Client"); //$NON-NLS-1$
+							trayIcon = new TrayIcon(IOUtils.scaleImage(logoImage, 0.5),
+									"Another Minecraft Chat Client"); //$NON-NLS-1$
 							try {
 								MouseListener ml = new MouseAdapter() {
 									@Override
@@ -436,18 +440,18 @@ public class Main {
 									@Override
 									public void actionPerformed(ActionEvent e) {
 										switch (trayLastMessageType) {
-											case 0: {
-												showQuickMessageDialog(trayLastMessageSender);
-												break;
-											}
-											case 1: {
-												ml.mouseClicked(new MouseEvent(win, 0, System.currentTimeMillis(), 0, 0,
-														0, 0, 0, 1, false, MouseEvent.BUTTON1));
-												break;
-											}
-											default: {
-												break;
-											}
+										case 0: {
+											showQuickMessageDialog(trayLastMessageSender);
+											break;
+										}
+										case 1: {
+											ml.mouseClicked(new MouseEvent(win, 0, System.currentTimeMillis(), 0, 0, 0,
+													0, 0, 1, false, MouseEvent.BUTTON1));
+											break;
+										}
+										default: {
+											break;
+										}
 										}
 									}
 								});
@@ -475,6 +479,11 @@ public class Main {
 									labels.get(srvLabel).add(cl);
 								}
 
+								MenuItem options = new MenuItem(Messages.getString("Main.optionsMenu") + "...");
+								options.addActionListener(ev2 -> {
+									showOptionsDialog();
+								});
+
 								menu.add(open);
 								menu.addSeparator();
 								for (String label : labels.keySet()) {
@@ -487,6 +496,8 @@ public class Main {
 														Messages.getString("Main.trayDisconnectItem")); //$NON-NLS-1$
 												MenuItem qmItem = new MenuItem(
 														Messages.getString("Main.trayQuickMessageItem")); //$NON-NLS-1$
+												MenuItem invItem = new MenuItem(
+														Messages.getString("Main.showInventoryButton")); //$NON-NLS-1$
 												final Menu ins = this;
 
 												dcItem.addActionListener(new ActionListener() {
@@ -509,8 +520,16 @@ public class Main {
 													showQuickMessageDialog(client);
 												});
 
+												invItem.addActionListener(ev -> {
+													if (!up.isEnableInventoryHandling())
+														return;
+													client.getInventory().openWindow(win,
+															up.isSendWindowClosePackets());
+												});
+
 												add(qmItem);
 												add(dcItem);
+												add(invItem);
 											}
 										};
 
@@ -520,6 +539,7 @@ public class Main {
 								}
 
 								menu.addSeparator();
+								menu.add(options);
 								menu.add(quit);
 								trayIcon.setPopupMenu(menu);
 
@@ -533,28 +553,27 @@ public class Main {
 					});
 
 					switch (up.getCloseMode()) {
-						default: {
-							break;
-						}
-						case 1: {
-							if (toTray.isEnabled()) {
-								toTray.doClick();
-								return;
-							}
-							break;
-						}
-						case 2: {
-							ok.doClick();
+					default: {
+						break;
+					}
+					case 1: {
+						if (toTray.isEnabled()) {
+							toTray.doClick();
 							return;
 						}
+						break;
+					}
+					case 2: {
+						ok.doClick();
+						return;
+					}
 					}
 
 					JOptionPane op = new JOptionPane(new Object[] { Messages.getString("Main.trayExitQuestion") //$NON-NLS-1$
 							+ Messages.getString("Main.trayExitQuestionLine2") + Integer.toString(clients.size()) //$NON-NLS-1$
 							+ Messages.getString("Main.trayExitQuestionLine2Append"), rememberOp //$NON-NLS-1$
 					}, JOptionPane.QUESTION_MESSAGE, JOptionPane.OK_CANCEL_OPTION, null,
-							new JButton[] { ok, toTray, cancel
-					});
+							new JButton[] { ok, toTray, cancel });
 
 					diag.setContentPane(op);
 					diag.pack();
@@ -580,7 +599,7 @@ public class Main {
 		serverListPane.setOpaque(false);
 		serverListBox.setBackground(new Color(60, 47, 74));
 
-		serverListPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		serverListPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
 		serverListBox.add(serverListPane);
 		serverListComponent.setMinimumSize(serverListBox.getPreferredSize());
@@ -842,7 +861,7 @@ public class Main {
 		JScrollPane lanListPane = new JScrollPane(lanListComponent);
 		lanListPane.setOpaque(false);
 
-		lanListPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		lanListPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
 		Box lanControlsBox = Box.createHorizontalBox();
 
@@ -907,611 +926,8 @@ public class Main {
 				setMnemonic(getText().charAt(0));
 				add(new JMenuItem(Messages.getString("Main.optionsMenuSettings")) { //$NON-NLS-1$
 					{
-						addActionListener(new ActionListener() {
-
-							@Override
-							public void actionPerformed(ActionEvent ev) {
-								JDialog od = new JDialog(win);
-								od.setModal(true);
-								od.setResizable(false);
-								od.setTitle(Messages.getString("Main.settingsTitle")); //$NON-NLS-1$
-
-								Box b = Box.createVerticalBox();
-
-								JTabbedPane jtp = new JTabbedPane();
-
-								JVBoxPanel rsBox = new JVBoxPanel();
-
-								JComboBox<Status> rPackBehaviorBox = new JComboBox<>(Status.values());
-								rPackBehaviorBox.setToolTipText(Messages.getString("Main.rsBehaviorToolTip")); //$NON-NLS-1$
-								rPackBehaviorBox.setSelectedItem(up.getResourcePackBehavior());
-								rPackBehaviorBox.setRenderer(new DefaultListCellRenderer() {
-									@Override
-									public Component getListCellRendererComponent(JList<? extends Object> list,
-											Object value, int index, boolean isSelected, boolean cellHasFocus) {
-										JLabel lbl = new JLabel();
-										String txt;
-										switch ((Status) value) {
-											case ACCEPTED: {
-												txt = Messages.getString("Main.rsBehaviorAccept"); //$NON-NLS-1$
-												break;
-											}
-											case DECLINED: {
-												txt = Messages.getString("Main.rsBehaviorDecline"); //$NON-NLS-1$
-												break;
-											}
-											case LOADED: {
-												txt = Messages.getString("Main.rsBehaviorAcceptLoad"); //$NON-NLS-1$
-												break;
-											}
-											default: {
-												txt = Messages.getString("Main.rsBehaviorFail"); //$NON-NLS-1$
-												break;
-											}
-										}
-										lbl.setText(txt);
-										lbl.setOpaque(true);
-										if (isSelected) {
-											lbl.setBackground(Color.blue);
-											lbl.setForeground(Color.white);
-										}
-										return lbl;
-									}
-								});
-
-								JCheckBox rsPackShowCheck = new JCheckBox(Messages.getString("Main.rsPackShowCheck"), //$NON-NLS-1$
-										up.isShowResourcePackMessages());
-								rsPackShowCheck.setToolTipText(Messages.getString("Main.rsPackShowToolTip")); //$NON-NLS-1$
-
-								JPlaceholderField rsPackMsgText = new JPlaceholderField(
-										Messages.getString("Main.rsPackMessageField")); //$NON-NLS-1$
-								rsPackMsgText.setToolTipText(Messages.getString("Main.rsPackMessageToolTip")); //$NON-NLS-1$
-								rsPackMsgText.setText(up.getResourcePackMessage());
-
-								JComboBox<Position> rsPackMessagePosition = new JComboBox<>(Position.values());
-								rsPackMessagePosition.setSelectedItem(up.getResourcePackMessagePosition());
-
-								rsBox.add(new JLabel(Messages.getString("Main.rsPackBehaviorLabel"))); //$NON-NLS-1$
-								rsBox.add(rPackBehaviorBox);
-								rsBox.add(new JLabel(" ")); //$NON-NLS-1$
-								rsBox.add(rsPackShowCheck);
-								rsBox.add(new JLabel(" ")); //$NON-NLS-1$
-								rsBox.add(new JLabel(Messages.getString("Main.rsPackMessageLabel"))); //$NON-NLS-1$
-								rsBox.add(rsPackMsgText);
-								rsBox.add(new JLabel(" ")); //$NON-NLS-1$
-								rsBox.add(new JLabel(Messages.getString("Main.rsPackPositionLabel"))); //$NON-NLS-1$
-								rsBox.add(rsPackMessagePosition);
-								rsBox.add(new JTextPane() {
-									{
-										setEditable(false);
-										setOpaque(false);
-									}
-								});
-
-								rsBox.alignAll();
-
-								JVBoxPanel skBox = new JVBoxPanel();
-								skBox.add(new JLabel(Messages.getString("Main.skinFetchMetchodLabel"))); //$NON-NLS-1$
-								JComboBox<SkinRule> ruleBox = new JComboBox<>(SkinRule.values());
-								ruleBox.setToolTipText(Messages.getString("Main.skinFetchToolTip")); //$NON-NLS-1$
-								ruleBox.setSelectedItem(up.getSkinFetchRule());
-								skBox.add(ruleBox);
-								skBox.add(new JTextPane() {
-									{
-										setText("\r\n" + Messages.getString("Main.skinFetchTipLine1") //$NON-NLS-1$ //$NON-NLS-2$
-												+ Messages.getString("Main.skinFetchTipLine2") //$NON-NLS-1$
-												+ Messages.getString("Main.skinFetchTipLine3") //$NON-NLS-1$
-												+ Messages.getString("Main.skinFetchTipLine4")); //$NON-NLS-1$
-										setEditable(false);
-									}
-								});
-
-								skBox.alignAll();
-
-								JVBoxPanel pkBox = new JVBoxPanel();
-
-								JCheckBox ignoreKAPackets = new JCheckBox(Messages.getString("Main.ignoreKAPackets")); //$NON-NLS-1$
-								ignoreKAPackets.setToolTipText(Messages.getString("Main.ignoreKAPacketsToolTop")); //$NON-NLS-1$
-								ignoreKAPackets.setSelected(up.isIgnoreKeepAlive());
-
-								JTextField brandField = new JPlaceholderField(Messages.getString("Main.brandField")); //$NON-NLS-1$
-								brandField.setToolTipText(Messages.getString("Main.brandToolTop")); //$NON-NLS-1$
-								brandField.setText(up.getBrand());
-								SwingUtilities.invokeLater(() -> {
-									brandField.setOpaque(true);
-								});
-
-								JSpinner pingField = new JSpinner(new SpinnerNumberModel(0, 0, Integer.MAX_VALUE, 1));
-								pingField.setToolTipText(Messages.getString("Main.pingToolTop")); //$NON-NLS-1$
-								pingField.setValue(up.getAdditionalPing());
-								SwingUtils.alignSpinner(pingField);
-
-								pkBox.add(ignoreKAPackets);
-								pkBox.add(new JLabel(" ")); //$NON-NLS-1$
-								pkBox.add(new JLabel(Messages.getString("Main.pingLabel"))); //$NON-NLS-1$
-								pkBox.add(new JLabel(Messages.getString("Main.pingLabel2"))); //$NON-NLS-1$
-								pkBox.add(pingField);
-								pkBox.add(new JLabel(" ")); //$NON-NLS-1$
-								pkBox.add(new JLabel(Messages.getString("Main.brandLabel"))); //$NON-NLS-1$
-								pkBox.add(brandField);
-
-								pkBox.add(new JTextPane() {
-									{
-										setEditable(false);
-										setOpaque(false);
-									}
-								});
-								pkBox.alignAll();
-
-								JVBoxPanel trBox = new JVBoxPanel();
-
-								JComboBox<String> trMessagesMode = new JComboBox<>(
-										new String[] { Constants.TRAY_MESSAGES_KEY_ALWAYS,
-												Constants.TRAY_MESSAGES_KEY_MENTION, Constants.TRAY_MESSAGES_KEY_NEVER
-								});
-								trMessagesMode.setToolTipText(Messages.getString("Main.trMessagesModeToolTop")); //$NON-NLS-1$
-								trMessagesMode.setSelectedItem(up.getTrayMessageMode());
-								JCheckBox showDMessages = new JCheckBox(Messages.getString("Main.showDMessages")); //$NON-NLS-1$
-								showDMessages.setToolTipText(Messages.getString("Main.showDMessagesToolTop")); //$NON-NLS-1$
-								showDMessages.setSelected(up.isTrayShowDisconnectMessages());
-
-								JButton clearRem = new JButton(Messages.getString("Main.clearRem")); //$NON-NLS-1$
-								if (up.getCloseMode() == Constants.WINDOW_CLOSE_ALWAYS_ASK)
-									clearRem.setEnabled(false);
-
-								clearRem.addActionListener(ev2 -> {
-									up.setCloseMode(0);
-									clearRem.setEnabled(false);
-								});
-
-								trBox.add(new JLabel(Messages.getString("Main.trMessagesModeLabel"))); //$NON-NLS-1$
-								trBox.add(trMessagesMode);
-								trBox.add(showDMessages);
-								trBox.add(new JLabel(" ")); //$NON-NLS-1$
-								trBox.add(clearRem);
-								trBox.add(new JTextPane() {
-									{
-										setEditable(false);
-										setOpaque(false);
-									}
-								});
-
-								trBox.alignAll();
-
-								JTabbedPane apPane = new JTabbedPane();
-
-								JVBoxPanel apButtonSettings = new JVBoxPanel();
-								JScrollPane apButtonSettingsSP = new JScrollPane(apButtonSettings);
-								JVBoxPanel apButtonSettingsFull = new JVBoxPanel();
-								apButtonSettingsSP.setPreferredSize(new Dimension(0, 0));
-
-								ColorPreferences cp = Main.up.getColorPreferences();
-								ColorPreferences cprefCopy = new UserPreferences.ColorPreferences();
-								cprefCopy.setColorDisabledButton(cp.getColorDisabledButton());
-								cprefCopy.setColorEnabledButton(cp.getColorEnabledButton());
-								cprefCopy.setColorEnabledHoverButton(cp.getColorEnabledHoverButton());
-								cprefCopy.setColorText(cp.getColorText());
-								cprefCopy.setDisabledColorText(cp.getDisabledColorText());
-
-								JColorChooserButton apButtonEnabled = new JColorChooserButton(
-										cp.getColorEnabledButton(), od);
-								JColorChooserButton apButtonEnabledHover = new JColorChooserButton(
-										cp.getColorEnabledHoverButton(), od);
-								JColorChooserButton apButtonDisabled = new JColorChooserButton(
-										cp.getColorDisabledButton(), od);
-								JColorChooserButton apButtonText = new JColorChooserButton(cp.getColorText(), od);
-								JColorChooserButton apButtonTextDisabled = new JColorChooserButton(
-										cp.getDisabledColorText(), od);
-
-								JCheckBox apButtonLockColors = new JCheckBox(
-										Messages.getString("Main.apButtonLockColors")); //$NON-NLS-1$
-								apButtonLockColors.setSelected(true);
-								JButton apButtonReset = new JButton(Messages.getString("Main.apButtonReset")); //$NON-NLS-1$
-
-								JMinecraftButton sampleButton = new JMinecraftButton("Test"); //$NON-NLS-1$
-								JMinecraftButton sampleDisabledButton = new JMinecraftButton("Test"); //$NON-NLS-1$
-								sampleButton.setCp(cprefCopy);
-								sampleDisabledButton.setCp(cprefCopy);
-								sampleDisabledButton.setEnabled(false);
-
-								apButtonSettings.add(apButtonLockColors);
-								apButtonSettings.add(new JLabel(Messages.getString("Main.apButtonSettingsBGLabel"))); //$NON-NLS-1$
-								apButtonSettings.add(apButtonEnabled);
-								apButtonSettings.add(new JLabel(Messages.getString("Main.apButtonSettingsHoverLabel"))); //$NON-NLS-1$
-								apButtonSettings.add(apButtonEnabledHover);
-								apButtonSettings
-										.add(new JLabel(Messages.getString("Main.apButtonSettingsDisabledLabel"))); //$NON-NLS-1$
-								apButtonSettings.add(apButtonDisabled);
-								apButtonSettings.add(new JLabel(Messages.getString("Main.apButtonSettingsTextColor"))); //$NON-NLS-1$
-								apButtonSettings.add(apButtonText);
-								apButtonSettings.add(new JLabel(Messages.getString("Main.apButtonSettingsDTexTColor"))); //$NON-NLS-1$
-								apButtonSettings.add(apButtonTextDisabled);
-								apButtonSettings.add(new JLabel(" ")); //$NON-NLS-1$
-								apButtonSettings.add(apButtonReset);
-								apButtonSettings.add(new JLabel(" ")); //$NON-NLS-1$
-
-								apButtonEnabled.addColorChangeListener(new ColorChangeListener() {
-
-									@Override
-									public void colorChanged(Color c) {
-										cprefCopy.setColorEnabledButton(SwingUtils.getHexRGB(c));
-										if (apButtonLockColors.isSelected()) {
-											Color hover = SwingUtils.brighten(c, 51);
-											Color disabled = SwingUtils.brighten(c,
-													(int) -(((c.getRed() + c.getGreen() + c.getBlue()) / 3) / 1.3));
-											cprefCopy.setColorEnabledHoverButton(SwingUtils.getHexRGB(hover));
-											cprefCopy.setColorDisabledButton(SwingUtils.getHexRGB(disabled));
-											apButtonEnabledHover.setColor(hover);
-											apButtonDisabled.setColor(disabled);
-										}
-										sampleButton.repaint();
-										sampleDisabledButton.repaint();
-									}
-								});
-								apButtonEnabledHover.addColorChangeListener(c -> {
-									cprefCopy.setColorEnabledHoverButton(SwingUtils.getHexRGB(c));
-									sampleButton.repaint();
-									sampleDisabledButton.repaint();
-								});
-
-								apButtonDisabled.addColorChangeListener(c -> {
-									cprefCopy.setColorDisabledButton(SwingUtils.getHexRGB(c));
-									sampleButton.repaint();
-									sampleDisabledButton.repaint();
-								});
-								apButtonText.addColorChangeListener(c -> {
-									cprefCopy.setColorText(SwingUtils.getHexRGB(c));
-									sampleButton.repaint();
-									sampleDisabledButton.repaint();
-								});
-								apButtonTextDisabled.addColorChangeListener(c -> {
-									cprefCopy.setDisabledColorText(SwingUtils.getHexRGB(c));
-									sampleButton.repaint();
-									sampleDisabledButton.repaint();
-								});
-								apButtonReset.addActionListener(ev2 -> {
-									ColorPreferences cp2 = UserPreferences.defaultColorPreferences;
-									cprefCopy.setColorDisabledButton(cp2.getColorDisabledButton());
-									cprefCopy.setColorEnabledButton(cp2.getColorEnabledButton());
-									cprefCopy.setColorEnabledHoverButton(cp2.getColorEnabledHoverButton());
-									cprefCopy.setColorText(cp2.getColorText());
-									cprefCopy.setDisabledColorText(cp2.getDisabledColorText());
-
-									apButtonDisabled
-											.setColor(new Color(Integer.parseInt(cp2.getColorDisabledButton(), 16)));
-									apButtonEnabled
-											.setColor(new Color(Integer.parseInt(cp2.getColorEnabledButton(), 16)));
-									apButtonEnabledHover.setColor(
-											new Color(Integer.parseInt(cp2.getColorEnabledHoverButton(), 16)));
-									apButtonText.setColor(new Color(Integer.parseInt(cp2.getColorText(), 16)));
-									apButtonTextDisabled
-											.setColor(new Color(Integer.parseInt(cp2.getDisabledColorText(), 16)));
-									sampleButton.repaint();
-									sampleDisabledButton.repaint();
-								});
-
-								Box apButtonSettingsSamples = Box.createHorizontalBox();
-								apButtonSettingsSamples.add(sampleButton);
-								apButtonSettingsSamples.add(sampleDisabledButton);
-
-								apButtonSettingsFull.add(apButtonSettingsSP);
-								apButtonSettingsFull.add(apButtonSettingsSamples);
-
-								apButtonSettings.alignAll();
-
-								apPane.addTab(Messages.getString("Main.appearancePaneButtons"), apButtonSettingsFull); //$NON-NLS-1$
-
-								JVBoxPanel ivBox = new JVBoxPanel();
-
-								final JCheckBox enableIVHandling = new JCheckBox(
-										Messages.getString("Main.enableIVHandling")); //$NON-NLS-1$
-								final JCheckBox hideIncomingWindows = new JCheckBox(
-										Messages.getString("Main.hideIncomingWindows")); //$NON-NLS-1$
-								final JCheckBox hiddenWindowsResponse = new JCheckBox(
-										Messages.getString("Main.hiddenWindowsResponse")); //$NON-NLS-1$
-								final JCheckBox loadTextures = new JCheckBox(
-										Messages.getString("Main.loadItemTextures")); //$NON-NLS-1$
-								final JCheckBox showWhenInTray = new JCheckBox(
-										Messages.getString("Main.showWindowsInTray")); //$NON-NLS-1$
-								final JCheckBox sendClosePackets = new JCheckBox(
-										Messages.getString("Main.sendClosePackets")); //$NON-NLS-1$
-
-								enableIVHandling.setToolTipText(Messages.getString("Main.enableIVHandlingToolTop")); //$NON-NLS-1$
-								loadTextures.setToolTipText(Messages.getString("Main.loadItemTexturesToolTop")); //$NON-NLS-1$
-								showWhenInTray.setToolTipText(Messages.getString("Main.showWindowsInTrayToolTop")); //$NON-NLS-1$
-								sendClosePackets.setToolTipText(Messages.getString("Main.sendClosePacketsToolTop")); //$NON-NLS-1$
-								hideIncomingWindows
-										.setToolTipText(Messages.getString("Main.hideIncomingWindowsToolTop")); //$NON-NLS-1$
-								hiddenWindowsResponse
-										.setToolTipText(Messages.getString("Main.hiddenWindowsResponseToolTop")); //$NON-NLS-1$
-
-								enableIVHandling.setSelected(up.isEnableInventoryHandling());
-								loadTextures.setSelected(up.isLoadInventoryTextures());
-								showWhenInTray.setSelected(up.isShowWindowsInTray());
-								sendClosePackets.setSelected(up.isSendWindowClosePackets());
-								hideIncomingWindows.setSelected(up.isHideIncomingWindows());
-								hiddenWindowsResponse.setSelected(up.isHiddenWindowsResponse());
-								hiddenWindowsResponse.setEnabled(hideIncomingWindows.isSelected());
-
-								hideIncomingWindows.addActionListener(ev2 -> {
-									hiddenWindowsResponse.setEnabled(hideIncomingWindows.isSelected());
-								});
-
-								enableIVHandling.addActionListener(new ActionListener() {
-
-									@Override
-									public void actionPerformed(ActionEvent e) {
-										recDisable(ivBox);
-									}
-
-									private void recDisable(Component ct) {
-										if (ct instanceof Container) {
-											setEb(ct);
-											for (Component cpt : ((Container) ct).getComponents())
-												recDisable(cpt);
-										} else {
-											setEb(ct);
-										}
-									}
-
-									private void setEb(Component ct) {
-										if ((ct instanceof JCheckBox) && !ct.equals(enableIVHandling)) {
-											ct.setEnabled(enableIVHandling.isSelected());
-											if (ct.equals(hiddenWindowsResponse))
-												ct.setEnabled(hideIncomingWindows.isSelected()
-														&& hideIncomingWindows.isEnabled());
-										}
-									}
-								});
-
-								ivBox.add(new JPanel() {
-									{
-										setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
-										add(enableIVHandling);
-										add(new JButton("?") { //$NON-NLS-1$
-											{
-												addActionListener(new ActionListener() {
-
-													@Override
-													public void actionPerformed(ActionEvent e) {
-														JOptionPane.showOptionDialog(od, Messages
-																.getString("Main.inventoryHandlingHelpLine1") //$NON-NLS-1$
-																+ Messages.getString("Main.inventoryHandlingHelpLine2") //$NON-NLS-1$
-																+ Messages.getString("Main.inventoryHandlingHelpLine3") //$NON-NLS-1$
-																+ Messages.getString("Main.inventoryHandlingHelpLine4") //$NON-NLS-1$
-																+ Messages.getString("Main.inventoryHandlingHelpLine5") //$NON-NLS-1$
-																+ Messages.getString("Main.inventoryHandlingHelpLine6") //$NON-NLS-1$
-																+ Messages.getString("Main.inventoryHandlingHelpLine7") //$NON-NLS-1$
-																+ Messages.getString("Main.inventoryHandlingHelpLine8") //$NON-NLS-1$
-																+ Messages.getString("Main.inventoryHandlingHelpLine9"), //$NON-NLS-1$
-																Messages.getString("Main.inventoryHandlingHelpTitle"), //$NON-NLS-1$
-																JOptionPane.YES_NO_OPTION,
-																JOptionPane.INFORMATION_MESSAGE, null,
-																new Object[] { Messages
-																		.getString("Main.inventoryHandlingHelpOk") //$NON-NLS-1$
-														}, 0);
-													}
-												});
-											}
-										});
-									}
-								});
-								ivBox.add(loadTextures);
-								ivBox.add(showWhenInTray);
-								ivBox.add(sendClosePackets);
-								ivBox.add(new JSeparator());
-								ivBox.add(hideIncomingWindows);
-								ivBox.add(new JPanel() {
-									{
-										setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
-										add(Box.createHorizontalStrut(10));
-										add(hiddenWindowsResponse);
-									}
-								});
-								ivBox.add(new JSeparator());
-								ivBox.add(new JTextPane() {
-									{
-										setEditable(false);
-										setOpaque(false);
-									}
-								});
-
-								for (Component ct : ivBox.getComponents()) {
-									if (!(ct instanceof JTextPane) && !ct.equals(enableIVHandling)) {
-										ct.setEnabled(enableIVHandling.isSelected());
-									}
-								}
-
-								ivBox.alignAll();
-
-								JVBoxPanel gnBox = new JVBoxPanel();
-
-								JComboBox<Language> languages = new JComboBox<>(Language.values());
-								languages.setSelectedItem(up.getAppLanguage());
-
-								gnBox.add(new JLabel(Messages.getString("Main.settingsLangChangeLabel"))); //$NON-NLS-1$
-								gnBox.add(languages);
-								gnBox.add(new JTextPane() {
-									{
-										setEditable(false);
-										setOpaque(false);
-									}
-								});
-
-								gnBox.alignAll();
-
-								jtp.add(Messages.getString("Main.settingsTabGeneral"), gnBox); //$NON-NLS-1$
-								jtp.add(Messages.getString("Main.settingsTabAppearance"), apPane); //$NON-NLS-1$
-								jtp.add(Messages.getString("Main.settingsTabTray"), trBox); //$NON-NLS-1$
-								jtp.add(Messages.getString("Main.settingsTabResourcePacks"), rsBox); //$NON-NLS-1$
-								jtp.add(Messages.getString("Main.settingsTabSkins"), skBox); //$NON-NLS-1$
-								jtp.add(Messages.getString("Main.settingsTabProtocol"), pkBox); //$NON-NLS-1$
-								jtp.add(Messages.getString("Main.settingsTabInventory"), ivBox); //$NON-NLS-1$
-								b.add(jtp);
-
-								JButton sOk = new JButton(Messages.getString("Main.settingsOk")); //$NON-NLS-1$
-								JButton sCancel = new JButton(Messages.getString("Main.settingsCancel")); //$NON-NLS-1$
-
-								sOk.addActionListener(new ActionListener() {
-
-									@Override
-									public void actionPerformed(ActionEvent e) {
-										Status rsBehavior = (Status) rPackBehaviorBox.getSelectedItem();
-										boolean showResourcePackMessages = rsPackShowCheck.isSelected();
-										String resourcePackMessage = rsPackMsgText.getText();
-										Position resourcePackMessagePosition = (Position) rsPackMessagePosition
-												.getSelectedItem();
-
-										SkinRule skinFetchRule = (SkinRule) ruleBox.getSelectedItem();
-
-										boolean ignoreKeepAlive = ignoreKAPackets.isSelected();
-										String brand = brandField.getText();
-										boolean sendMCBrand = !brand.isEmpty();
-
-										up.setResourcePackBehavior(rsBehavior);
-										up.setShowResourcePackMessages(showResourcePackMessages);
-										up.setResourcePackMessage(resourcePackMessage.replace("&", "\u00A7")); //$NON-NLS-1$ //$NON-NLS-2$
-										up.setResourcePackMessagePosition(resourcePackMessagePosition);
-
-										up.setSkinFetchRule(skinFetchRule);
-
-										up.setIgnoreKeepAlive(ignoreKeepAlive);
-										up.setAdditionalPing((int) pingField.getValue());
-										up.setBrand(brand);
-										up.setSendMCBrand(sendMCBrand);
-
-										up.setTrayMessageMode((String) trMessagesMode.getSelectedItem());
-										up.setTrayShowDisconnectMessages(showDMessages.isSelected());
-
-										if (!enableIVHandling.isSelected()) {
-											for (MinecraftClient cl : clients.values()) {
-												for (ItemsWindow iw : cl.getOpenWindows().values())
-													iw.closeWindow();
-												cl.getInventory().closeWindow();
-											}
-										}
-
-										if (!enableIVHandling.isSelected() || !loadTextures.isSelected()) {
-											if ((up.isEnableInventoryHandling() != enableIVHandling.isSelected())
-													|| (up.isLoadInventoryTextures() != loadTextures.isSelected()))
-												if (ItemsWindow.getTexturesSize() > 0) {
-													int response = JOptionPane.showOptionDialog(od, Messages
-															.getString("Main.inventoryHandlingDisabledLine1") //$NON-NLS-1$
-															+ Messages.getString("Main.inventoryHandlingDisabledLine2"), //$NON-NLS-1$
-															Messages.getString("Main.inventoryHandlingDisabledTitle"), //$NON-NLS-1$
-															JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE,
-															null,
-															new Object[] {
-																	Messages.getString(
-																			"Main.inventoryHandlingDisabledYes"), //$NON-NLS-1$
-																	Messages.getString(
-																			"Main.inventoryHandlingDisabledNo") //$NON-NLS-1$
-													}, 0);
-													if (response == 0)
-														ItemsWindow.clearTextures(Main.this);
-												}
-										}
-
-										if (enableIVHandling.isSelected() && loadTextures.isSelected())
-											if ((up.isEnableInventoryHandling() != enableIVHandling.isSelected())
-													|| (up.isLoadInventoryTextures() != loadTextures.isSelected())) {
-												int response = JOptionPane.showOptionDialog(od,
-														Messages.getString("Main.itemLoadingEnabledLine1") //$NON-NLS-1$
-																+ Messages.getString("Main.itemLoadingEnabledLine2"), //$NON-NLS-1$
-														Messages.getString("Main.itemLoadingEnabledTitle"), //$NON-NLS-1$
-														JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null,
-														new Object[] { Messages.getString("Main.itemLoadingEnabledYes"), //$NON-NLS-1$
-																Messages.getString("Main.itemLoadingEnabledNo") //$NON-NLS-1$
-												}, 0);
-												if (response == 0) {
-													od.dispose();
-													ItemsWindow.initTextures(Main.this, false);
-													if (clients.size() > 0)
-														JOptionPane.showOptionDialog(
-																od, Messages.getString("Main.itemTexturesLoadedLine1") //$NON-NLS-1$
-																		+ Messages.getString(
-																				"Main.itemTexturesLoadedLine2") //$NON-NLS-1$
-																		+ Messages.getString(
-																				"Main.itemTexturesLoadedLine3"), //$NON-NLS-1$
-																Messages.getString("Main.itemTexturesLoadedTitle"), //$NON-NLS-1$
-																JOptionPane.OK_CANCEL_OPTION,
-																JOptionPane.INFORMATION_MESSAGE, null, new Object[] {
-																		Messages.getString("Main.itemTexturesLoadedOk") //$NON-NLS-1$
-														}, 0);
-												}
-											}
-
-										if (enableIVHandling.isSelected() && !up.isEnableInventoryHandling())
-											if (clients.size() > 0)
-												JOptionPane.showOptionDialog(
-														od, Messages.getString("Main.inventoryHandlingEnabledLine1") //$NON-NLS-1$
-																+ Messages
-																		.getString("Main.inventoryHandlingEnabledLine2") //$NON-NLS-1$
-																+ Messages.getString(
-																		"Main.inventoryHandlingEnabledLine3"), //$NON-NLS-1$
-														Messages.getString("Main.inventoryHandlingEnabledTitle"), //$NON-NLS-1$
-														JOptionPane.OK_CANCEL_OPTION, JOptionPane.INFORMATION_MESSAGE,
-														null, new Object[] {
-																Messages.getString("Main.inventoryHandlingEnabledOk") //$NON-NLS-1$
-												}, 0);
-
-										up.setEnableInventoryHandling(enableIVHandling.isSelected());
-										up.setHideIncomingWindows(hideIncomingWindows.isSelected());
-										up.setHiddenWindowsResponse(hiddenWindowsResponse.isSelected());
-										up.setLoadInventoryTextures(loadTextures.isSelected());
-										up.setShowWindowsInTray(showWhenInTray.isSelected());
-										up.setSendWindowClosePackets(sendClosePackets.isSelected());
-
-										boolean langChanged = up.getAppLanguage() != languages.getSelectedItem();
-										up.setAppLanguage((Language) languages.getSelectedItem());
-
-										ColorPreferences cp2 = up.getColorPreferences();
-										cp2.setColorDisabledButton(SwingUtils.getHexRGB(apButtonDisabled.getColor()));
-										cp2.setColorEnabledButton(SwingUtils.getHexRGB(apButtonEnabled.getColor()));
-										cp2.setColorEnabledHoverButton(
-												SwingUtils.getHexRGB(apButtonEnabledHover.getColor()));
-										cp2.setColorText(SwingUtils.getHexRGB(apButtonText.getColor()));
-										cp2.setDisabledColorText(SwingUtils.getHexRGB(apButtonTextDisabled.getColor()));
-
-										upSaveRunnable.run();
-										PlayerSkinCache.getSkincache().clear();
-
-										if (langChanged) {
-											int response = JOptionPane.showOptionDialog(od,
-													Messages.getString("Main.langChangedLabelLine1") //$NON-NLS-1$
-															+ Messages.getString("Main.langChangedLabelLine2"), //$NON-NLS-1$
-													Messages.getString("Main.langChangedDialogTitle"), //$NON-NLS-1$
-													JOptionPane.OK_OPTION, JOptionPane.INFORMATION_MESSAGE, null,
-													new Object[] {
-															Messages.getString(
-																	"Main.langChangedLabelDialogOptionRestart"), //$NON-NLS-1$
-															Messages.getString(
-																	"Main.langChangedLabelDialogOptionContinue") //$NON-NLS-1$
-											}, 0);
-											if (response == 0)
-												System.exit(0);
-										}
-
-										od.dispose();
-										win.repaint();
-									}
-								});
-
-								sCancel.addActionListener(ev2 -> {
-									od.dispose();
-								});
-
-								Box sControls = Box.createHorizontalBox();
-
-								sControls.add(sOk);
-								sControls.add(sCancel);
-
-								b.add(sControls);
-								od.setContentPane(b);
-								od.pack();
-								SwingUtils.centerWindow(od);
-								od.setVisible(true);
-							}
+						addActionListener(e -> {
+							showOptionsDialog();
 						});
 					}
 				});
@@ -1532,6 +948,646 @@ public class Main {
 
 	}
 
+	private void showOptionsDialog() {
+		JDialog od = new JDialog(win);
+		od.setModal(true);
+		od.setResizable(false);
+		od.setTitle(Messages.getString("Main.settingsTitle")); //$NON-NLS-1$
+
+		Box b = Box.createVerticalBox();
+
+		JTabbedPane jtp = new JTabbedPane();
+
+		JVBoxPanel rsBox = new JVBoxPanel();
+
+		JComboBox<Status> rPackBehaviorBox = new JComboBox<>(Status.values());
+		rPackBehaviorBox.setToolTipText(Messages.getString("Main.rsBehaviorToolTip")); //$NON-NLS-1$
+		rPackBehaviorBox.setSelectedItem(up.getResourcePackBehavior());
+		rPackBehaviorBox.setRenderer(new DefaultListCellRenderer() {
+			@Override
+			public Component getListCellRendererComponent(JList<? extends Object> list, Object value, int index,
+					boolean isSelected, boolean cellHasFocus) {
+				JLabel lbl = new JLabel();
+				String txt;
+				switch ((Status) value) {
+				case ACCEPTED: {
+					txt = Messages.getString("Main.rsBehaviorAccept"); //$NON-NLS-1$
+					break;
+				}
+				case DECLINED: {
+					txt = Messages.getString("Main.rsBehaviorDecline"); //$NON-NLS-1$
+					break;
+				}
+				case LOADED: {
+					txt = Messages.getString("Main.rsBehaviorAcceptLoad"); //$NON-NLS-1$
+					break;
+				}
+				default: {
+					txt = Messages.getString("Main.rsBehaviorFail"); //$NON-NLS-1$
+					break;
+				}
+				}
+				lbl.setText(txt);
+				lbl.setOpaque(true);
+				if (isSelected) {
+					lbl.setBackground(Color.blue);
+					lbl.setForeground(Color.white);
+				}
+				return lbl;
+			}
+		});
+
+		JCheckBox rsPackShowCheck = new JCheckBox(Messages.getString("Main.rsPackShowCheck"), //$NON-NLS-1$
+				up.isShowResourcePackMessages());
+		rsPackShowCheck.setToolTipText(Messages.getString("Main.rsPackShowToolTip")); //$NON-NLS-1$
+
+		JPlaceholderField rsPackMsgText = new JPlaceholderField(Messages.getString("Main.rsPackMessageField")); //$NON-NLS-1$
+		rsPackMsgText.setToolTipText(Messages.getString("Main.rsPackMessageToolTip")); //$NON-NLS-1$
+		rsPackMsgText.setText(up.getResourcePackMessage());
+
+		JComboBox<Position> rsPackMessagePosition = new JComboBox<>(Position.values());
+		rsPackMessagePosition.setSelectedItem(up.getResourcePackMessagePosition());
+
+		rsBox.add(new JLabel(Messages.getString("Main.rsPackBehaviorLabel"))); //$NON-NLS-1$
+		rsBox.add(rPackBehaviorBox);
+		rsBox.add(new JLabel(" ")); //$NON-NLS-1$
+		rsBox.add(rsPackShowCheck);
+		rsBox.add(new JLabel(" ")); //$NON-NLS-1$
+		rsBox.add(new JLabel(Messages.getString("Main.rsPackMessageLabel"))); //$NON-NLS-1$
+		rsBox.add(rsPackMsgText);
+		rsBox.add(new JLabel(" ")); //$NON-NLS-1$
+		rsBox.add(new JLabel(Messages.getString("Main.rsPackPositionLabel"))); //$NON-NLS-1$
+		rsBox.add(rsPackMessagePosition);
+		rsBox.add(new JTextPane() {
+			{
+				setEditable(false);
+				setOpaque(false);
+			}
+		});
+
+		rsBox.alignAll();
+
+		JVBoxPanel skBox = new JVBoxPanel();
+		skBox.add(new JLabel(Messages.getString("Main.skinFetchMetchodLabel"))); //$NON-NLS-1$
+		JComboBox<SkinRule> ruleBox = new JComboBox<>(SkinRule.values());
+		ruleBox.setToolTipText(Messages.getString("Main.skinFetchToolTip")); //$NON-NLS-1$
+		ruleBox.setSelectedItem(up.getSkinFetchRule());
+		skBox.add(ruleBox);
+		skBox.add(new JTextPane() {
+			{
+				setText("\r\n" + Messages.getString("Main.skinFetchTipLine1") //$NON-NLS-1$ //$NON-NLS-2$
+						+ Messages.getString("Main.skinFetchTipLine2") //$NON-NLS-1$
+						+ Messages.getString("Main.skinFetchTipLine3") //$NON-NLS-1$
+						+ Messages.getString("Main.skinFetchTipLine4")); //$NON-NLS-1$
+				setEditable(false);
+			}
+		});
+
+		skBox.alignAll();
+
+		JVBoxPanel pkBox = new JVBoxPanel();
+
+		JCheckBox ignoreKAPackets = new JCheckBox(Messages.getString("Main.ignoreKAPackets")); //$NON-NLS-1$
+		ignoreKAPackets.setToolTipText(Messages.getString("Main.ignoreKAPacketsToolTop")); //$NON-NLS-1$
+		ignoreKAPackets.setSelected(up.isIgnoreKeepAlive());
+
+		JTextField brandField = new JPlaceholderField(Messages.getString("Main.brandField")); //$NON-NLS-1$
+		brandField.setToolTipText(Messages.getString("Main.brandToolTop")); //$NON-NLS-1$
+		brandField.setText(up.getBrand());
+		SwingUtilities.invokeLater(() -> {
+			brandField.setOpaque(true);
+		});
+
+		JSpinner pingField = new JSpinner(new SpinnerNumberModel(0, 0, Integer.MAX_VALUE, 1));
+		pingField.setToolTipText(Messages.getString("Main.pingToolTop")); //$NON-NLS-1$
+		pingField.setValue(up.getAdditionalPing());
+		SwingUtils.alignSpinner(pingField);
+
+		pkBox.add(ignoreKAPackets);
+		pkBox.add(new JLabel(" ")); //$NON-NLS-1$
+		pkBox.add(new JLabel(Messages.getString("Main.pingLabel"))); //$NON-NLS-1$
+		pkBox.add(new JLabel(Messages.getString("Main.pingLabel2"))); //$NON-NLS-1$
+		pkBox.add(pingField);
+		pkBox.add(new JLabel(" ")); //$NON-NLS-1$
+		pkBox.add(new JLabel(Messages.getString("Main.brandLabel"))); //$NON-NLS-1$
+		pkBox.add(brandField);
+
+		pkBox.add(new JTextPane() {
+			{
+				setEditable(false);
+				setOpaque(false);
+			}
+		});
+		pkBox.alignAll();
+
+		JVBoxPanel trBox = new JVBoxPanel();
+
+		JComboBox<String> trMessagesMode = new JComboBox<>(
+				new String[] { Constants.TRAY_MESSAGES_KEY_ALWAYS, Constants.TRAY_MESSAGES_KEY_MENTION,
+						Constants.TRAY_MESSAGES_KEY_KEYWORD, Constants.TRAY_MESSAGES_KEY_NEVER });
+		trMessagesMode.setToolTipText(Messages.getString("Main.trMessagesModeToolTop")); //$NON-NLS-1$
+		trMessagesMode.setSelectedItem(up.getTrayMessageMode());
+		JCheckBox showDMessages = new JCheckBox(Messages.getString("Main.showDMessages")); //$NON-NLS-1$
+		showDMessages.setToolTipText(Messages.getString("Main.showDMessagesToolTop")); //$NON-NLS-1$
+		showDMessages.setSelected(up.isTrayShowDisconnectMessages());
+
+		JMemList<String> trMessagesKeywords = new JMemList<>();
+		trMessagesKeywords.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		trMessagesKeywords.setListData(up.getTrayKeyWords() == null ? new String[0] : up.getTrayKeyWords());
+		// TODO Tray message keywords
+
+		Box trKwControls = Box.createHorizontalBox();
+
+		JButton addKeyword = new JButton(Messages.getString("Main.keywordAdd"));
+		JButton removeKeyword = new JButton(Messages.getString("Main.keywordRemove"));
+
+		removeKeyword.setEnabled(trMessagesKeywords.getSelectedIndex() != -1);
+
+		trMessagesKeywords.addListSelectionListener(e -> {
+			if (!e.getValueIsAdjusting()) {
+				removeKeyword.setEnabled(e.getFirstIndex() != -1);
+			}
+		});
+
+		removeKeyword.addActionListener(e -> {
+			if (trMessagesKeywords.getSelectedIndex() == -1)
+				return;
+
+			String selected = trMessagesKeywords.getSelectedValue();
+			int index = trMessagesKeywords.getSelectedIndex();
+
+			List<String> ld = new ArrayList<>();
+			for (String s : trMessagesKeywords.getListData())
+				ld.add(s);
+
+			ld.remove(selected);
+
+			String[] ss = new String[ld.size()];
+			ss = ld.toArray(ss);
+
+			trMessagesKeywords.setListData(ss);
+
+			trMessagesKeywords.setSelectedIndex(index > 0 ? index - 1 : 0);
+
+			removeKeyword.setEnabled(ss.length > 0);
+		});
+
+		addKeyword.addActionListener(e -> {
+
+			JTextField kwField = new JPlaceholderField(Messages.getString("Main.kewyordField"));
+
+			int response = JOptionPane.showOptionDialog(od,
+					new Object[] { Messages.getString("Main.keywordDialogLabel"), kwField },
+					Messages.getString("Main.keywordDialogTitle"), JOptionPane.OK_CANCEL_OPTION,
+					JOptionPane.QUESTION_MESSAGE, null,
+					new String[] { Messages.getString("Main.qmOkOption"), Messages.getString("Main.qmCancelOption") },
+					0);
+
+			if (response == 0 && !kwField.getText().isEmpty()) {
+				List<String> ld = new ArrayList<>();
+				for (String s : trMessagesKeywords.getListData())
+					ld.add(s);
+				if (ld.contains(kwField.getText()))
+					return;
+				ld.add(kwField.getText());
+
+				String[] ss = new String[ld.size()];
+				ss = ld.toArray(ss);
+
+				trMessagesKeywords.setListData(ss);
+
+				removeKeyword.setEnabled(ss.length > 0);
+			}
+		});
+
+		trKwControls.add(addKeyword);
+		trKwControls.add(removeKeyword);
+
+		JScrollPane trKeywordsScroll = new JScrollPane(trMessagesKeywords);
+
+		JButton clearRem = new JButton(Messages.getString("Main.clearRem")); //$NON-NLS-1$
+		if (up.getCloseMode() == Constants.WINDOW_CLOSE_ALWAYS_ASK)
+			clearRem.setEnabled(false);
+
+		clearRem.addActionListener(ev2 -> {
+			up.setCloseMode(0);
+			clearRem.setEnabled(false);
+		});
+
+		trBox.add(new JLabel(Messages.getString("Main.trMessagesModeLabel"))); //$NON-NLS-1$
+		trBox.add(trMessagesMode);
+		trBox.add(showDMessages);
+		trBox.add(new JLabel(" ")); //$NON-NLS-1$
+		trBox.add(clearRem);
+		trBox.add(new JLabel(" "));
+		trBox.add(new JLabel(Messages.getString("Main.keywordLabel")));
+		trBox.add(trKeywordsScroll);
+		trBox.add(trKwControls);
+		trBox.add(new JTextPane() {
+			{
+				setEditable(false);
+				setOpaque(false);
+			}
+		});
+
+		trBox.alignAll();
+
+		JTabbedPane apPane = new JTabbedPane();
+
+		JVBoxPanel apButtonSettings = new JVBoxPanel();
+		JScrollPane apButtonSettingsSP = new JScrollPane(apButtonSettings);
+		JVBoxPanel apButtonSettingsFull = new JVBoxPanel();
+		apButtonSettingsSP.setPreferredSize(new Dimension(0, 0));
+
+		ColorPreferences cp = Main.up.getColorPreferences();
+		ColorPreferences cprefCopy = new UserPreferences.ColorPreferences();
+		cprefCopy.setColorDisabledButton(cp.getColorDisabledButton());
+		cprefCopy.setColorEnabledButton(cp.getColorEnabledButton());
+		cprefCopy.setColorEnabledHoverButton(cp.getColorEnabledHoverButton());
+		cprefCopy.setColorText(cp.getColorText());
+		cprefCopy.setDisabledColorText(cp.getDisabledColorText());
+
+		JColorChooserButton apButtonEnabled = new JColorChooserButton(cp.getColorEnabledButton(), od);
+		JColorChooserButton apButtonEnabledHover = new JColorChooserButton(cp.getColorEnabledHoverButton(), od);
+		JColorChooserButton apButtonDisabled = new JColorChooserButton(cp.getColorDisabledButton(), od);
+		JColorChooserButton apButtonText = new JColorChooserButton(cp.getColorText(), od);
+		JColorChooserButton apButtonTextDisabled = new JColorChooserButton(cp.getDisabledColorText(), od);
+
+		JCheckBox apButtonLockColors = new JCheckBox(Messages.getString("Main.apButtonLockColors")); //$NON-NLS-1$
+		apButtonLockColors.setSelected(true);
+		JButton apButtonReset = new JButton(Messages.getString("Main.apButtonReset")); //$NON-NLS-1$
+
+		JMinecraftButton sampleButton = new JMinecraftButton("Test"); //$NON-NLS-1$
+		JMinecraftButton sampleDisabledButton = new JMinecraftButton("Test"); //$NON-NLS-1$
+		sampleButton.setCp(cprefCopy);
+		sampleDisabledButton.setCp(cprefCopy);
+		sampleDisabledButton.setEnabled(false);
+
+		apButtonSettings.add(apButtonLockColors);
+		apButtonSettings.add(new JLabel(Messages.getString("Main.apButtonSettingsBGLabel"))); //$NON-NLS-1$
+		apButtonSettings.add(apButtonEnabled);
+		apButtonSettings.add(new JLabel(Messages.getString("Main.apButtonSettingsHoverLabel"))); //$NON-NLS-1$
+		apButtonSettings.add(apButtonEnabledHover);
+		apButtonSettings.add(new JLabel(Messages.getString("Main.apButtonSettingsDisabledLabel"))); //$NON-NLS-1$
+		apButtonSettings.add(apButtonDisabled);
+		apButtonSettings.add(new JLabel(Messages.getString("Main.apButtonSettingsTextColor"))); //$NON-NLS-1$
+		apButtonSettings.add(apButtonText);
+		apButtonSettings.add(new JLabel(Messages.getString("Main.apButtonSettingsDTexTColor"))); //$NON-NLS-1$
+		apButtonSettings.add(apButtonTextDisabled);
+		apButtonSettings.add(new JLabel(" ")); //$NON-NLS-1$
+		apButtonSettings.add(apButtonReset);
+		apButtonSettings.add(new JLabel(" ")); //$NON-NLS-1$
+
+		apButtonEnabled.addColorChangeListener(new ColorChangeListener() {
+
+			@Override
+			public void colorChanged(Color c) {
+				cprefCopy.setColorEnabledButton(SwingUtils.getHexRGB(c));
+				if (apButtonLockColors.isSelected()) {
+					Color hover = SwingUtils.brighten(c, 51);
+					Color disabled = SwingUtils.brighten(c,
+							(int) -(((c.getRed() + c.getGreen() + c.getBlue()) / 3) / 1.3));
+					cprefCopy.setColorEnabledHoverButton(SwingUtils.getHexRGB(hover));
+					cprefCopy.setColorDisabledButton(SwingUtils.getHexRGB(disabled));
+					apButtonEnabledHover.setColor(hover);
+					apButtonDisabled.setColor(disabled);
+				}
+				sampleButton.repaint();
+				sampleDisabledButton.repaint();
+			}
+		});
+		apButtonEnabledHover.addColorChangeListener(c -> {
+			cprefCopy.setColorEnabledHoverButton(SwingUtils.getHexRGB(c));
+			sampleButton.repaint();
+			sampleDisabledButton.repaint();
+		});
+
+		apButtonDisabled.addColorChangeListener(c -> {
+			cprefCopy.setColorDisabledButton(SwingUtils.getHexRGB(c));
+			sampleButton.repaint();
+			sampleDisabledButton.repaint();
+		});
+		apButtonText.addColorChangeListener(c -> {
+			cprefCopy.setColorText(SwingUtils.getHexRGB(c));
+			sampleButton.repaint();
+			sampleDisabledButton.repaint();
+		});
+		apButtonTextDisabled.addColorChangeListener(c -> {
+			cprefCopy.setDisabledColorText(SwingUtils.getHexRGB(c));
+			sampleButton.repaint();
+			sampleDisabledButton.repaint();
+		});
+		apButtonReset.addActionListener(ev2 -> {
+			ColorPreferences cp2 = UserPreferences.defaultColorPreferences;
+			cprefCopy.setColorDisabledButton(cp2.getColorDisabledButton());
+			cprefCopy.setColorEnabledButton(cp2.getColorEnabledButton());
+			cprefCopy.setColorEnabledHoverButton(cp2.getColorEnabledHoverButton());
+			cprefCopy.setColorText(cp2.getColorText());
+			cprefCopy.setDisabledColorText(cp2.getDisabledColorText());
+
+			apButtonDisabled.setColor(new Color(Integer.parseInt(cp2.getColorDisabledButton(), 16)));
+			apButtonEnabled.setColor(new Color(Integer.parseInt(cp2.getColorEnabledButton(), 16)));
+			apButtonEnabledHover.setColor(new Color(Integer.parseInt(cp2.getColorEnabledHoverButton(), 16)));
+			apButtonText.setColor(new Color(Integer.parseInt(cp2.getColorText(), 16)));
+			apButtonTextDisabled.setColor(new Color(Integer.parseInt(cp2.getDisabledColorText(), 16)));
+			sampleButton.repaint();
+			sampleDisabledButton.repaint();
+		});
+
+		Box apButtonSettingsSamples = Box.createHorizontalBox();
+		apButtonSettingsSamples.add(sampleButton);
+		apButtonSettingsSamples.add(sampleDisabledButton);
+
+		apButtonSettingsFull.add(apButtonSettingsSP);
+		apButtonSettingsFull.add(apButtonSettingsSamples);
+
+		apButtonSettings.alignAll();
+
+		apPane.addTab(Messages.getString("Main.appearancePaneButtons"), apButtonSettingsFull); //$NON-NLS-1$
+
+		JVBoxPanel ivBox = new JVBoxPanel();
+
+		final JCheckBox enableIVHandling = new JCheckBox(Messages.getString("Main.enableIVHandling")); //$NON-NLS-1$
+		final JCheckBox hideIncomingWindows = new JCheckBox(Messages.getString("Main.hideIncomingWindows")); //$NON-NLS-1$
+		final JCheckBox hiddenWindowsResponse = new JCheckBox(Messages.getString("Main.hiddenWindowsResponse")); //$NON-NLS-1$
+		final JCheckBox loadTextures = new JCheckBox(Messages.getString("Main.loadItemTextures")); //$NON-NLS-1$
+		final JCheckBox showWhenInTray = new JCheckBox(Messages.getString("Main.showWindowsInTray")); //$NON-NLS-1$
+		final JCheckBox sendClosePackets = new JCheckBox(Messages.getString("Main.sendClosePackets")); //$NON-NLS-1$
+
+		enableIVHandling.setToolTipText(Messages.getString("Main.enableIVHandlingToolTop")); //$NON-NLS-1$
+		loadTextures.setToolTipText(Messages.getString("Main.loadItemTexturesToolTop")); //$NON-NLS-1$
+		showWhenInTray.setToolTipText(Messages.getString("Main.showWindowsInTrayToolTop")); //$NON-NLS-1$
+		sendClosePackets.setToolTipText(Messages.getString("Main.sendClosePacketsToolTop")); //$NON-NLS-1$
+		hideIncomingWindows.setToolTipText(Messages.getString("Main.hideIncomingWindowsToolTop")); //$NON-NLS-1$
+		hiddenWindowsResponse.setToolTipText(Messages.getString("Main.hiddenWindowsResponseToolTop")); //$NON-NLS-1$
+
+		enableIVHandling.setSelected(up.isEnableInventoryHandling());
+		loadTextures.setSelected(up.isLoadInventoryTextures());
+		showWhenInTray.setSelected(up.isShowWindowsInTray());
+		sendClosePackets.setSelected(up.isSendWindowClosePackets());
+		hideIncomingWindows.setSelected(up.isHideIncomingWindows());
+		hiddenWindowsResponse.setSelected(up.isHiddenWindowsResponse());
+		hiddenWindowsResponse.setEnabled(hideIncomingWindows.isSelected());
+
+		hideIncomingWindows.addActionListener(ev2 -> {
+			hiddenWindowsResponse.setEnabled(hideIncomingWindows.isSelected());
+		});
+
+		enableIVHandling.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				recDisable(ivBox);
+			}
+
+			private void recDisable(Component ct) {
+				if (ct instanceof Container) {
+					setEb(ct);
+					for (Component cpt : ((Container) ct).getComponents())
+						recDisable(cpt);
+				} else {
+					setEb(ct);
+				}
+			}
+
+			private void setEb(Component ct) {
+				if ((ct instanceof JCheckBox) && !ct.equals(enableIVHandling)) {
+					ct.setEnabled(enableIVHandling.isSelected());
+					if (ct.equals(hiddenWindowsResponse))
+						ct.setEnabled(hideIncomingWindows.isSelected() && hideIncomingWindows.isEnabled());
+				}
+			}
+		});
+
+		ivBox.add(new JPanel() {
+			{
+				setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+				add(enableIVHandling);
+				add(new JButton("?") { //$NON-NLS-1$
+					{
+						addActionListener(new ActionListener() {
+
+							@Override
+							public void actionPerformed(ActionEvent e) {
+								JOptionPane.showOptionDialog(od, Messages.getString("Main.inventoryHandlingHelpLine1") //$NON-NLS-1$
+										+ Messages.getString("Main.inventoryHandlingHelpLine2") //$NON-NLS-1$
+										+ Messages.getString("Main.inventoryHandlingHelpLine3") //$NON-NLS-1$
+										+ Messages.getString("Main.inventoryHandlingHelpLine4") //$NON-NLS-1$
+										+ Messages.getString("Main.inventoryHandlingHelpLine5") //$NON-NLS-1$
+										+ Messages.getString("Main.inventoryHandlingHelpLine6") //$NON-NLS-1$
+										+ Messages.getString("Main.inventoryHandlingHelpLine7") //$NON-NLS-1$
+										+ Messages.getString("Main.inventoryHandlingHelpLine8") //$NON-NLS-1$
+										+ Messages.getString("Main.inventoryHandlingHelpLine9"), //$NON-NLS-1$
+										Messages.getString("Main.inventoryHandlingHelpTitle"), //$NON-NLS-1$
+										JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE, null,
+										new Object[] { Messages.getString("Main.inventoryHandlingHelpOk") //$NON-NLS-1$
+								}, 0);
+							}
+						});
+					}
+				});
+			}
+		});
+		ivBox.add(loadTextures);
+		ivBox.add(showWhenInTray);
+		ivBox.add(sendClosePackets);
+		ivBox.add(new JSeparator());
+		ivBox.add(hideIncomingWindows);
+		ivBox.add(new JPanel() {
+			{
+				setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+				add(Box.createHorizontalStrut(10));
+				add(hiddenWindowsResponse);
+			}
+		});
+		ivBox.add(new JSeparator());
+		ivBox.add(new JTextPane() {
+			{
+				setEditable(false);
+				setOpaque(false);
+			}
+		});
+
+		for (Component ct : ivBox.getComponents()) {
+			if (!(ct instanceof JTextPane) && !ct.equals(enableIVHandling)) {
+				ct.setEnabled(enableIVHandling.isSelected());
+			}
+		}
+
+		ivBox.alignAll();
+
+		JVBoxPanel gnBox = new JVBoxPanel();
+
+		JComboBox<Language> languages = new JComboBox<>(Language.values());
+		languages.setSelectedItem(up.getAppLanguage());
+
+		gnBox.add(new JLabel(Messages.getString("Main.settingsLangChangeLabel"))); //$NON-NLS-1$
+		gnBox.add(languages);
+		gnBox.add(new JTextPane() {
+			{
+				setEditable(false);
+				setOpaque(false);
+			}
+		});
+
+		gnBox.alignAll();
+
+		jtp.add(Messages.getString("Main.settingsTabGeneral"), gnBox); //$NON-NLS-1$
+		jtp.add(Messages.getString("Main.settingsTabAppearance"), apPane); //$NON-NLS-1$
+		jtp.add(Messages.getString("Main.settingsTabTray"), trBox); //$NON-NLS-1$
+		jtp.add(Messages.getString("Main.settingsTabResourcePacks"), rsBox); //$NON-NLS-1$
+		jtp.add(Messages.getString("Main.settingsTabSkins"), skBox); //$NON-NLS-1$
+		jtp.add(Messages.getString("Main.settingsTabProtocol"), pkBox); //$NON-NLS-1$
+		jtp.add(Messages.getString("Main.settingsTabInventory"), ivBox); //$NON-NLS-1$
+		b.add(jtp);
+
+		JButton sOk = new JButton(Messages.getString("Main.settingsOk")); //$NON-NLS-1$
+		JButton sCancel = new JButton(Messages.getString("Main.settingsCancel")); //$NON-NLS-1$
+
+		sOk.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				Status rsBehavior = (Status) rPackBehaviorBox.getSelectedItem();
+				boolean showResourcePackMessages = rsPackShowCheck.isSelected();
+				String resourcePackMessage = rsPackMsgText.getText();
+				Position resourcePackMessagePosition = (Position) rsPackMessagePosition.getSelectedItem();
+
+				SkinRule skinFetchRule = (SkinRule) ruleBox.getSelectedItem();
+
+				boolean ignoreKeepAlive = ignoreKAPackets.isSelected();
+				String brand = brandField.getText();
+				boolean sendMCBrand = !brand.isEmpty();
+
+				up.setResourcePackBehavior(rsBehavior);
+				up.setShowResourcePackMessages(showResourcePackMessages);
+				up.setResourcePackMessage(resourcePackMessage.replace("&", "\u00A7")); //$NON-NLS-1$ //$NON-NLS-2$
+				up.setResourcePackMessagePosition(resourcePackMessagePosition);
+
+				up.setSkinFetchRule(skinFetchRule);
+
+				up.setIgnoreKeepAlive(ignoreKeepAlive);
+				up.setAdditionalPing((int) pingField.getValue());
+				up.setBrand(brand);
+				up.setSendMCBrand(sendMCBrand);
+
+				up.setTrayMessageMode((String) trMessagesMode.getSelectedItem());
+				up.setTrayShowDisconnectMessages(showDMessages.isSelected());
+				up.setTrayKeyWords(trMessagesKeywords.getListData());
+
+				if (!enableIVHandling.isSelected()) {
+					for (MinecraftClient cl : clients.values()) {
+						for (ItemsWindow iw : cl.getOpenWindows().values())
+							iw.closeWindow();
+						cl.getInventory().closeWindow();
+					}
+				}
+
+				if (!enableIVHandling.isSelected() || !loadTextures.isSelected()) {
+					if ((up.isEnableInventoryHandling() != enableIVHandling.isSelected())
+							|| (up.isLoadInventoryTextures() != loadTextures.isSelected()))
+						if (ItemsWindow.getTexturesSize() > 0) {
+							int response = JOptionPane.showOptionDialog(od,
+									Messages.getString("Main.inventoryHandlingDisabledLine1") //$NON-NLS-1$
+											+ Messages.getString("Main.inventoryHandlingDisabledLine2"), //$NON-NLS-1$
+									Messages.getString("Main.inventoryHandlingDisabledTitle"), //$NON-NLS-1$
+									JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null,
+									new Object[] { Messages.getString("Main.inventoryHandlingDisabledYes"), //$NON-NLS-1$
+											Messages.getString("Main.inventoryHandlingDisabledNo") //$NON-NLS-1$
+							}, 0);
+							if (response == 0)
+								ItemsWindow.clearTextures(Main.this);
+						}
+				}
+
+				if (enableIVHandling.isSelected() && loadTextures.isSelected())
+					if ((up.isEnableInventoryHandling() != enableIVHandling.isSelected())
+							|| (up.isLoadInventoryTextures() != loadTextures.isSelected())) {
+						int response = JOptionPane.showOptionDialog(od,
+								Messages.getString("Main.itemLoadingEnabledLine1") //$NON-NLS-1$
+										+ Messages.getString("Main.itemLoadingEnabledLine2"), //$NON-NLS-1$
+								Messages.getString("Main.itemLoadingEnabledTitle"), //$NON-NLS-1$
+								JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null,
+								new Object[] { Messages.getString("Main.itemLoadingEnabledYes"), //$NON-NLS-1$
+										Messages.getString("Main.itemLoadingEnabledNo") //$NON-NLS-1$
+						}, 0);
+						if (response == 0) {
+							od.dispose();
+							ItemsWindow.initTextures(Main.this, false);
+							if (clients.size() > 0)
+								JOptionPane.showOptionDialog(od, Messages.getString("Main.itemTexturesLoadedLine1") //$NON-NLS-1$
+										+ Messages.getString("Main.itemTexturesLoadedLine2") //$NON-NLS-1$
+										+ Messages.getString("Main.itemTexturesLoadedLine3"), //$NON-NLS-1$
+										Messages.getString("Main.itemTexturesLoadedTitle"), //$NON-NLS-1$
+										JOptionPane.OK_CANCEL_OPTION, JOptionPane.INFORMATION_MESSAGE, null,
+										new Object[] { Messages.getString("Main.itemTexturesLoadedOk") //$NON-NLS-1$
+								}, 0);
+						}
+					}
+
+				if (enableIVHandling.isSelected() && !up.isEnableInventoryHandling())
+					if (clients.size() > 0)
+						JOptionPane.showOptionDialog(od, Messages.getString("Main.inventoryHandlingEnabledLine1") //$NON-NLS-1$
+								+ Messages.getString("Main.inventoryHandlingEnabledLine2") //$NON-NLS-1$
+								+ Messages.getString("Main.inventoryHandlingEnabledLine3"), //$NON-NLS-1$
+								Messages.getString("Main.inventoryHandlingEnabledTitle"), //$NON-NLS-1$
+								JOptionPane.OK_CANCEL_OPTION, JOptionPane.INFORMATION_MESSAGE, null,
+								new Object[] { Messages.getString("Main.inventoryHandlingEnabledOk") //$NON-NLS-1$
+						}, 0);
+
+				up.setEnableInventoryHandling(enableIVHandling.isSelected());
+				up.setHideIncomingWindows(hideIncomingWindows.isSelected());
+				up.setHiddenWindowsResponse(hiddenWindowsResponse.isSelected());
+				up.setLoadInventoryTextures(loadTextures.isSelected());
+				up.setShowWindowsInTray(showWhenInTray.isSelected());
+				up.setSendWindowClosePackets(sendClosePackets.isSelected());
+
+				boolean langChanged = up.getAppLanguage() != languages.getSelectedItem();
+				up.setAppLanguage((Language) languages.getSelectedItem());
+
+				ColorPreferences cp2 = up.getColorPreferences();
+				cp2.setColorDisabledButton(SwingUtils.getHexRGB(apButtonDisabled.getColor()));
+				cp2.setColorEnabledButton(SwingUtils.getHexRGB(apButtonEnabled.getColor()));
+				cp2.setColorEnabledHoverButton(SwingUtils.getHexRGB(apButtonEnabledHover.getColor()));
+				cp2.setColorText(SwingUtils.getHexRGB(apButtonText.getColor()));
+				cp2.setDisabledColorText(SwingUtils.getHexRGB(apButtonTextDisabled.getColor()));
+
+				upSaveRunnable.run();
+				PlayerSkinCache.getSkincache().clear();
+
+				if (langChanged) {
+					int response = JOptionPane.showOptionDialog(od, Messages.getString("Main.langChangedLabelLine1") //$NON-NLS-1$
+							+ Messages.getString("Main.langChangedLabelLine2"), //$NON-NLS-1$
+							Messages.getString("Main.langChangedDialogTitle"), //$NON-NLS-1$
+							JOptionPane.OK_OPTION, JOptionPane.INFORMATION_MESSAGE, null,
+							new Object[] { Messages.getString("Main.langChangedLabelDialogOptionRestart"), //$NON-NLS-1$
+									Messages.getString("Main.langChangedLabelDialogOptionContinue") //$NON-NLS-1$
+					}, 0);
+					if (response == 0)
+						System.exit(0);
+				}
+
+				od.dispose();
+				win.repaint();
+			}
+		});
+
+		sCancel.addActionListener(ev2 -> {
+			od.dispose();
+		});
+
+		Box sControls = Box.createHorizontalBox();
+
+		sControls.add(sOk);
+		sControls.add(sCancel);
+
+		b.add(sControls);
+		od.setContentPane(b);
+		od.pack();
+		SwingUtils.centerWindow(od);
+		od.setVisible(true);
+	}
+
 	private JSplitPane createServerPane(final ServerEntry entry, final String username) {
 
 		final JSplitPane fPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
@@ -1542,10 +1598,10 @@ public class Main {
 		pane.setBackground(new Color(35, 35, 35));
 		pane.setForeground(Color.white);
 		pane.setEditable(false);
-		pane.setFont(mcFont.deriveFont((float) 13.5f));
+		pane.setFont(mcFont.deriveFont(13.5f));
 
 		final JScrollPane jsc = new JScrollPane(pane);
-		jsc.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		jsc.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
 		final Box chatControls = Box.createHorizontalBox();
 
@@ -1557,7 +1613,7 @@ public class Main {
 		chatSend.setMargin(new Insets(5, 5, 5, 5));
 
 		for (Component ct : chatControls.getComponents())
-			ct.setFont(ct.getFont().deriveFont((float) 13.5f));
+			ct.setFont(ct.getFont().deriveFont(13.5f));
 
 		chatControls.add(chatInput);
 		chatControls.add(chatSend);
@@ -1567,7 +1623,7 @@ public class Main {
 		hotbar.setBackground(new Color(35, 35, 35));
 		hotbar.setForeground(Color.white);
 		hotbar.setEditable(false);
-		hotbar.setFont(mcFont.deriveFont((float) 13.5f));
+		hotbar.setFont(mcFont.deriveFont(13.5f));
 
 		JScrollPane hjsc = new JScrollPane(hotbar);
 		hjsc.setMaximumSize(chatControls.getMaximumSize());
@@ -1582,7 +1638,7 @@ public class Main {
 
 					@Override
 					public void run() {
-						fPane.setDividerLocation((double) 0.8);
+						fPane.setDividerLocation(0.8);
 					}
 				});
 			}
@@ -1628,8 +1684,7 @@ public class Main {
 				new BasicArrowButton(SwingConstants.SOUTH_WEST), new BasicArrowButton(SwingConstants.WEST),
 				new BasicArrowButton(SwingConstants.NORTH_WEST), new BasicArrowButton(SwingConstants.SOUTH),
 				new BasicArrowButton(SwingConstants.NORTH_EAST), new BasicArrowButton(SwingConstants.EAST),
-				new BasicArrowButton(SwingConstants.SOUTH_EAST)
-		};
+				new BasicArrowButton(SwingConstants.SOUTH_EAST) };
 
 		JButton jumpButton = new BasicArrowButton(SwingConstants.NORTH_EAST);
 		jumpButton.setEnabled(false);
@@ -1813,7 +1868,7 @@ public class Main {
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				fPane.setDividerLocation((double) 0.8);
+				fPane.setDividerLocation(0.8);
 			}
 		});
 
@@ -1828,31 +1883,31 @@ public class Main {
 				final int port = entry.getPort();
 				int protocol = -1;
 				switch (entry.getVersion()) {
-					case "Auto": { //$NON-NLS-1$
-						try {
-							protocol = MinecraftStat.serverListPing(host, port).getProtocol();
-							boolean contains = false;
-							for (ProtocolNumber num : ProtocolNumber.values()) {
-								if (num.protocol == protocol)
-									contains = true;
-							}
-							if (!contains)
-								protocol = -2;
-						} catch (Exception e) {
-							SwingUtils.appendColoredText(
-									Messages.getString("Main.connectionFailedChatMessage") + e.toString(), pane); //$NON-NLS-1$
-							e.printStackTrace();
+				case "Auto": { //$NON-NLS-1$
+					try {
+						protocol = MinecraftStat.serverListPing(host, port).getProtocol();
+						boolean contains = false;
+						for (ProtocolNumber num : ProtocolNumber.values()) {
+							if (num.protocol == protocol)
+								contains = true;
 						}
-						break;
+						if (!contains)
+							protocol = -2;
+					} catch (Exception e) {
+						SwingUtils.appendColoredText(
+								Messages.getString("Main.connectionFailedChatMessage") + e.toString(), pane); //$NON-NLS-1$
+						e.printStackTrace();
 					}
-					case "Always Ask": { //$NON-NLS-1$
-						protocol = -2;
-						break;
-					}
-					default: {
-						protocol = ProtocolNumber.getForName(entry.getVersion()).protocol;
-						break;
-					}
+					break;
+				}
+				case "Always Ask": { //$NON-NLS-1$
+					protocol = -2;
+					break;
+				}
+				default: {
+					protocol = ProtocolNumber.getForName(entry.getVersion()).protocol;
+					break;
+				}
 				}
 
 				if (protocol == -2) {
@@ -1927,10 +1982,19 @@ public class Main {
 									if (trayIcon != null) {
 										boolean shouldDisplay = (up.getTrayMessageMode()
 												.equals(Constants.TRAY_MESSAGES_KEY_ALWAYS))
-												|| (up.getTrayMessageMode()
-														.contentEquals(Constants.TRAY_MESSAGES_KEY_MENTION)
+												|| (up.getTrayMessageMode().equals(Constants.TRAY_MESSAGES_KEY_MENTION)
 														&& message.toLowerCase()
 																.contains(cl.getUsername().toLowerCase()));
+										if (!shouldDisplay && up.getTrayMessageMode()
+												.equals(Constants.TRAY_MESSAGES_KEY_KEYWORD)) {
+											String[] keyWords = up.getTrayKeyWords();
+											if (keyWords != null) {
+												for (String keyWord : keyWords)
+													if (message.toLowerCase().contains(keyWord.toLowerCase()))
+														shouldDisplay = true;
+											}
+										}
+
 										if (shouldDisplay) {
 											trayLastMessageType = 0;
 											trayLastMessageSender = cl;
@@ -2089,7 +2153,7 @@ public class Main {
 
 							@Override
 							public void run() {
-								fPane.setDividerLocation((double) 0.8);
+								fPane.setDividerLocation(0.8);
 							}
 						});
 

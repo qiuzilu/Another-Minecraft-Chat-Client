@@ -74,16 +74,16 @@ public class IOUtils {
 	public static BufferedImage trimSkinHead(BufferedImage img, boolean hatOn, int side) {
 		int sx, sy;
 		switch (side) {
-			case 1: {
-				sx = 24;
-				sy = 8;
-				break;
-			}
-			default: {
-				sx = 8;
-				sy = 8;
-				break;
-			}
+		case 1: {
+			sx = 24;
+			sy = 8;
+			break;
+		}
+		default: {
+			sx = 8;
+			sy = 8;
+			break;
+		}
 		}
 
 		BufferedImage hat = new BufferedImage(8, 8, BufferedImage.TYPE_INT_ARGB);
@@ -141,24 +141,24 @@ public class IOUtils {
 
 		int bx, ax, lx;
 		switch (direction) {
-			case 0: {
-				bx = 20;
-				ax = 44;
-				lx = 4;
-				break;
-			}
-			case 1: {
-				bx = 32;
-				ax = 52;
-				lx = 12;
-				break;
-			}
-			default: {
-				bx = 20;
-				ax = 44;
-				lx = 4;
-				break;
-			}
+		case 0: {
+			bx = 20;
+			ax = 44;
+			lx = 4;
+			break;
+		}
+		case 1: {
+			bx = 32;
+			ax = 52;
+			lx = 12;
+			break;
+		}
+		default: {
+			bx = 20;
+			ax = 44;
+			lx = 4;
+			break;
+		}
 		}
 
 		BufferedImage arms = trim(skin, ax, 20, 4, 12);

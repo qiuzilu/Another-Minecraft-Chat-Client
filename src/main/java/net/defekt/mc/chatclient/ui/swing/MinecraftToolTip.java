@@ -34,11 +34,11 @@ public class MinecraftToolTip {
 			@Override
 			public void paintComponent(Graphics g) {
 				super.paintComponent(g);
-				Graphics2D g2 = (Graphics2D)g;
+				Graphics2D g2 = (Graphics2D) g;
 				g2.setColor(new Color(100, 0, 100));
 				g2.fillRect(0, 0, getWidth(), 2);
-				g2.fillRect(getWidth()-2, 0, 2, getHeight());
-				g2.fillRect(0, getHeight()-2, getWidth(), 2);
+				g2.fillRect(getWidth() - 2, 0, 2, getHeight());
+				g2.fillRect(0, getHeight() - 2, getWidth(), 2);
 				g2.fillRect(0, 0, 2, getHeight());
 			}
 		};

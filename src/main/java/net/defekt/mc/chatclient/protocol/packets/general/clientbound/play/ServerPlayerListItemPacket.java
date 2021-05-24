@@ -92,42 +92,42 @@ public class ServerPlayerListItemPacket extends Packet {
 		uuid = is.readUUID();
 
 		switch (action) {
-			case ADD_PLAYER: {
-				playerName = is.readString();
-				int propertiesNum = is.readVarInt();
-				textures = null;
-				displayName = null;
+		case ADD_PLAYER: {
+			playerName = is.readString();
+			int propertiesNum = is.readVarInt();
+			textures = null;
+			displayName = null;
 
-				for (int x = 0; x < propertiesNum; x++) {
-					String pName = is.readString();
-					String value = is.readString();
-					boolean isSigned = is.readBoolean();
-					if (isSigned)
-						is.readString();
+			for (int x = 0; x < propertiesNum; x++) {
+				String pName = is.readString();
+				String value = is.readString();
+				boolean isSigned = is.readBoolean();
+				if (isSigned)
+					is.readString();
 
-					if (pName.equals("textures"))
-						textures = value;
-				}
+				if (pName.equals("textures"))
+					textures = value;
+			}
 
-				is.readVarInt();
-				ping = is.readVarInt();
-				if (is.readBoolean())
-					displayName = is.readString();
+			is.readVarInt();
+			ping = is.readVarInt();
+			if (is.readBoolean())
+				displayName = is.readString();
 
-				break;
-			}
-			case UPDATE_DISPLAY_NAME: {
-				if (is.readBoolean())
-					displayName = is.readString();
-				break;
-			}
-			case UPDATE_LATENCY: {
-				ping = is.readVarInt();
-				break;
-			}
-			default: {
-				break;
-			}
+			break;
+		}
+		case UPDATE_DISPLAY_NAME: {
+			if (is.readBoolean())
+				displayName = is.readString();
+			break;
+		}
+		case UPDATE_LATENCY: {
+			ping = is.readVarInt();
+			break;
+		}
+		default: {
+			break;
+		}
 		}
 
 		if (displayName != null)
