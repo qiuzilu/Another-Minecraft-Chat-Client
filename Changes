@@ -1,11 +1,8 @@
 AMCC Change Log
-v1.2.2
+v1.2.3
 
 [+] Added:
-- New tray message rule "On keyword".
-  It will display a message pop-up only if incoming message contains user defined phrase.
-  
-- Application options and user's inventory are now accessible from tray icon.
+- New Minecraft version - 1.17.
 
-[+] Improved:
-- Changed how client will handle incoming packets.
+[!] Broken:
+- Inventory handling does NOT work in 1.17

@@ -123,7 +123,7 @@ public class Main {
 	public static final BufferedImage bgImage = new BufferedImage(64, 64, BufferedImage.TYPE_INT_ARGB);
 	private static BufferedImage logoImage = null;
 
-	public static final String version = "1.2.2"; //$NON-NLS-1$
+	public static final String version = "1.2.3"; //$NON-NLS-1$
 	private static final String changelogURL = "https://raw.githubusercontent.com/Defective4/Another-Minecraft-Chat-Client/master/Changes"; //$NON-NLS-1$
 
 	public static Font mcFont = Font.decode(null);
@@ -1933,6 +1933,8 @@ public class Main {
 				if (protocol != -1) {
 					final int iprotocol = protocol;
 					try {
+						if (iprotocol == 755)
+							showInventory.setEnabled(false);
 						if (iprotocol >= 393)
 							controlsTabPane.setEnabledAt(2, false);
 						final MinecraftClient cl = new MinecraftClient(host, port, iprotocol);

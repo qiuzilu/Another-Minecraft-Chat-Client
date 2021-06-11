@@ -71,7 +71,7 @@ public class ClientPacketListener implements InternalPacketListener {
 	public void packetReceived(Packet packet, PacketRegistry registry) {
 		try {
 			if (packet instanceof ServerConfirmTransactionPacket) {
-				if (!up.isEnableInventoryHandling())
+				if (!up.isEnableInventoryHandling() || protocol==755)
 					return;
 
 				int windowID = (int) packet.accessPacketMethod("getWindowID");
@@ -93,7 +93,7 @@ public class ClientPacketListener implements InternalPacketListener {
 							(byte) windowID, actionID, accepted));
 
 			} else if (packet instanceof ServerSetSlotPacket) {
-				if (!up.isEnableInventoryHandling())
+				if (!up.isEnableInventoryHandling() || protocol==755)
 					return;
 
 				int windowID = (int) packet.accessPacketMethod("getWindowID");
@@ -106,7 +106,7 @@ public class ClientPacketListener implements InternalPacketListener {
 					iWin.putItem(slot, item);
 				}
 			} else if (packet instanceof ServerCloseWindowPacket) {
-				if (!up.isEnableInventoryHandling())
+				if (!up.isEnableInventoryHandling() || protocol==755)
 					return;
 
 				int windowID = (int) packet.accessPacketMethod("getWindowID");
@@ -115,7 +115,7 @@ public class ClientPacketListener implements InternalPacketListener {
 				else if (windowID == 0)
 					cl.getInventory().closeWindow();
 			} else if (packet instanceof ServerWindowItemsPacket) {
-				if (!up.isEnableInventoryHandling())
+				if (!up.isEnableInventoryHandling() || protocol==755)
 					return;
 
 				int windowID = (int) packet.accessPacketMethod("getWindowID");
@@ -129,7 +129,7 @@ public class ClientPacketListener implements InternalPacketListener {
 				}
 			} else if (packet instanceof ServerOpenWindowPacket
 					|| packet instanceof net.defekt.mc.chatclient.protocol.packets.alternate.clientbound.play.ServerOpenWindowPacket) {
-				if (!up.isEnableInventoryHandling())
+				if (!up.isEnableInventoryHandling() || protocol==755)
 					return;
 
 				int windowID = (int) packet.accessPacketMethod("getWindowID");

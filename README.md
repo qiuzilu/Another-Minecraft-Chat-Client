@@ -2,7 +2,7 @@
 ![license](https://img.shields.io/github/license/Defective4/Minecraft-Chat-Client)
 ![version](https://img.shields.io/github/v/release/Defective4/Minecraft-Chat-Client)
 ![lastCommit](https://img.shields.io/github/last-commit/Defective4/Minecraft-Chat-Client)
-![version](https://img.shields.io/badge/latest_version-1.16.5-success)
+![version](https://img.shields.io/badge/latest_mc_version-1.17-success)
 [![Java CI with Gradle](https://github.com/Defective4/Another-Minecraft-Chat-Client/actions/workflows/gradle.yml/badge.svg)](https://github.com/Defective4/Another-Minecraft-Chat-Client/actions/workflows/gradle.yml)
 
 AMCC is a GUI application that lets you join a Minecraft server and chat freely without opening your Minecraft game.
@@ -11,7 +11,7 @@ AMCC is a GUI application that lets you join a Minecraft server and chat freely 
 * 📖 Complete GUI with Minecraft styled server list, in-game player list with skins and a tabbed pane allowing you to chat on multiple clients.
 * 🎨 Minecraft style UI elements, such as chat font (Minecraftia), configurable buttons and text fields.
 * 📋 Tray support.
-* ⚙️ My own lightweight implementation of Minecraft protocol, supporting versions 1.8 to 1.16.5 (1.17 is planned when its documentation will get published on wiki.vg).
+* ⚙️ My own lightweight implementation of Minecraft protocol, supporting versions 1.8 to 1.17.
 * 📦 Basic inventory handling and item using.
 
 ## 📙 My goals
@@ -23,7 +23,7 @@ without using any other third-party libraries.
 ## 📦 Inventory handling
 ⚠️ **Caution** If you have a `mcc.prefs` file from version v1.1.0 or older and you want to use inventory handling make sure to first enable it in settings!<br><br>
 Inventory handling is an experimental, yet useful feature, that allows you to manage items in your/remote inventory.
-It was added in pre-release v1.1.0
+It was added in pre-release v1.1.0 and it does NOT work with Minecraft version 1.17 yet.
 
 ### 🔌 What you can do with it
 * Interact with server through a GUI. For example if server you connect to is a lobby server, and it opens a
