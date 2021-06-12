@@ -31,5 +31,5 @@ jar {
     configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
   }
   
-  archiveName 'AMCC-1.2.2.jar'
+  archiveName 'AMCC-1.2.3.jar'
 }
