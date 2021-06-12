@@ -34,7 +34,7 @@ import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.Client
 import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.ClientWindowClickPacket;
 
 /**
- * A packet registry implementation for protocol 751
+ * A packet registry implementation for protocol 755
  * 
  * @author Defective4
  */
