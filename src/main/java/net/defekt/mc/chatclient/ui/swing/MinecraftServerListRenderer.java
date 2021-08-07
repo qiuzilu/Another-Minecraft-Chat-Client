@@ -47,34 +47,34 @@ public class MinecraftServerListRenderer extends DefaultListCellRenderer {
 		Box serverBox = Box.createVerticalBox();
 		serverBox.setMinimumSize(new Dimension(list.getMinimumSize().width, 100));
 
-		JLabel name = new JLabel(" " + entry.getName()); //$NON-NLS-1$
+		JLabel name = new JLabel(" " + entry.getName());
 		JTextPane version = new JTextPane();
-		version.setText("???"); //$NON-NLS-1$
+		version.setText("???");
 		JLabel players = new JLabel(
-				Messages.getString("MinecraftServerListRenderer.serverListPlayersLabel") + entry.getVersion() + ")"); //$NON-NLS-1$ //$NON-NLS-2$
+				Messages.getString("MinecraftServerListRenderer.serverListPlayersLabel") + entry.getVersion() + ")");
 		JTextPane description = new JTextPane();
-		description.setText(Messages.getString("MinecraftServerListRenderer.serverListStatusPinging")); //$NON-NLS-1$
+		description.setText(Messages.getString("MinecraftServerListRenderer.serverListStatusPinging"));
 
 		serverBox.add(name);
 		serverBox.add(players);
 		serverBox.add(version);
 		serverBox.add(description);
-		serverBox.add(new JLabel(" ")); //$NON-NLS-1$
+		serverBox.add(new JLabel(" "));
 
 		for (Component ct : serverBox.getComponents()) {
 			ct.setFont(Main.mcFont);
 			ct.setForeground(Color.white);
 			if (ct instanceof JTextPane) {
 				JTextPane jtp = (JTextPane) ct;
-				jtp.setForeground(ChatColor.translateColorCode("7")); //$NON-NLS-1$
+				jtp.setForeground(ChatColor.translateColorCode("7"));
 				jtp.setOpaque(false);
 				jtp.setEditable(false);
 				jtp.setAlignmentX(Component.LEFT_ALIGNMENT);
 			}
 		}
 
-		version.setForeground(ChatColor.translateColorCode("7")); //$NON-NLS-1$
-		players.setForeground(ChatColor.translateColorCode("7")); //$NON-NLS-1$
+		version.setForeground(ChatColor.translateColorCode("7"));
+		players.setForeground(ChatColor.translateColorCode("7"));
 		serverBox.setOpaque(isSelected);
 		serverBox.setBackground(isSelected ? new Color(0, 0, 0, 155) : new Color(0, 0, 0, 0));
 
@@ -83,14 +83,14 @@ public class MinecraftServerListRenderer extends DefaultListCellRenderer {
 		if (entry.getInfo() != null) {
 			StatusInfo inf = entry.getInfo();
 			if (inf.getOnlinePlayers() != -1)
-				players.setText(" " + Integer.toString(inf.getOnlinePlayers()) + "/" //$NON-NLS-1$ //$NON-NLS-2$
-						+ Integer.toString(inf.getMaxPlayers())
-						+ Messages.getString("MinecraftServerListRenderer.serverListPlayersLabel2") + entry.getVersion() //$NON-NLS-1$
-						+ ")"); //$NON-NLS-1$
-			description.setText(""); //$NON-NLS-1$
-			SwingUtils.appendColoredText(" " + inf.getDescription().replace("\n", "\n "), description); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			version.setText(inf.getVersionName().isEmpty() ? " ???" : ""); //$NON-NLS-1$ //$NON-NLS-2$
-			SwingUtils.appendColoredText(" " + inf.getVersionName(), version); //$NON-NLS-1$
+				players.setText(
+						" " + Integer.toString(inf.getOnlinePlayers()) + "/" + Integer.toString(inf.getMaxPlayers())
+								+ Messages.getString("MinecraftServerListRenderer.serverListPlayersLabel2")
+								+ entry.getVersion() + ")");
+			description.setText("");
+			SwingUtils.appendColoredText(" " + inf.getDescription().replace("\n", "\n "), description);
+			version.setText(inf.getVersionName().isEmpty() ? " ???" : "");
+			SwingUtils.appendColoredText(" " + inf.getVersionName(), version);
 
 		}
 		if (entry.getIcon() != null) {
@@ -121,9 +121,8 @@ public class MinecraftServerListRenderer extends DefaultListCellRenderer {
 
 		if (list instanceof JMinecraftServerList) {
 			JMinecraftServerList jmc = (JMinecraftServerList) list;
-			if (jmc.getSelectedIndex() == -1) {
+			if (jmc.getSelectedIndex() == -1)
 				jmc.setListData(jmc.getListData());
-			}
 		}
 
 		final BufferedImage icon2 = icon;
@@ -136,9 +135,8 @@ public class MinecraftServerListRenderer extends DefaultListCellRenderer {
 
 			@Override
 			public void paintComponent(Graphics g) {
-				if (icon2 != null) {
+				if (icon2 != null)
 					g.drawImage(icon2, 4, 4, 64, 64, null);
-				}
 			}
 		});
 		bBox.add(serverBox);

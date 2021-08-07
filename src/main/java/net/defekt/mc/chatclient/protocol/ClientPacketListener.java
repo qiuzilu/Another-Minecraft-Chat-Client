@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import net.defekt.mc.chatclient.protocol.data.ChatMessage;
+import net.defekt.mc.chatclient.protocol.data.ChatMessages;
 import net.defekt.mc.chatclient.protocol.data.ItemStack;
 import net.defekt.mc.chatclient.protocol.data.ItemsWindow;
 import net.defekt.mc.chatclient.protocol.data.PlayerInfo;
@@ -32,6 +32,7 @@ import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.Server
 import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.ServerResourcePackSendPacket;
 import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.ServerSetSlotPacket;
 import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.ServerStatisticsPacket;
+import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.ServerTimeUpdatePacket;
 import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.ServerUpdateHealthPacket;
 import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.ServerWindowItemsPacket;
 import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.ClientTeleportConfirmPacket;
@@ -70,8 +71,12 @@ public class ClientPacketListener implements InternalPacketListener {
 	@Override
 	public void packetReceived(Packet packet, PacketRegistry registry) {
 		try {
-			if (packet instanceof ServerConfirmTransactionPacket) {
-				if (!up.isEnableInventoryHandling() || protocol==755)
+			if (packet instanceof ServerTimeUpdatePacket) {
+				ServerTimeUpdatePacket sti = (ServerTimeUpdatePacket) packet;
+				for (ClientListener cls : cl.getClientListeners())
+					cls.timeUpdated(sti.getTime(), sti.getWorldAge());
+			} else if (packet instanceof ServerConfirmTransactionPacket) {
+				if (!up.isEnableInventoryHandling() || protocol == 755)
 					return;
 
 				int windowID = (int) packet.accessPacketMethod("getWindowID");
@@ -81,19 +86,18 @@ public class ClientPacketListener implements InternalPacketListener {
 				ItemsWindow win = windowID == 0 ? cl.getInventory()
 						: cl.getOpenWindows().containsKey(windowID) ? cl.getOpenWindows().get(windowID) : null;
 
-				if (win != null) {
+				if (win != null)
 					if (accepted)
 						win.finishTransaction(actionID);
 					else
 						win.cancelTransaction(actionID);
-				}
 
 				if (!accepted)
 					cl.sendPacket(PacketFactory.constructPacket(registry, "ClientConfirmTransactionPacket",
 							(byte) windowID, actionID, accepted));
 
 			} else if (packet instanceof ServerSetSlotPacket) {
-				if (!up.isEnableInventoryHandling() || protocol==755)
+				if (!up.isEnableInventoryHandling() || protocol == 755)
 					return;
 
 				int windowID = (int) packet.accessPacketMethod("getWindowID");
@@ -106,7 +110,7 @@ public class ClientPacketListener implements InternalPacketListener {
 					iWin.putItem(slot, item);
 				}
 			} else if (packet instanceof ServerCloseWindowPacket) {
-				if (!up.isEnableInventoryHandling() || protocol==755)
+				if (!up.isEnableInventoryHandling() || protocol == 755)
 					return;
 
 				int windowID = (int) packet.accessPacketMethod("getWindowID");
@@ -115,7 +119,7 @@ public class ClientPacketListener implements InternalPacketListener {
 				else if (windowID == 0)
 					cl.getInventory().closeWindow();
 			} else if (packet instanceof ServerWindowItemsPacket) {
-				if (!up.isEnableInventoryHandling() || protocol==755)
+				if (!up.isEnableInventoryHandling() || protocol == 755)
 					return;
 
 				int windowID = (int) packet.accessPacketMethod("getWindowID");
@@ -123,26 +127,25 @@ public class ClientPacketListener implements InternalPacketListener {
 				if (windowID == 0
 						|| (cl.getOpenWindows().containsKey(windowID) && cl.getOpenWindows().get(windowID) != null)) {
 					ItemsWindow iWin = windowID == 0 ? cl.getInventory() : cl.getOpenWindows().get(windowID);
-					for (int x = 0; x < items.size(); x++) {
+					for (int x = 0; x < items.size(); x++)
 						iWin.putItem(x, items.get(x));
-					}
 				}
 			} else if (packet instanceof ServerOpenWindowPacket
 					|| packet instanceof net.defekt.mc.chatclient.protocol.packets.alternate.clientbound.play.ServerOpenWindowPacket) {
-				if (!up.isEnableInventoryHandling() || protocol==755)
+				if (!up.isEnableInventoryHandling() || protocol == 755)
 					return;
 
 				int windowID = (int) packet.accessPacketMethod("getWindowID");
-				String windowTitle = ChatMessage
-						.removeColors(ChatMessage.parse((String) packet.accessPacketMethod("getWindowTitle")));
+				String windowTitle = ChatMessages
+						.removeColors(ChatMessages.parse((String) packet.accessPacketMethod("getWindowTitle")));
 				int slots = 0;
 				if (packet instanceof ServerOpenWindowPacket)
 					slots = ((int) packet.accessPacketMethod("getSlots"));
 				else {
 					int windowType = (int) packet.accessPacketMethod("getWindowType");
-					if (windowID <= 5) {
+					if (windowID <= 5)
 						slots = (windowType + 1) * 9;
-					} else
+					else
 						return;
 				}
 
@@ -160,37 +163,37 @@ public class ClientPacketListener implements InternalPacketListener {
 				Action action = (Action) packet.accessPacketMethod("getAction");
 				UUID pid = (UUID) packet.accessPacketMethod("getUUID");
 				switch (action) {
-				case ADD_PLAYER: {
-					playersTabList.put(pid,
-							new PlayerInfo((String) packet.accessPacketMethod("getPlayerName"),
-									(String) packet.accessPacketMethod("getTextures"),
-									(String) packet.accessPacketMethod("getDisplayName"),
-									(int) packet.accessPacketMethod("getPing"), pid));
-					break;
-				}
-				case UPDATE_DISPLAY_NAME: {
-					if (!playersTabList.containsKey(pid))
+					case ADD_PLAYER: {
+						playersTabList.put(pid,
+								new PlayerInfo((String) packet.accessPacketMethod("getPlayerName"),
+										(String) packet.accessPacketMethod("getTextures"),
+										(String) packet.accessPacketMethod("getDisplayName"),
+										(int) packet.accessPacketMethod("getPing"), pid));
 						break;
-					PlayerInfo old = playersTabList.get(pid);
-					playersTabList.put(pid, new PlayerInfo(old.getName(), old.getTexture(),
-							(String) packet.accessPacketMethod("getDisplayName"), old.getPing(), pid));
-					break;
-				}
-				case REMOVE_PLAYER: {
-					playersTabList.remove(pid);
-					break;
-				}
-				case UPDATE_LATENCY: {
-					if (!playersTabList.containsKey(pid))
+					}
+					case UPDATE_DISPLAY_NAME: {
+						if (!playersTabList.containsKey(pid))
+							break;
+						PlayerInfo old = playersTabList.get(pid);
+						playersTabList.put(pid, new PlayerInfo(old.getName(), old.getTexture(),
+								(String) packet.accessPacketMethod("getDisplayName"), old.getPing(), pid));
 						break;
-					PlayerInfo old = playersTabList.get(pid);
-					playersTabList.put(pid, new PlayerInfo(old.getName(), old.getTexture(), old.getDisplayName(),
-							(int) packet.accessPacketMethod("getPing"), pid));
-					break;
-				}
-				case UPDATE_GAMEMODE: {
-					break;
-				}
+					}
+					case REMOVE_PLAYER: {
+						playersTabList.remove(pid);
+						break;
+					}
+					case UPDATE_LATENCY: {
+						if (!playersTabList.containsKey(pid))
+							break;
+						PlayerInfo old = playersTabList.get(pid);
+						playersTabList.put(pid, new PlayerInfo(old.getName(), old.getTexture(), old.getDisplayName(),
+								(int) packet.accessPacketMethod("getPing"), pid));
+						break;
+					}
+					case UPDATE_GAMEMODE: {
+						break;
+					}
 				}
 
 			} else if (packet instanceof ServerJoinGamePacket) {
@@ -221,9 +224,9 @@ public class ClientPacketListener implements InternalPacketListener {
 				int food = (int) packet.accessPacketMethod("getFood");
 				for (ClientListener ls : cl.getClientListeners())
 					ls.healthUpdate(hp, food);
-			} else if (packet instanceof ServerLoginSuccessPacket) {
+			} else if (packet instanceof ServerLoginSuccessPacket)
 				cl.setCurrentState(State.IN);
-			} else if (packet instanceof ServerKeepAlivePacket
+			else if (packet instanceof ServerKeepAlivePacket
 					|| packet instanceof net.defekt.mc.chatclient.protocol.packets.alternate.clientbound.play.ServerKeepAlivePacket) {
 				if (up.isIgnoreKeepAlive())
 					return;
@@ -250,9 +253,8 @@ public class ClientPacketListener implements InternalPacketListener {
 			} else if (packet instanceof ServerChatMessagePacket) {
 				String json = (String) packet.accessPacketMethod("getMessage");
 
-				for (ClientListener ls : cl.getClientListeners()) {
-					ls.messageReceived(ChatMessage.parse(json), (Position) packet.accessPacketMethod("getPosition"));
-				}
+				for (ClientListener ls : cl.getClientListeners())
+					ls.messageReceived(ChatMessages.parse(json), (Position) packet.accessPacketMethod("getPosition"));
 			} else if (packet instanceof ServerPlayerPositionAndLookPacket
 					|| packet instanceof net.defekt.mc.chatclient.protocol.packets.alternate.clientbound.play.ServerPlayerPositionAndLookPacket) {
 				double x = (double) packet.accessPacketMethod("getX");
@@ -283,7 +285,7 @@ public class ClientPacketListener implements InternalPacketListener {
 				String json = (String) packet.accessPacketMethod("getReason");
 
 				for (ClientListener ls : cl.getClientListeners())
-					ls.disconnected(ChatMessage.parse(json));
+					ls.disconnected(ChatMessages.parse(json));
 				cl.close();
 			} else if (packet instanceof ServerPluginMessagePacket) {
 				String channel = (String) packet.accessPacketMethod("getChannel");

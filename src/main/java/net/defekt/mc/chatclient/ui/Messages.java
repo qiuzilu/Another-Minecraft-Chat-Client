@@ -8,7 +8,7 @@ import java.util.ResourceBundle;
  *
  */
 public class Messages {
-	private static final String BUNDLE_NAME = "resources.lang." + Main.up.getAppLanguage().getCode(); //$NON-NLS-1$
+	private static final String BUNDLE_NAME = "resources.lang." + Main.up.getAppLanguage().getCode();
 
 	private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle(BUNDLE_NAME);
 

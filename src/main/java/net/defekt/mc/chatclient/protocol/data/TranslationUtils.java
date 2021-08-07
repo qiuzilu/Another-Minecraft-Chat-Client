@@ -3,6 +3,7 @@ package net.defekt.mc.chatclient.protocol.data;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,7 +24,7 @@ import net.defekt.mc.chatclient.ui.UserPreferences.Language;
  * This class contains translation keys used by Minecraft chat messages.<br>
  * They are used in parsing of chat messages
  * 
- * @see ChatMessage
+ * @see ChatMessages
  * @author Defective4
  *
  */
@@ -40,14 +41,13 @@ public class TranslationUtils {
 				if (is == null)
 					continue;
 				Map<String, String> kMap = new HashMap<String, String>();
-				try (BufferedReader br = new BufferedReader(new InputStreamReader(is))) {
+				try (BufferedReader br = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
 					String line;
-					while ((line = br.readLine()) != null) {
+					while ((line = br.readLine()) != null)
 						if (line.contains("=") && line.split("=").length > 1) {
 							String[] ags = line.split("=");
 							kMap.put(ags[0], ags[1]);
 						}
-					}
 
 					br.close();
 				} catch (Exception e) {
@@ -75,6 +75,8 @@ public class TranslationUtils {
 				try {
 					HashMap<Integer, ItemInfo> infs = new HashMap<>();
 					String pName = pNum.name;
+					if (TranslationUtils.class.getResourceAsStream("/resources/items/" + pName + ".json") == null)
+						continue;
 					JsonArray el = new JsonParser()
 							.parse(new InputStreamReader(
 									TranslationUtils.class.getResourceAsStream("/resources/items/" + pName + ".json")))

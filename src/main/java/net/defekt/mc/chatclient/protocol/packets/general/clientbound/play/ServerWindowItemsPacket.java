@@ -33,9 +33,8 @@ public class ServerWindowItemsPacket extends Packet {
 		VarInputStream is = getInputStream();
 		windowID = is.readUnsignedByte();
 		short count = is.readShort();
-		for (int x = 0; x < count; x++) {
+		for (int x = 0; x < count; x++)
 			items.add(is.readSlotData(PacketFactory.getProtocolFor(reg)));
-		}
 	}
 
 	/**

@@ -1,8 +1,19 @@
 AMCC Change Log
-v1.2.3
+v1.3.0:
 
 [+] Added:
-- New Minecraft version - 1.17.
+- Universal support for RGB Chat Component
+- Mod Loader information and mods list information to StatusInfo object*
+- Option to move servers on server list (use right mouse button on a server you want to move)
+- Unfinished world tab (currently only displays world time, more features are planned)
+- ...and probably some more things I forgot about
 
-[!] Broken:
-- Inventory handling does NOT work in 1.17
+[+] Fixed:
+- Client now supports sending chat messages that contain UTF-8 characters
+- Unicode characters being read incorrectly from language files
+
+[/] Changed:
+- Multiple InternalPacketListeners can now be added to MinecraftClient*
+
+
+* These changes are made for preparation to add support for Forge Mod Loader

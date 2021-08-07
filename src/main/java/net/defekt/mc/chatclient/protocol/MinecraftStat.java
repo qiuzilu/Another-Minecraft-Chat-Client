@@ -7,11 +7,16 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.MulticastSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import net.defekt.mc.chatclient.protocol.data.ChatMessage;
+import net.defekt.mc.chatclient.protocol.data.ChatMessages;
+import net.defekt.mc.chatclient.protocol.data.ModInfo;
 import net.defekt.mc.chatclient.protocol.data.StatusInfo;
 import net.defekt.mc.chatclient.protocol.io.VarInputStream;
 import net.defekt.mc.chatclient.protocol.packets.HandshakePacket;
@@ -68,15 +73,28 @@ public class MinecraftStat {
 
 			String description;
 			try {
-				description = ChatMessage.parse(obj.get("description").toString());
+				description = ChatMessages.parse(obj.get("description").toString());
 			} catch (Exception e) {
-//				e.printStackTrace();
 				description = obj.get("description").toString();
 			}
 
 			String icon = obj.has("favicon") ? obj.get("favicon").getAsString() : null;
 
-			return new StatusInfo(description, online, max, version, protocol, icon);
+			String modType = null;
+			List<ModInfo> modList = new ArrayList<ModInfo>();
+
+			if (obj.has("modinfo")) {
+				JsonObject modinfo = (JsonObject) obj.get("modinfo");
+				modType = modinfo.get("type").getAsString();
+				JsonArray mods = modinfo.get("modList").getAsJsonArray();
+				for (JsonElement modElement : mods) {
+					JsonObject modObject = modElement.getAsJsonObject();
+					modList.add(
+							new ModInfo(modObject.get("modid").getAsString(), modObject.get("version").getAsString()));
+				}
+			}
+
+			return new StatusInfo(description, online, max, version, protocol, icon, modType, modList);
 
 		}
 	}
@@ -94,7 +112,7 @@ public class MinecraftStat {
 				try (MulticastSocket soc = new MulticastSocket(4445)) {
 					soc.joinGroup(InetAddress.getByName("224.0.2.60"));
 					byte[] recv = new byte[1024];
-					while (true) {
+					while (true)
 						try {
 							DatagramPacket packet = new DatagramPacket(recv, recv.length);
 							soc.receive(packet);
@@ -112,7 +130,6 @@ public class MinecraftStat {
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
-					}
 				} catch (Exception e) {
 					e.printStackTrace();
 				}

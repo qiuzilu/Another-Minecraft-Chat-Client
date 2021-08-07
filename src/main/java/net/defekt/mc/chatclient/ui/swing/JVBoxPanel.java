@@ -25,12 +25,11 @@ public class JVBoxPanel extends JPanel {
 	 * Aligns all contained components to the left
 	 */
 	public void alignAll() {
-		for (Component ct : getComponents()) {
+		for (Component ct : getComponents())
 			if (ct instanceof JComponent) {
 				JComponent jct = (JComponent) ct;
 				jct.setAlignmentX(Component.LEFT_ALIGNMENT);
 				jct.setOpaque(false);
 			}
-		}
 	}
 }

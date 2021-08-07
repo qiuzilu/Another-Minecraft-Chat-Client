@@ -101,25 +101,36 @@ public class SwingUtils {
 	public static void appendColoredText(String text, JTextPane pane) {
 		StyledDocument doc = pane.getStyledDocument();
 		StyleContext ctx = new StyleContext();
-		Style style = ctx.addStyle("style", null); //$NON-NLS-1$
+		Style style = ctx.addStyle("style", null);
 
-		String[] split = text.split("\u00A7"); //$NON-NLS-1$
-		for (String part : split) {
+		String[] split = text.split("\u00A7");
+		for (String part : split)
 			try {
 				if (text.startsWith(part))
 					doc.insertString(doc.getLength(), part, null);
 				else {
 					String code = part.substring(0, 1);
-					Color c = ChatColor.translateColorCode(code);
+					Color c;
+					boolean isHex = false;
+					if (code.equals("#") && part.length() > 7)
+						try {
+							String hex = part.substring(1, 7);
+							int rgb = Integer.parseInt(hex, 16);
+							c = new Color(rgb);
+							isHex = true;
+						} catch (Exception e) {
+							c = ChatColor.translateColorCode(code);
+						}
+					else
+						c = ChatColor.translateColorCode(code);
 					StyleConstants.setForeground(style, c);
 
-					String rest = part.substring(1);
+					String rest = part.substring(isHex ? 7 : 1);
 					doc.insertString(doc.getLength(), rest, style);
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-		}
 	}
 
 	/**
@@ -136,13 +147,13 @@ public class SwingUtils {
 		errDial.setTitle(title);
 
 		JOptionPane jop = new JOptionPane(message, JOptionPane.ERROR_MESSAGE, JOptionPane.DEFAULT_OPTION, null,
-				new Object[] { new JButton(Messages.getString("SwingUtils.errorDialogOptionOk")) { //$NON-NLS-1$
+				new Object[] { new JButton(Messages.getString("SwingUtils.errorDialogOptionOk")) {
 					{
 						addActionListener(ev -> {
 							errDial.dispose();
 						});
 					}
-				}, new JButton(Messages.getString("SwingUtils.errorDialogOptionDetails")) { //$NON-NLS-1$
+				}, new JButton(Messages.getString("SwingUtils.errorDialogOptionDetails")) {
 					{
 						addActionListener(ev -> {
 							showExceptionDetails(parent, ex);
@@ -177,7 +188,7 @@ public class SwingUtils {
 		int r = c.getRed();
 		int g = c.getGreen();
 		int b = c.getBlue();
-		for (int x = 0; x < Math.abs(index); x++) {
+		for (int x = 0; x < Math.abs(index); x++)
 			if (index < 0) {
 				if (r > 1)
 					r--;
@@ -193,7 +204,6 @@ public class SwingUtils {
 				if (b < 255)
 					b++;
 			}
-		}
 		return new Color(r, g, b);
 	}
 
@@ -214,54 +224,52 @@ public class SwingUtils {
 	public static void showVersionDialog(String oldVersion, String newVersion, int difference, String versionType,
 			List<String> changesList) {
 		JFrame win = new JFrame();
-		win.setTitle("New version available!"); //$NON-NLS-1$
+		win.setTitle("New version available!");
 		win.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		Box message = Box.createVerticalBox();
-		message.add(new JLabel("<html><font style=\"font-weight:bold;\">A new update is available!</font><br><br>" //$NON-NLS-1$
-				+ "An update is available to download!<br><br>" + "Current version: <font style=\"font-weight:bold;\">" //$NON-NLS-1$ //$NON-NLS-2$
-				+ oldVersion + "</font><br>" + "New version: <font style=\"font-weight:bold;\">" + newVersion //$NON-NLS-1$ //$NON-NLS-2$
-				+ "</font><br><br>" + "You are <font style=\"font-weight:bold;\">" + Integer.toString(difference) //$NON-NLS-1$ //$NON-NLS-2$
-				+ "</font> " + versionType + " versions behind!</html>")); //$NON-NLS-1$ //$NON-NLS-2$
+		message.add(new JLabel("<html><font style=\"font-weight:bold;\">A new update is available!</font><br><br>"
+				+ "An update is available to download!<br><br>" + "Current version: <font style=\"font-weight:bold;\">"
+				+ oldVersion + "</font><br>" + "New version: <font style=\"font-weight:bold;\">" + newVersion
+				+ "</font><br><br>" + "You are <font style=\"font-weight:bold;\">" + Integer.toString(difference)
+				+ "</font> " + versionType + " versions behind!</html>"));
 
-		for (Component ct : message.getComponents()) {
+		for (Component ct : message.getComponents())
 			if (ct instanceof JComponent)
 				((JComponent) ct).setAlignmentX(Component.LEFT_ALIGNMENT);
-		}
 
-		JButton ok = new JButton(Messages.getString("SwingUtils.updateDialogOptionOk")); //$NON-NLS-1$
+		JButton ok = new JButton(Messages.getString("SwingUtils.updateDialogOptionOk"));
 		ok.addActionListener(ev -> {
 			synchronized (win) {
 				win.notify();
 			}
 		});
 
-		JButton changes = new JButton(Messages.getString("SwingUtils.updateDialogOptionShowChanges")); //$NON-NLS-1$
+		JButton changes = new JButton(Messages.getString("SwingUtils.updateDialogOptionShowChanges"));
 		changes.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
 
-				String msg = ""; //$NON-NLS-1$
+				StringBuilder msg = new StringBuilder();
 				for (String line : changesList) {
-					if (line.startsWith("[")) //$NON-NLS-1$
-						msg += "<font style=\"font-weight: bold;\">"; //$NON-NLS-1$
-					msg += line + "<br>"; //$NON-NLS-1$
-					if (line.startsWith("[")) //$NON-NLS-1$
-						msg += "</font>"; //$NON-NLS-1$
+					if (line.startsWith("["))
+						msg.append("<font style=\"font-weight: bold;\">");
+					msg.append(line).append("<br>");
+					if (line.startsWith("["))
+						msg.append("</font>");
 				}
 
-				JLabel message = new JLabel("<html>" + msg + "</html>"); //$NON-NLS-1$ //$NON-NLS-2$
+				JLabel message = new JLabel("<html>" + msg.append("</html>").toString());
 				JScrollPane jsp = new JScrollPane(message);
 				jsp.setPreferredSize(win.getSize());
 				JOptionPane.showOptionDialog(win, jsp,
-						Messages.getString("SwingUtils.updateDialogChangesTitle") + newVersion, //$NON-NLS-1$
+						Messages.getString("SwingUtils.updateDialogChangesTitle") + newVersion,
 						JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null,
-						new String[] { Messages.getString("SwingUtils.updateDialogChangesOptionOk") //$NON-NLS-1$
-				}, 0);
+						new String[] { Messages.getString("SwingUtils.updateDialogChangesOptionOk") }, 0);
 			}
 		});
-		JButton update = new JButton(Messages.getString("SwingUtils.updateDialogOptionUpdate")); //$NON-NLS-1$
+		JButton update = new JButton(Messages.getString("SwingUtils.updateDialogOptionUpdate"));
 		update.setEnabled(Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Action.BROWSE));
 		update.addActionListener(new ActionListener() {
 
@@ -269,14 +277,14 @@ public class SwingUtils {
 			public void actionPerformed(ActionEvent e) {
 				try {
 					Desktop.getDesktop()
-							.browse(new URI("https://github.com/Defective4/Another-Minecraft-Chat-Client/releases")); //$NON-NLS-1$
+							.browse(new URI("https://github.com/Defective4/Another-Minecraft-Chat-Client/releases"));
 				} catch (IOException | URISyntaxException e1) {
 					e1.printStackTrace();
 				}
 			}
 		});
 
-		JButton exit = new JButton(Messages.getString("SwingUtils.updateDialogOptionExit")); //$NON-NLS-1$
+		JButton exit = new JButton(Messages.getString("SwingUtils.updateDialogOptionExit"));
 		exit.addActionListener(ev -> {
 			System.exit(0);
 		});
@@ -306,13 +314,12 @@ public class SwingUtils {
 	private static void showExceptionDetails(Window parent, Exception ex) {
 
 		Box box = Box.createVerticalBox();
-		box.add(new JLabel(Messages.getString("SwingUtils.exceptionDetailsDialogLabel"))); //$NON-NLS-1$
+		box.add(new JLabel(Messages.getString("SwingUtils.exceptionDetailsDialogLabel")));
 		box.add(new JScrollPane(new JTextArea() {
 			{
-				append(ex.toString() + "\r\n"); //$NON-NLS-1$
-				for (StackTraceElement ste : ex.getStackTrace()) {
-					append(ste.toString() + "\r\n"); //$NON-NLS-1$
-				}
+				append(ex.toString() + "\r\n");
+				for (StackTraceElement ste : ex.getStackTrace())
+					append(ste.toString() + "\r\n");
 				setForeground(new Color(150, 0, 0));
 				setFont(getFont().deriveFont(13f));
 			}
@@ -323,9 +330,8 @@ public class SwingUtils {
 		});
 
 		for (Component ct : box.getComponents()) {
-			if (ct instanceof JComponent) {
+			if (ct instanceof JComponent)
 				((JComponent) ct).setAlignmentX(Component.LEFT_ALIGNMENT);
-			}
 			if (ct instanceof JScrollPane)
 				SwingUtilities.invokeLater(new Runnable() {
 
@@ -336,9 +342,8 @@ public class SwingUtils {
 				});
 		}
 
-		JOptionPane.showOptionDialog(parent, box, Messages.getString("SwingUtils.exceptionDetailsDialogTitle"), //$NON-NLS-1$
+		JOptionPane.showOptionDialog(parent, box, Messages.getString("SwingUtils.exceptionDetailsDialogTitle"),
 				JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null,
-				new Object[] { Messages.getString("SwingUtils.exceptionDetailsDialogOptionOk") //$NON-NLS-1$
-				}, 0);
+				new Object[] { Messages.getString("SwingUtils.exceptionDetailsDialogOptionOk") }, 0);
 	}
 }

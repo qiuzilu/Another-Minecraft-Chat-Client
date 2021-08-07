@@ -68,18 +68,18 @@ public class ServerChatMessagePacket extends Packet {
 	 */
 	public Position getPosition() {
 		switch (position) {
-		case 0: {
-			return Position.CHAT;
-		}
-		case 1: {
-			return Position.SYSTEM;
-		}
-		case 2: {
-			return Position.HOTBAR;
-		}
-		default: {
-			return Position.CHAT;
-		}
+			case 0: {
+				return Position.CHAT;
+			}
+			case 1: {
+				return Position.SYSTEM;
+			}
+			case 2: {
+				return Position.HOTBAR;
+			}
+			default: {
+				return Position.CHAT;
+			}
 		}
 	}
 

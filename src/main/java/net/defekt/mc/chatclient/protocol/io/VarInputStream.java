@@ -61,10 +61,11 @@ public class VarInputStream extends DataInputStream {
 	}
 
 	/**
-	 * Read a VarInt from stream Snippet from
+	 * Read a VarInt from stream.<br>
+	 * Snippet from
 	 * <a href="https://wiki.vg/Protocol#VarInt_and_VarLong">wiki.vg</a>
 	 * 
-	 * @return read VarInT
+	 * @return read VarInt
 	 * @throws IOException thrown when there was an error reading from stream
 	 */
 	public int readVarInt() throws IOException {
@@ -77,9 +78,8 @@ public class VarInputStream extends DataInputStream {
 			result |= (value << (7 * numRead));
 
 			numRead++;
-			if (numRead > 5) {
+			if (numRead > 5)
 				throw new RuntimeException("VarInt is too big");
-			}
 		} while ((read & 0b10000000) != 0);
 
 		return result;

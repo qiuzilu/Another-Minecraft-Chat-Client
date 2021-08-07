@@ -63,4 +63,12 @@ public interface ClientListener {
 	 * @param reg client's packet registry
 	 */
 	public void windowOpened(int id, ItemsWindow win, PacketRegistry reg);
+
+	/**
+	 * Invoked when time on server is updated
+	 * 
+	 * @param time     server's time
+	 * @param worldAge current world's age
+	 */
+	public void timeUpdated(long time, long worldAge);
 }

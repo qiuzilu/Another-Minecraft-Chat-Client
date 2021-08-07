@@ -24,9 +24,6 @@ public class UserPreferences implements Serializable {
 
 	private static final long serialVersionUID = 5064975536053236721L;
 
-	@SuppressWarnings("unused")
-	private final int prefsVersion = 1;
-
 	private UserPreferences() {
 	}
 
@@ -72,10 +69,10 @@ public class UserPreferences implements Serializable {
 	}
 
 	public static class Constants {
-		public static final String TRAY_MESSAGES_KEY_ALWAYS = "Always"; //$NON-NLS-1$
-		public static final String TRAY_MESSAGES_KEY_MENTION = "On mention"; //$NON-NLS-1$
-		public static final String TRAY_MESSAGES_KEY_KEYWORD = "On keyword"; //$NON-NLS-1$
-		public static final String TRAY_MESSAGES_KEY_NEVER = "Never"; //$NON-NLS-1$
+		public static final String TRAY_MESSAGES_KEY_ALWAYS = "Always";
+		public static final String TRAY_MESSAGES_KEY_MENTION = "On mention";
+		public static final String TRAY_MESSAGES_KEY_KEYWORD = "On keyword";
+		public static final String TRAY_MESSAGES_KEY_NEVER = "Never";
 
 		public static final int WINDOW_CLOSE_ALWAYS_ASK = 0;
 		public static final int WINDOW_CLOSE_TO_TRAY = 1;
@@ -89,9 +86,9 @@ public class UserPreferences implements Serializable {
 	public static class ColorPreferences implements Serializable {
 
 		private static final long serialVersionUID = 1L;
-		private String colorEnabledButton = "6f6f6f"; //$NON-NLS-1$
-		private String colorEnabledHoverButton = "7c86be"; //$NON-NLS-1$
-		private String colorDisabledButton = "2d2d2d"; //$NON-NLS-1$
+		private String colorEnabledButton = "6f6f6f";
+		private String colorEnabledHoverButton = "7c86be";
+		private String colorDisabledButton = "2d2d2d";
 		private String colorText = SwingUtils.getHexRGB(Color.white);
 		private String disabledColorText = SwingUtils.getHexRGB(Color.lightGray);
 
@@ -156,7 +153,7 @@ public class UserPreferences implements Serializable {
 	private boolean ignoreKeepAlive = false;
 	private int additionalPing = 0;
 	private boolean sendMCBrand = true;
-	private String brand = "vanilla"; //$NON-NLS-1$
+	private String brand = "vanilla";
 
 	private String trayMessageMode = Constants.TRAY_MESSAGES_KEY_MENTION;
 	private boolean trayShowDisconnectMessages = true;
@@ -172,13 +169,13 @@ public class UserPreferences implements Serializable {
 
 	protected static UserPreferences load() {
 		try {
-			if (Main.serverFile.exists()) {
+			if (Main.serverFile.exists())
 				try (ObjectInputStream is = new ObjectInputStream(new FileInputStream(Main.serverFile))) {
 					UserPreferences prefs = (UserPreferences) is.readObject();
 
 					return prefs;
 				}
-			} else
+			else
 				return new UserPreferences();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -304,10 +301,9 @@ public class UserPreferences implements Serializable {
 		if (lastUsernames.contains(username))
 			lastUsernames.remove(username);
 		if (!lastUsernames.contains(username)) {
-			lastUsernames.add(" "); //$NON-NLS-1$
-			for (int x = lastUsernames.size() - 1; x > 0; x--) {
+			lastUsernames.add(" ");
+			for (int x = lastUsernames.size() - 1; x > 0; x--)
 				lastUsernames.set(x, lastUsernames.get(x - 1));
-			}
 			lastUsernames.set(0, username);
 		}
 	}

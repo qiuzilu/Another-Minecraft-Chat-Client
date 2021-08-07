@@ -31,9 +31,8 @@ public class IOUtils {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		byte[] buffer = new byte[1024];
 		int num = 0;
-		while ((num = is.read(buffer)) > 0) {
+		while ((num = is.read(buffer)) > 0)
 			bos.write(buffer, 0, num);
-		}
 		if (autoClose)
 			is.close();
 		return bos.toByteArray();
@@ -74,16 +73,16 @@ public class IOUtils {
 	public static BufferedImage trimSkinHead(BufferedImage img, boolean hatOn, int side) {
 		int sx, sy;
 		switch (side) {
-		case 1: {
-			sx = 24;
-			sy = 8;
-			break;
-		}
-		default: {
-			sx = 8;
-			sy = 8;
-			break;
-		}
+			case 1: {
+				sx = 24;
+				sy = 8;
+				break;
+			}
+			default: {
+				sx = 8;
+				sy = 8;
+				break;
+			}
 		}
 
 		BufferedImage hat = new BufferedImage(8, 8, BufferedImage.TYPE_INT_ARGB);
@@ -141,24 +140,24 @@ public class IOUtils {
 
 		int bx, ax, lx;
 		switch (direction) {
-		case 0: {
-			bx = 20;
-			ax = 44;
-			lx = 4;
-			break;
-		}
-		case 1: {
-			bx = 32;
-			ax = 52;
-			lx = 12;
-			break;
-		}
-		default: {
-			bx = 20;
-			ax = 44;
-			lx = 4;
-			break;
-		}
+			case 0: {
+				bx = 20;
+				ax = 44;
+				lx = 4;
+				break;
+			}
+			case 1: {
+				bx = 32;
+				ax = 52;
+				lx = 12;
+				break;
+			}
+			default: {
+				bx = 20;
+				ax = 44;
+				lx = 4;
+				break;
+			}
 		}
 
 		BufferedImage arms = trim(skin, ax, 20, 4, 12);
@@ -210,12 +209,16 @@ public class IOUtils {
 	 * @param string       string to pad
 	 * @param len          string's target length
 	 * @param padCharacter characters used in padding
+	 * @param mode         padding mode 0 - append 1 - prepend
 	 * @return padded string
 	 */
-	public static String padString(String string, int len, String padCharacter) {
+	public static String padString(String string, int len, String padCharacter, int mode) {
 		String s = string;
 		while (s.length() < len)
-			s += padCharacter;
+			if (mode == 0)
+				s += padCharacter;
+			else
+				s = padCharacter + s;
 		return s;
 	}
 }

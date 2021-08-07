@@ -44,9 +44,8 @@ public class JPlaceholderField extends JTextField {
 			}
 		});
 
-		for (FocusListener listener : getFocusListeners()) {
+		for (FocusListener listener : getFocusListeners())
 			listener.focusLost(new FocusEvent(this, 1));
-		}
 	}
 
 	@Override
@@ -66,9 +65,8 @@ public class JPlaceholderField extends JTextField {
 	public void setText(String text) {
 		super.setText(text);
 		super.setForeground(fg);
-		for (FocusListener listener : getFocusListeners()) {
+		for (FocusListener listener : getFocusListeners())
 			listener.focusLost(new FocusEvent(this, 1));
-		}
 	}
 
 	@Override

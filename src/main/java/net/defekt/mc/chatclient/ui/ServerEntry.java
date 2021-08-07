@@ -1,6 +1,7 @@
 package net.defekt.mc.chatclient.ui;
 
 import java.io.Serializable;
+import java.net.UnknownHostException;
 
 import net.defekt.mc.chatclient.protocol.MinecraftStat;
 import net.defekt.mc.chatclient.protocol.data.StatusInfo;
@@ -18,7 +19,14 @@ public class ServerEntry implements Serializable {
 	private final int port;
 	private String name;
 
-	private String version = "Auto"; //$NON-NLS-1$
+	private String version = "Auto";
+
+	/**
+	 * @return true if client is still trying to ping server for its status
+	 */
+	public boolean isRefreshing() {
+		return refreshing;
+	}
 
 	private transient StatusInfo info = null;
 	private String icon = null;
@@ -27,6 +35,11 @@ public class ServerEntry implements Serializable {
 	 * Indicates if server is pinged for status data
 	 */
 	protected transient boolean refreshing = false;
+
+	/**
+	 * True if there was an error while retrieving server's status
+	 */
+	protected transient boolean error = false;
 
 	/**
 	 * Creates new server entry
@@ -44,21 +57,34 @@ public class ServerEntry implements Serializable {
 	}
 
 	/**
+	 * @return true if there was an error while retrieving server's status
+	 */
+	public boolean isError() {
+		return error;
+	}
+
+	/**
 	 * Performs server list ping on this server and updates it on server list
 	 */
 	protected void ping() {
-		if (!refreshing) {
+		if (!refreshing)
 			new Thread(new Runnable() {
 
 				@Override
 				public void run() {
 					refreshing = true;
+					error = false;
 					info = null;
 					try {
 						info = MinecraftStat.serverListPing(host, port);
+					} catch (UnknownHostException e) {
+						info = new StatusInfo(Messages.getString("ServerEntry.serverEntryUnknownHost"), -1, -1, "", -1,
+								null, null, null);
+						error = true;
 					} catch (Exception e) {
-						info = new StatusInfo(Messages.getString("ServerEntry.serverEntryCantConnect"), -1, -1, "", -1, //$NON-NLS-1$ //$NON-NLS-2$
-								null);
+						info = new StatusInfo(Messages.getString("ServerEntry.serverEntryCantConnect"), -1, -1, "", -1,
+								null, null, null);
+						error = true;
 					}
 					if (info != null && info.getProtocol() != -1)
 						icon = info.getIcon();
@@ -67,7 +93,6 @@ public class ServerEntry implements Serializable {
 
 				}
 			}).start();
-		}
 	}
 
 	/**

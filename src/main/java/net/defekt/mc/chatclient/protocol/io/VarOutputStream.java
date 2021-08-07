@@ -40,8 +40,9 @@ public class VarOutputStream extends DataOutputStream {
 	 * @throws IOException thrown when there was an error writting to stream
 	 */
 	public void writeString(String v) throws IOException {
-		writeVarInt(v.length());
-		write(v.getBytes(StandardCharsets.UTF_8));
+		byte[] sBytes = v.getBytes(StandardCharsets.UTF_8);
+		writeVarInt(sBytes.length);
+		write(sBytes);
 	}
 
 	/**
@@ -88,7 +89,8 @@ public class VarOutputStream extends DataOutputStream {
 	}
 
 	/**
-	 * Writes VarInt to stream Snippet from
+	 * Writes VarInt to stream.<br>
+	 * Snippet from
 	 * <a href="https://wiki.vg/Protocol#VarInt_and_VarLong">wiki.vg</a>
 	 * 
 	 * @param value VarInt value
@@ -98,9 +100,8 @@ public class VarOutputStream extends DataOutputStream {
 		do {
 			byte temp = (byte) (value & 0b01111111);
 			value >>>= 7;
-			if (value != 0) {
+			if (value != 0)
 				temp |= 0b10000000;
-			}
 			writeByte(temp);
 		} while (value != 0);
 	}

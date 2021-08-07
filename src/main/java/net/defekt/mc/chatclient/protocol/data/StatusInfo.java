@@ -1,6 +1,8 @@
 package net.defekt.mc.chatclient.protocol.data;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 import net.defekt.mc.chatclient.protocol.MinecraftStat;
 
@@ -19,6 +21,8 @@ public class StatusInfo implements Serializable {
 	private final String versionName;
 	private final String description;
 	private String icon;
+	private String modType;
+	private List<ModInfo> modList;
 
 	/**
 	 * Constructs status info object
@@ -29,14 +33,21 @@ public class StatusInfo implements Serializable {
 	 * @param version     server's version name
 	 * @param protocol    protocol used by server
 	 * @param icon        server's icon, or null if none
+	 * @param modType     server's mod loader type if present, else it should be
+	 *                    null.
+	 * @param modList     server's mods list if present, else it should be null, or
+	 *                    empty.
 	 */
-	public StatusInfo(String description, int online, int max, String version, int protocol, String icon) {
+	public StatusInfo(String description, int online, int max, String version, int protocol, String icon,
+			String modType, List<ModInfo> modList) {
 		this.description = description;
 		this.onlinePlayers = online;
 		this.maxPlayers = max;
 		this.versionName = version;
 		this.protocol = protocol;
 		this.icon = icon;
+		this.modType = modType;
+		this.modList = modList == null ? new ArrayList<ModInfo>() : modList;
 	}
 
 	/**
@@ -102,5 +113,19 @@ public class StatusInfo implements Serializable {
 	 */
 	public void setIcon(String icon) {
 		this.icon = icon;
+	}
+
+	/**
+	 * @return return server's mod loader type.
+	 */
+	public String getModType() {
+		return modType;
+	}
+
+	/**
+	 * @return return server's mods list.
+	 */
+	public List<ModInfo> getModList() {
+		return modList;
 	}
 }

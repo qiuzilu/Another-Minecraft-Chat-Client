@@ -86,7 +86,7 @@ public class PacketFactory {
 			return packetRegistries.get(protocol);
 		else
 			throw new IOException(
-					Messages.getString("PacketFactory.regInitProtocolNotImplemented") + Integer.toString(protocol)); //$NON-NLS-1$
+					Messages.getString("PacketFactory.regInitProtocolNotImplemented") + Integer.toString(protocol));
 	}
 
 	/**
@@ -118,7 +118,7 @@ public class PacketFactory {
 
 			e.printStackTrace();
 
-			throw new IOException(Messages.getString("PacketFactory.packetInitNoSuchPacket") + name); //$NON-NLS-1$
+			throw new IOException(Messages.getString("PacketFactory.packetInitNoSuchPacket") + name);
 		}
 
 	}

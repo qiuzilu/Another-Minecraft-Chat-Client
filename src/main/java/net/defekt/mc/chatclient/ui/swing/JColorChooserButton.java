@@ -98,7 +98,7 @@ public class JColorChooserButton extends JButton {
 	 *                     parent.
 	 */
 	public JColorChooserButton(Color initialColor, Window parent) {
-		setText(" "); //$NON-NLS-1$
+		setText(" ");
 		currentColor = initialColor;
 		addActionListener(new ActionListener() {
 
@@ -106,7 +106,7 @@ public class JColorChooserButton extends JButton {
 			public void actionPerformed(ActionEvent e) {
 				{
 					Color tc = JColorChooser.showDialog(parent,
-							Messages.getString("JColorChooserButton.colorChooserDialogTitle"), //$NON-NLS-1$
+							Messages.getString("JColorChooserButton.colorChooserDialogTitle"),
 							JColorChooserButton.this.currentColor);
 					if (tc == null)
 						return;

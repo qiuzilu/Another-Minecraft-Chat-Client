@@ -17,11 +17,11 @@ import net.defekt.mc.chatclient.protocol.ClientListener;
  * @author Defective4
  *
  */
-public class ChatMessage {
+public class ChatMessages {
 
 	private static final String pChar = "\u00A7";
 
-	private ChatMessage() {
+	private ChatMessages() {
 	}
 
 	/**
@@ -42,12 +42,22 @@ public class ChatMessage {
 
 			AtomicReference<String> strRef = new AtomicReference<String>("");
 
+			if (root.has("text")) {
+				strRef.set(root.get("text").getAsString());
+				root.remove("text");
+			}
+
+			String colorAppend = "";
+			if (root.has("color"))
+				colorAppend = pChar + ChatColor.translateColorName(root.get("color").getAsString());
+
+			strRef.set(colorAppend + strRef.get());
+
 			recursiveParse(root, strRef);
 
-			if (strRef.get().contains(pChar)) {
+			if (strRef.get().contains(pChar))
 				if (root.has("translate"))
 					strRef.set(root.get("translate").getAsString());
-			}
 			return strRef.get();
 		} catch (Exception e) {
 			return json;
@@ -56,16 +66,12 @@ public class ChatMessage {
 
 	private static void recursiveParse(JsonElement ob, AtomicReference<String> str) {
 
-		if (ob.isJsonPrimitive()) {
-			if (!ob.getAsString().isEmpty()) {
-				if (str.get().contains(pChar + "%s")) {
+		if (ob.isJsonPrimitive())
+			if (!ob.getAsString().isEmpty())
+				if (str.get().contains(pChar + "%s"))
 					str.set(str.get().replaceFirst(pChar + "%s", ob.getAsString()));
-				} else {
-
+				else
 					str.set(str.get() + ob.getAsString());
-				}
-			}
-		}
 
 		if (ob.isJsonArray())
 			for (JsonElement el : ob.getAsJsonArray())
@@ -79,40 +85,40 @@ public class ChatMessage {
 				JsonElement value = entry.getValue();
 
 				switch (key) {
-				case "translate": {
+					case "translate": {
 
-					String translated = TranslationUtils.translateKey(value.getAsString());
-					str.set(str.get() + translated);
-					break;
-				}
-
-				case "text": {
-					if (!value.getAsString().isEmpty()) {
-						if (str.get().contains(pChar + "%s")) {
-							str.set(str.get().replaceFirst(pChar + "%s", value.getAsString()));
-						} else {
-
-							String colorAppend = "";
-							if (obj.has("color")) {
-								colorAppend = pChar + ChatColor.translateColorName(obj.get("color").getAsString());
-							}
-
-							str.set(str.get() + colorAppend + value.getAsString());
-						}
+						String translated = TranslationUtils.translateKey(value.getAsString());
+						str.set(str.get() + translated);
+						break;
 					}
-					break;
-				}
-				case "with": {
-					recursiveParse(value, str);
-					break;
-				}
-				case "extra": {
-					recursiveParse(value, str);
-					break;
-				}
-				default: {
-					break;
-				}
+
+					case "text": {
+						if (!value.getAsString().isEmpty())
+							if (str.get().contains(pChar + "%s"))
+								str.set(str.get().replaceFirst(pChar + "%s", value.getAsString()));
+							else {
+
+								String colorAppend = "";
+								if (obj.has("color"))
+									colorAppend = pChar + ChatColor.translateColorName(obj.get("color").getAsString());
+								else
+									colorAppend = pChar + "f";
+
+								str.set(str.get() + colorAppend + value.getAsString());
+							}
+						break;
+					}
+					case "with": {
+						recursiveParse(value, str);
+						break;
+					}
+					case "extra": {
+						recursiveParse(value, str);
+						break;
+					}
+					default: {
+						break;
+					}
 
 				}
 			}
@@ -127,15 +133,14 @@ public class ChatMessage {
 	 * @return colorless message
 	 */
 	public static String removeColors(String message) {
-		String colorless = "";
+		StringBuilder colorless = new StringBuilder();
 		char[] chs = message.toCharArray();
-		for (int x = 0; x < chs.length; x++) {
+		for (int x = 0; x < chs.length; x++)
 			if (chs[x] == pChar.charAt(0))
 				x++;
 			else
-				colorless += chs[x];
-		}
+				colorless.append(chs[x]);
 
-		return colorless;
+		return colorless.toString();
 	}
 }

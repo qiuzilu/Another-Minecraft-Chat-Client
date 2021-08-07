@@ -60,15 +60,13 @@ public class ListenerHashMap<K, V> extends HashMap<K, V> {
 	}
 
 	private void activateAdd(K key, V value) {
-		for (MapChangeListener<K, V> listener : listeners) {
+		for (MapChangeListener<K, V> listener : listeners)
 			listener.itemAdded(key, value, this);
-		}
 	}
 
 	private void activateRemove(Object key, V value) {
-		for (MapChangeListener<K, V> listener : listeners) {
+		for (MapChangeListener<K, V> listener : listeners)
 			listener.itemRemoved(key, value, this);
-		}
 	}
 
 	/**

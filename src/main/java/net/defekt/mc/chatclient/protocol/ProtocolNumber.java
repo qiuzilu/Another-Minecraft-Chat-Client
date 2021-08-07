@@ -20,6 +20,8 @@ public enum ProtocolNumber {
 	V1_11_2(316, "1.11.2"), V1_11(315, "1.11"), V1_10_X(210, "1.10"), V1_9_4(110, "1.9.4"), V1_9_2(109, "1.9.2"),
 	V1_9_1(108, "1.9.1"), V1_9(107, "1.9"), V1_8(47, "1.8");
 
+	// Commented out versions do not work properly, sorry...
+
 	/**
 	 * Protocol number represented by this enum
 	 */
@@ -67,10 +69,9 @@ public enum ProtocolNumber {
 	}
 
 	public static ProtocolNumber getForNumber(int protocol) {
-		for (ProtocolNumber num : ProtocolNumber.values()) {
+		for (ProtocolNumber num : ProtocolNumber.values())
 			if (num.protocol == protocol)
 				return num;
-		}
 		return ProtocolNumber.values()[ProtocolNumber.values().length - 1];
 	}
 }

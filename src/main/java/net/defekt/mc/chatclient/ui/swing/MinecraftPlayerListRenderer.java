@@ -17,7 +17,7 @@ import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
 
-import net.defekt.mc.chatclient.protocol.data.ChatMessage;
+import net.defekt.mc.chatclient.protocol.data.ChatMessages;
 import net.defekt.mc.chatclient.protocol.data.PlayerInfo;
 import net.defekt.mc.chatclient.protocol.data.PlayerSkinCache;
 import net.defekt.mc.chatclient.ui.Main;
@@ -175,10 +175,10 @@ public class MinecraftPlayerListRenderer extends DefaultListCellRenderer {
 	public Component getListCellRendererComponent(JList<? extends Object> list, Object value, int index,
 			boolean isSelected, boolean cellHasFocus) {
 		PlayerInfo info = (PlayerInfo) value;
-		String dname = info.getDisplayName() != null ? ChatMessage.parse(info.getDisplayName()) : info.getName();
+		String dname = info.getDisplayName() != null ? ChatMessages.parse(info.getDisplayName()) : info.getName();
 
 		if (!filter.getText().isEmpty()
-				&& !ChatMessage.removeColors(dname).toLowerCase().contains(filter.getText().toLowerCase()))
+				&& !ChatMessages.removeColors(dname).toLowerCase().contains(filter.getText().toLowerCase()))
 			return new JLabel();
 
 		Box playerLine = Box.createHorizontalBox();
@@ -186,7 +186,7 @@ public class MinecraftPlayerListRenderer extends DefaultListCellRenderer {
 		if (info.getTexture() != null)
 			try {
 				PlayerSkinCache.putSkin(info.getUUID(), info.getTexture(), info.getName());
-				if (true) {
+				if (true)
 					playerLine.add(new JPanel() {
 						BufferedImage img = PlayerSkinCache.getHead(info.getUUID());
 						private static final long serialVersionUID = 1L;
@@ -201,7 +201,6 @@ public class MinecraftPlayerListRenderer extends DefaultListCellRenderer {
 							g.drawImage(img, 0, 0, 32, 32, null);
 						}
 					});
-				}
 			} catch (Exception e) {
 
 			}

@@ -3,7 +3,7 @@ package net.defekt.mc.chatclient.protocol.packets.general.clientbound.play;
 import java.io.IOException;
 import java.util.UUID;
 
-import net.defekt.mc.chatclient.protocol.data.ChatMessage;
+import net.defekt.mc.chatclient.protocol.data.ChatMessages;
 import net.defekt.mc.chatclient.protocol.io.VarInputStream;
 import net.defekt.mc.chatclient.protocol.packets.Packet;
 import net.defekt.mc.chatclient.protocol.packets.PacketRegistry;
@@ -92,46 +92,46 @@ public class ServerPlayerListItemPacket extends Packet {
 		uuid = is.readUUID();
 
 		switch (action) {
-		case ADD_PLAYER: {
-			playerName = is.readString();
-			int propertiesNum = is.readVarInt();
-			textures = null;
-			displayName = null;
+			case ADD_PLAYER: {
+				playerName = is.readString();
+				int propertiesNum = is.readVarInt();
+				textures = null;
+				displayName = null;
 
-			for (int x = 0; x < propertiesNum; x++) {
-				String pName = is.readString();
-				String value = is.readString();
-				boolean isSigned = is.readBoolean();
-				if (isSigned)
-					is.readString();
+				for (int x = 0; x < propertiesNum; x++) {
+					String pName = is.readString();
+					String value = is.readString();
+					boolean isSigned = is.readBoolean();
+					if (isSigned)
+						is.readString();
 
-				if (pName.equals("textures"))
-					textures = value;
+					if (pName.equals("textures"))
+						textures = value;
+				}
+
+				is.readVarInt();
+				ping = is.readVarInt();
+				if (is.readBoolean())
+					displayName = is.readString();
+
+				break;
 			}
-
-			is.readVarInt();
-			ping = is.readVarInt();
-			if (is.readBoolean())
-				displayName = is.readString();
-
-			break;
-		}
-		case UPDATE_DISPLAY_NAME: {
-			if (is.readBoolean())
-				displayName = is.readString();
-			break;
-		}
-		case UPDATE_LATENCY: {
-			ping = is.readVarInt();
-			break;
-		}
-		default: {
-			break;
-		}
+			case UPDATE_DISPLAY_NAME: {
+				if (is.readBoolean())
+					displayName = is.readString();
+				break;
+			}
+			case UPDATE_LATENCY: {
+				ping = is.readVarInt();
+				break;
+			}
+			default: {
+				break;
+			}
 		}
 
 		if (displayName != null)
-			displayName = ChatMessage.parse(displayName);
+			displayName = ChatMessages.parse(displayName);
 	}
 
 	/**

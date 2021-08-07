@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.zip.Inflater;
 
-import net.defekt.mc.chatclient.protocol.data.ChatMessage;
+import net.defekt.mc.chatclient.protocol.data.ChatMessages;
 import net.defekt.mc.chatclient.protocol.data.ItemsWindow;
 import net.defekt.mc.chatclient.protocol.data.PlayerInfo;
 import net.defekt.mc.chatclient.protocol.io.ListenerHashMap;
@@ -44,7 +44,7 @@ public class MinecraftClient {
 	private final int protocol;
 	private final PacketRegistry reg;
 
-	private String username = ""; //$NON-NLS-1$
+	private String username = "";
 
 	private double x = Integer.MIN_VALUE;
 	private double y = 0;
@@ -65,11 +65,11 @@ public class MinecraftClient {
 
 	private final Object lock = new Object();
 
-	private static final String notConnectedError = Messages.getString("MinecraftClient.clientErrorNotConnected"); //$NON-NLS-1$
+	private static final String notConnectedError = Messages.getString("MinecraftClient.clientErrorNotConnected");
 
 	private final ListenerHashMap<UUID, PlayerInfo> playersTabList = new ListenerHashMap<UUID, PlayerInfo>();
 
-	private ClientPacketListener listener;
+	private List<InternalPacketListener> packetListeners = new ArrayList<InternalPacketListener>();
 	private List<ClientListener> clientListeners = new ArrayList<ClientListener>();
 
 	private final Map<Integer, ItemsWindow> openWindows = new HashMap<Integer, ItemsWindow>();
@@ -170,9 +170,10 @@ public class MinecraftClient {
 	 */
 	public void connect(String username) throws IOException {
 		this.username = username;
+
 		try {
 			if (connected || this.soc != null)
-				throw new IOException(Messages.getString("MinecraftClient.clientErrorAlreadyConnected")); //$NON-NLS-1$
+				throw new IOException(Messages.getString("MinecraftClient.clientErrorAlreadyConnected"));
 
 			this.soc = new Socket();
 			soc.connect(new InetSocketAddress(host, port));
@@ -180,35 +181,35 @@ public class MinecraftClient {
 
 			this.os = soc.getOutputStream();
 			final VarInputStream is = new VarInputStream(soc.getInputStream());
-			inventory = new ItemsWindow(Messages.getString("MinecraftClient.clientInventoryName"), 46, 0, this, reg); //$NON-NLS-1$
-			listener = new ClientPacketListener(this);
+			inventory = new ItemsWindow(Messages.getString("MinecraftClient.clientInventoryName"), 46, 0, this, reg);
+			packetListeners.add(new ClientPacketListener(this));
 
 			Packet handshake = new HandshakePacket(reg, protocol, host, port, 2);
 			os.write(handshake.getData(compression));
 
-			Packet login = PacketFactory.constructPacket(reg, "ClientLoginRequestPacket", username); //$NON-NLS-1$
+			Packet login = PacketFactory.constructPacket(reg, "ClientLoginRequestPacket", username);
 			os.write(login.getData(compression));
 
 			int len = is.readVarInt();
 			if (len < 0)
 				throw new IOException(
-						Messages.getString("MinecraftClient.clientErrorInvalidPacketLen") + Integer.toString(len)); //$NON-NLS-1$
+						Messages.getString("MinecraftClient.clientErrorInvalidPacketLen") + Integer.toString(len));
 
 			int id = is.readVarInt();
 			switch (id) {
-			case 0x01: {
-				throw new IOException(Messages.getString("MinecraftClient.clientErrorDisconnectedNoAuth")); //$NON-NLS-1$
-			}
-			case 0x00: {
-				String reason = ChatMessage.parse(is.readString());
-				throw new IOException(Messages.getString("MinecraftClient.clientErrorDisconnected") + reason); //$NON-NLS-1$
-			}
-			case 0x03: {
-				cThreshold = is.readVarInt();
-				if (cThreshold > -1)
-					compression = true;
-				break;
-			}
+				case 0x01: {
+					throw new IOException(Messages.getString("MinecraftClient.clientErrorDisconnectedNoAuth"));
+				}
+				case 0x00: {
+					String reason = ChatMessages.parse(is.readString());
+					throw new IOException(Messages.getString("MinecraftClient.clientErrorDisconnected") + reason);
+				}
+				case 0x03: {
+					cThreshold = is.readVarInt();
+					if (cThreshold > -1)
+						compression = true;
+					break;
+				}
 			}
 
 			packetReaderThread = new Thread(new Runnable() {
@@ -262,7 +263,8 @@ public class MinecraftClient {
 
 								Packet packet = PacketFactory.constructPacket(reg, pClass.getSimpleName(), packetData);
 
-								listener.packetReceived(packet, reg);
+								for (InternalPacketListener lis : packetListeners)
+									lis.packetReceived(packet, reg);
 							}
 						}
 					} catch (Exception e) {
@@ -294,7 +296,7 @@ public class MinecraftClient {
 									return;
 								}
 								Packet playerPositionPacket = PacketFactory.constructPacket(reg,
-										"ClientPlayerPositionPacket", x, y, z, true); //$NON-NLS-1$
+										"ClientPlayerPositionPacket", x, y, z, true);
 								os.write(playerPositionPacket.getData(isCompressionEnabled()));
 							} catch (Exception e) {
 								e.printStackTrace();
@@ -417,7 +419,7 @@ public class MinecraftClient {
 		sneaking = !sneaking;
 		EntityAction action = sneaking ? EntityAction.START_SNEAKING : EntityAction.STOP_SNEAKING;
 		try {
-			sendPacket(PacketFactory.constructPacket(reg, "ClientEntityActionPacket", entityID, action)); //$NON-NLS-1$
+			sendPacket(PacketFactory.constructPacket(reg, "ClientEntityActionPacket", entityID, action));
 		} catch (Exception e) {
 			sneaking = !sneaking;
 			throw e;
@@ -434,7 +436,7 @@ public class MinecraftClient {
 		sprinting = !sprinting;
 		EntityAction action = sprinting ? EntityAction.START_SPRINTING : EntityAction.STOP_SPRINTING;
 		try {
-			sendPacket(PacketFactory.constructPacket(reg, "ClientEntityActionPacket", entityID, action)); //$NON-NLS-1$
+			sendPacket(PacketFactory.constructPacket(reg, "ClientEntityActionPacket", entityID, action));
 		} catch (Exception e) {
 			sprinting = !sprinting;
 			throw e;
@@ -448,9 +450,9 @@ public class MinecraftClient {
 	 * @throws IOException thrown when there was an error sending packet
 	 */
 	public void sendPacket(Packet packet) throws IOException {
-		if (connected && soc != null && !soc.isClosed()) {
+		if (connected && soc != null && !soc.isClosed())
 			os.write(packet.getData(compression));
-		} else
+		else
 			throw new IOException(notConnectedError);
 	}
 
@@ -462,7 +464,7 @@ public class MinecraftClient {
 	 *                     error sending packet to server
 	 */
 	public void sendChatMessage(String message) throws IOException {
-		sendPacket(PacketFactory.constructPacket(reg, "ClientChatMessagePacket", message)); //$NON-NLS-1$
+		sendPacket(PacketFactory.constructPacket(reg, "ClientChatMessagePacket", message));
 	}
 
 	/**
@@ -597,7 +599,7 @@ public class MinecraftClient {
 		try {
 			this.yaw = direction;
 			os.write(PacketFactory
-					.constructPacket(reg, "ClientPlayerPositionAndLookPacket", x, y, z, direction, 0f, true) //$NON-NLS-1$
+					.constructPacket(reg, "ClientPlayerPositionAndLookPacket", x, y, z, direction, 0f, true)
 					.getData(isCompressionEnabled()));
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -633,53 +635,53 @@ public class MinecraftClient {
 						double tz = MinecraftClient.this.z;
 						float nyaw = 0;
 						switch (direction) {
-						case 0: {
-							tz += speedModifier;
-							nyaw = 0;
-							break;
-						}
-						case 1: {
-							tz += speedModifier;
-							tx += speedModifier;
-							nyaw = -45;
-							break;
-						}
-						case 2: {
-							tx += speedModifier;
-							nyaw = -90;
-							break;
-						}
-						case 3: {
-							tz -= speedModifier;
-							tx += speedModifier;
-							nyaw = -135;
-							break;
-						}
-						case 4: {
-							tz -= speedModifier;
-							nyaw = 180;
-							break;
-						}
-						case 5: {
-							tz -= speedModifier;
-							tx -= speedModifier;
-							nyaw = 135;
-							break;
-						}
-						case 6: {
-							tx -= speedModifier;
-							nyaw = 90;
-							break;
-						}
-						case 7: {
-							tz += speedModifier;
-							tx -= speedModifier;
-							nyaw = 45;
-							break;
-						}
-						default: {
-							break;
-						}
+							case 0: {
+								tz += speedModifier;
+								nyaw = 0;
+								break;
+							}
+							case 1: {
+								tz += speedModifier;
+								tx += speedModifier;
+								nyaw = -45;
+								break;
+							}
+							case 2: {
+								tx += speedModifier;
+								nyaw = -90;
+								break;
+							}
+							case 3: {
+								tz -= speedModifier;
+								tx += speedModifier;
+								nyaw = -135;
+								break;
+							}
+							case 4: {
+								tz -= speedModifier;
+								nyaw = 180;
+								break;
+							}
+							case 5: {
+								tz -= speedModifier;
+								tx -= speedModifier;
+								nyaw = 135;
+								break;
+							}
+							case 6: {
+								tx -= speedModifier;
+								nyaw = 90;
+								break;
+							}
+							case 7: {
+								tz += speedModifier;
+								tx -= speedModifier;
+								nyaw = 45;
+								break;
+							}
+							default: {
+								break;
+							}
 						}
 
 						setLook(nyaw);
@@ -688,7 +690,7 @@ public class MinecraftClient {
 						try {
 							setX(tx);
 							setZ(tz);
-							sendPacket(PacketFactory.constructPacket(reg, "ClientPlayerPositionAndLookPacket", tx, //$NON-NLS-1$
+							sendPacket(PacketFactory.constructPacket(reg, "ClientPlayerPositionAndLookPacket", tx,
 									MinecraftClient.this.y, tz, MinecraftClient.this.yaw, 0f, true));
 						} catch (Exception e) {
 
@@ -709,7 +711,7 @@ public class MinecraftClient {
 	 * @throws IOException thrown when there was an error sending packet.
 	 */
 	public void refreshStatistics() throws IOException {
-		sendPacket(PacketFactory.constructPacket(reg, "ClientStatusPacket", 1)); //$NON-NLS-1$
+		sendPacket(PacketFactory.constructPacket(reg, "ClientStatusPacket", 1));
 	}
 
 	/**

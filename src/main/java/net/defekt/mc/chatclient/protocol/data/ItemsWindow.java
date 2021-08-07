@@ -58,8 +58,7 @@ import net.defekt.mc.chatclient.ui.swing.SwingUtils;
 public class ItemsWindow {
 
 	private static final Map<String, BufferedImage> itemTextures = new HashMap<String, BufferedImage>();
-	private static final String[] armorNames = new String[] { "helmet", "chestplate", "leggings", "boots", "pumpkin" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
-	};
+	private static final String[] armorNames = new String[] { "helmet", "chestplate", "leggings", "boots", "pumpkin" };
 
 	private final Map<Short, Runnable> pendingTransactions = new HashMap<Short, Runnable>();
 
@@ -103,7 +102,7 @@ public class ItemsWindow {
 		for (int x = 0; x < size; x++) {
 			final int xIndexLocal = x;
 			items[x] = null;
-			bts[x] = new JButton(" "); //$NON-NLS-1$
+			bts[x] = new JButton(" ");
 
 			BufferedImage picon = null;
 			if (isInventory)
@@ -116,7 +115,7 @@ public class ItemsWindow {
 				final JPopupMenu pm = new JPopupMenu() {
 					{
 						boolean isHotbar = isInventory && (xIndex >= 36 && xIndex <= 44);
-						add(new JMenuItem(Messages.getString("ItemsWindow.itemWindowOptionShiftClick")) { //$NON-NLS-1$
+						add(new JMenuItem(Messages.getString("ItemsWindow.itemWindowOptionShiftClick")) {
 							{
 								addActionListener(new ActionListener() {
 
@@ -125,10 +124,10 @@ public class ItemsWindow {
 										try {
 											short actionID = (short) rand.nextInt(Short.MAX_VALUE);
 											client.sendPacket(PacketFactory.constructPacket(registry,
-													"ClientWindowClickPacket", windowID, (short) xIndex, (byte) 0, //$NON-NLS-1$
+													"ClientWindowClickPacket", windowID, (short) xIndex, (byte) 0,
 													actionID, 1, emptyItem));
 											int newPosition = 0;
-											String itemName = items[xIndex] == null ? "" //$NON-NLS-1$
+											String itemName = items[xIndex] == null ? ""
 													: TranslationUtils
 															.getItemForID(items[xIndex].getId(),
 																	PacketFactory.getProtocolFor(registry))
@@ -148,25 +147,24 @@ public class ItemsWindow {
 														armorPlace = -1;
 												}
 
-												if (itemName.contains("elytra") && xIndex != 6) { //$NON-NLS-1$
+												if (itemName.contains("elytra") && xIndex != 6)
 													newPosition = 6;
-												} else if (itemName.contains("shield") && xIndex != 45) { //$NON-NLS-1$
+												else if (itemName.contains("shield") && xIndex != 45)
 													newPosition = 45;
-												} else if (armorPlace != -1 && !(xIndex < 9 && xIndex >= 5)) {
+												else if (armorPlace != -1 && !(xIndex < 9 && xIndex >= 5))
 													newPosition = 5 + armorPlace;
-												} else if (!isHotbar && !(xIndex < 9 && xIndex >= 5) && xIndex != 45) {
+												else if (!isHotbar && !(xIndex < 9 && xIndex >= 5) && xIndex != 45)
 													for (int x = 36; x <= 44; x++) {
 														newPosition = x;
 														if (items[x] == null || items[x].getId() == 0)
 															break;
 													}
-												} else {
+												else
 													for (int x = 9; x < 36; x++) {
 														newPosition = x;
 														if (items[x] == null || items[x].getId() == 0)
 															break;
 													}
-												}
 											} else
 												newPosition = -1;
 
@@ -191,7 +189,7 @@ public class ItemsWindow {
 							}
 						});
 
-						add(new JMenuItem(Messages.getString("ItemsWindow.itemWindowOptionDrop")) { //$NON-NLS-1$
+						add(new JMenuItem(Messages.getString("ItemsWindow.itemWindowOptionDrop")) {
 							{
 								addActionListener(new ActionListener() {
 
@@ -200,7 +198,7 @@ public class ItemsWindow {
 										try {
 											short actionID = (short) rand.nextInt(Short.MAX_VALUE);
 											client.sendPacket(PacketFactory.constructPacket(registry,
-													"ClientWindowClickPacket", windowID, (short) xIndex, (byte) 1, //$NON-NLS-1$
+													"ClientWindowClickPacket", windowID, (short) xIndex, (byte) 1,
 													actionID, 4, emptyItem));
 											pendingTransactions.put(actionID, new Runnable() {
 
@@ -218,7 +216,7 @@ public class ItemsWindow {
 						});
 
 						if (isHotbar) {
-							add(new JMenuItem(Messages.getString("ItemsWindow.itemWindowOptionSetSlot")) { //$NON-NLS-1$
+							add(new JMenuItem(Messages.getString("ItemsWindow.itemWindowOptionSetSlot")) {
 								{
 									addActionListener(new ActionListener() {
 
@@ -226,7 +224,7 @@ public class ItemsWindow {
 										public void actionPerformed(ActionEvent e) {
 											try {
 												client.sendPacket(PacketFactory.constructPacket(registry,
-														"ClientHeldItemChangePacket", (short) (xIndex - 36))); //$NON-NLS-1$
+														"ClientHeldItemChangePacket", (short) (xIndex - 36)));
 											} catch (Exception e2) {
 												e2.printStackTrace();
 											}
@@ -235,7 +233,7 @@ public class ItemsWindow {
 								}
 							});
 							if (PacketFactory.getProtocolFor(registry) > 47) {
-								add(new JMenuItem(Messages.getString("ItemsWindow.itemWindowOptionUse")) { //$NON-NLS-1$
+								add(new JMenuItem(Messages.getString("ItemsWindow.itemWindowOptionUse")) {
 									{
 										setFont(getFont().deriveFont(Font.BOLD));
 										addActionListener(new ActionListener() {
@@ -244,9 +242,9 @@ public class ItemsWindow {
 											public void actionPerformed(ActionEvent e) {
 												try {
 													client.sendPacket(PacketFactory.constructPacket(registry,
-															"ClientHeldItemChangePacket", (short) (xIndex - 36))); //$NON-NLS-1$
+															"ClientHeldItemChangePacket", (short) (xIndex - 36)));
 													client.sendPacket(PacketFactory.constructPacket(registry,
-															"ClientUseItemPacket")); //$NON-NLS-1$
+															"ClientUseItemPacket"));
 												} catch (Exception e2) {
 													e2.printStackTrace();
 												}
@@ -255,7 +253,7 @@ public class ItemsWindow {
 									}
 								});
 
-								add(new JMenuItem(Messages.getString("ItemsWindow.itemWindowOptionStopUsing")) { //$NON-NLS-1$
+								add(new JMenuItem(Messages.getString("ItemsWindow.itemWindowOptionStopUsing")) {
 									{
 										addActionListener(new ActionListener() {
 
@@ -263,7 +261,7 @@ public class ItemsWindow {
 											public void actionPerformed(ActionEvent e) {
 												try {
 													client.sendPacket(PacketFactory.constructPacket(registry,
-															"ClientPlayerDiggingPacket", Status.FINISH_ACTION, 0, 0, 0, //$NON-NLS-1$
+															"ClientPlayerDiggingPacket", Status.FINISH_ACTION, 0, 0, 0,
 															(byte) 0));
 												} catch (Exception e2) {
 													e2.printStackTrace();
@@ -273,7 +271,7 @@ public class ItemsWindow {
 									}
 								});
 
-								add(new JMenuItem(Messages.getString("ItemsWindow.itemWindowOptionSwapItems")) { //$NON-NLS-1$
+								add(new JMenuItem(Messages.getString("ItemsWindow.itemWindowOptionSwapItems")) {
 									{
 										addActionListener(new ActionListener() {
 
@@ -281,9 +279,9 @@ public class ItemsWindow {
 											public void actionPerformed(ActionEvent e) {
 												try {
 													client.sendPacket(PacketFactory.constructPacket(registry,
-															"ClientHeldItemChangePacket", (short) (xIndex - 36))); //$NON-NLS-1$
+															"ClientHeldItemChangePacket", (short) (xIndex - 36)));
 													client.sendPacket(PacketFactory.constructPacket(registry,
-															"ClientPlayerDiggingPacket", Status.SWAP_ITEMS, 0, 0, 0, //$NON-NLS-1$
+															"ClientPlayerDiggingPacket", Status.SWAP_ITEMS, 0, 0, 0,
 															(byte) 0));
 												} catch (Exception e3) {
 													e3.printStackTrace();
@@ -312,19 +310,18 @@ public class ItemsWindow {
 					try {
 						boolean isHotbar = isInventory && (xIndex >= 36 && xIndex <= 44);
 
-						if (isHotbar && PacketFactory.getProtocolFor(registry) > 47) {
+						if (isHotbar && PacketFactory.getProtocolFor(registry) > 47)
 							try {
-								client.sendPacket(PacketFactory.constructPacket(registry, "ClientHeldItemChangePacket", //$NON-NLS-1$
+								client.sendPacket(PacketFactory.constructPacket(registry, "ClientHeldItemChangePacket",
 										(short) (xIndex - 36)));
-								client.sendPacket(PacketFactory.constructPacket(registry, "ClientUseItemPacket")); //$NON-NLS-1$
+								client.sendPacket(PacketFactory.constructPacket(registry, "ClientUseItemPacket"));
 							} catch (Exception e2) {
 								e2.printStackTrace();
 							}
-						} else if (!isInventory) {
-							client.sendPacket(PacketFactory.constructPacket(registry, "ClientWindowClickPacket", //$NON-NLS-1$
+						else if (!isInventory)
+							client.sendPacket(PacketFactory.constructPacket(registry, "ClientWindowClickPacket",
 									windowID, (short) xIndex, (byte) 0, (short) rand.nextInt(Short.MAX_VALUE), 0,
 									emptyItem));
-						}
 					} catch (IOException e1) {
 						e1.printStackTrace();
 					}
@@ -340,13 +337,13 @@ public class ItemsWindow {
 	 * @param preStart is this method invoked before application was launched
 	 */
 	public static void initTextures(Main main, boolean preStart) {
-		JFrame win = new JFrame(Messages.getString("ItemsWindow.itemWindowItemLoadDialogTitle")); //$NON-NLS-1$
+		JFrame win = new JFrame(Messages.getString("ItemsWindow.itemWindowItemLoadDialogTitle"));
 		win.setDefaultCloseOperation(preStart ? JFrame.EXIT_ON_CLOSE : WindowConstants.DO_NOTHING_ON_CLOSE);
 
 		JVBoxPanel message = new JVBoxPanel();
-		message.add(new JLabel(Messages.getString("ItemsWindow.itemWindowItemLoadDialogLabel"))); //$NON-NLS-1$
+		message.add(new JLabel(Messages.getString("ItemsWindow.itemWindowItemLoadDialogLabel")));
 
-		JLabel pLabel = new JLabel(" "); //$NON-NLS-1$
+		JLabel pLabel = new JLabel(" ");
 		JProgressBar jpb = new JProgressBar(0, 0);
 		message.add(pLabel);
 		message.alignAll();
@@ -363,7 +360,7 @@ public class ItemsWindow {
 		win.setAlwaysOnTop(true);
 		try {
 
-			ZipInputStream zis = new ZipInputStream(ItemsWindow.class.getResourceAsStream("/resources/textures.jar")); //$NON-NLS-1$
+			ZipInputStream zis = new ZipInputStream(ItemsWindow.class.getResourceAsStream("/resources/textures.jar"));
 			ZipEntry ze;
 			while ((ze = zis.getNextEntry()) != null) {
 				jpb.setMaximum(jpb.getMaximum() + 1);
@@ -371,13 +368,13 @@ public class ItemsWindow {
 			}
 			zis.close();
 
-			zis = new ZipInputStream(ItemsWindow.class.getResourceAsStream("/resources/textures.jar")); //$NON-NLS-1$
+			zis = new ZipInputStream(ItemsWindow.class.getResourceAsStream("/resources/textures.jar"));
 			while ((ze = zis.getNextEntry()) != null) {
-				if (!ze.getName().contains(".png")) //$NON-NLS-1$
+				if (!ze.getName().contains(".png"))
 					continue;
 				byte[] entryData = IOUtils.readFully(zis, false);
-				String name = ze.getName().substring(ze.getName().lastIndexOf("/") + 1); //$NON-NLS-1$
-				name = name.substring(0, name.lastIndexOf(".")); //$NON-NLS-1$
+				String name = ze.getName().substring(ze.getName().lastIndexOf("/") + 1);
+				name = name.substring(0, name.lastIndexOf("."));
 				pLabel.setText(name);
 				try {
 					BufferedImage raw = ImageIO.read(new ByteArrayInputStream(entryData));
@@ -424,24 +421,24 @@ public class ItemsWindow {
 	 */
 	private BufferedImage getPlaceholderIcon(int index) {
 		switch (index) {
-		case 5: {
-			return itemTextures.get("empty_armor_slot_helmet"); //$NON-NLS-1$
-		}
-		case 6: {
-			return itemTextures.get("empty_armor_slot_chestplate"); //$NON-NLS-1$
-		}
-		case 7: {
-			return itemTextures.get("empty_armor_slot_leggings"); //$NON-NLS-1$
-		}
-		case 8: {
-			return itemTextures.get("empty_armor_slot_boots"); //$NON-NLS-1$
-		}
-		case 45: {
-			return itemTextures.get("empty_armor_slot_shield"); //$NON-NLS-1$
-		}
-		default: {
-			return null;
-		}
+			case 5: {
+				return itemTextures.get("empty_armor_slot_helmet");
+			}
+			case 6: {
+				return itemTextures.get("empty_armor_slot_chestplate");
+			}
+			case 7: {
+				return itemTextures.get("empty_armor_slot_leggings");
+			}
+			case 8: {
+				return itemTextures.get("empty_armor_slot_boots");
+			}
+			case 45: {
+				return itemTextures.get("empty_armor_slot_shield");
+			}
+			default: {
+				return null;
+			}
 		}
 	}
 
@@ -460,15 +457,14 @@ public class ItemsWindow {
 
 		items[index] = item.getId() == 0 ? null : item;
 		if (itemTextures.containsKey(itemInfo.getFileName())) {
-			bts[index].setText(" "); //$NON-NLS-1$
+			bts[index].setText(" ");
 			bts[index].setIcon(new ImageIcon(itemTextures.get(itemInfo.getFileName())));
 		} else {
-			bts[index].setText(item.getId() == 0 ? " " : "" + item.getId()); //$NON-NLS-1$ //$NON-NLS-2$
-			if (bts[index].getText().replace(" ", "").isEmpty()) { //$NON-NLS-1$ //$NON-NLS-2$
+			bts[index].setText(item.getId() == 0 ? " " : "" + item.getId());
+			if (bts[index].getText().replace(" ", "").isEmpty()) {
 				BufferedImage pimg = null;
-				if (isInventory) {
+				if (isInventory)
 					pimg = getPlaceholderIcon(index);
-				}
 				bts[index].setIcon(pimg == null ? null : new ImageIcon(pimg));
 			} else
 				bts[index].setIcon(null);
@@ -482,19 +478,17 @@ public class ItemsWindow {
 			}
 		if (item.getId() == 0)
 			return;
-		String label = "\u00A7f" + itemInfo.getName(); //$NON-NLS-1$
+		String label = "\u00A7f" + itemInfo.getName();
 		try {
 			if (item.getNbt() != null) {
 				CompoundMap map = (CompoundMap) item.getNbt().getValue();
-				if (map.containsKey("display")) { //$NON-NLS-1$
-					map = (CompoundMap) map.get("display").getValue(); //$NON-NLS-1$
-					if (map.containsKey("Name")) //$NON-NLS-1$
-						label = "\u00A7f" + ChatMessage.parse((String) map.get("Name").getValue()); //$NON-NLS-1$ //$NON-NLS-2$
-					if (map.containsKey("Lore")) { //$NON-NLS-1$
-						for (StringTag lore : (List<StringTag>) map.get("Lore").getValue()) { //$NON-NLS-1$
-							label += "\r\n\u00A75" + ChatMessage.parse(lore.getValue()); //$NON-NLS-1$
-						}
-					}
+				if (map.containsKey("display")) {
+					map = (CompoundMap) map.get("display").getValue();
+					if (map.containsKey("Name"))
+						label = "\u00A7f" + ChatMessages.parse((String) map.get("Name").getValue());
+					if (map.containsKey("Lore"))
+						for (StringTag lore : (List<StringTag>) map.get("Lore").getValue())
+							label += "\r\n\u00A75" + ChatMessages.parse(lore.getValue());
 				}
 			}
 		} catch (Exception e) {
@@ -617,7 +611,7 @@ public class ItemsWindow {
 						ml.mouseExited(new MouseEvent(bt, 0, System.currentTimeMillis(), 0, 0, 0, 0, 0, 1, false, 0));
 				if (sendClosePacketsL && !closeSilently)
 					try {
-						client.sendPacket(PacketFactory.constructPacket(registry, "ClientCloseWindowPacket", windowID)); //$NON-NLS-1$
+						client.sendPacket(PacketFactory.constructPacket(registry, "ClientCloseWindowPacket", windowID));
 					} catch (Exception e2) {
 						return;
 					}
@@ -627,7 +621,6 @@ public class ItemsWindow {
 			}
 		});
 
-//		dialog.setModal(true);
 		dialog.setTitle(title);
 
 		JPanel panel = new JPanel(new GridLayout((size / 9) - (isInventory ? 5 : 0), 9));
@@ -638,11 +631,11 @@ public class ItemsWindow {
 			panel.add(bt);
 			if (x == 8 && isInventory) {
 				if (hasShield) {
-					panel.add(new JLabel(" ")); //$NON-NLS-1$
+					panel.add(new JLabel(" "));
 					panel.add(bts[45]);
 				}
 				for (int y = 0; y < (hasShield ? 3 : 5); y++)
-					panel.add(new JLabel(" ")); //$NON-NLS-1$
+					panel.add(new JLabel(" "));
 			}
 		}
 

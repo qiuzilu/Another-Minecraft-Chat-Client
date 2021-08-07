@@ -112,9 +112,8 @@ public abstract class PacketRegistry {
 		if (packets.containsKey(state)) {
 			Map<Integer, Class<? extends Packet>> pmap = packets.get(state);
 
-			if (pmap.containsKey(id)) {
+			if (pmap.containsKey(id))
 				return pmap.get(id);
-			}
 		}
 		return null;
 	}
