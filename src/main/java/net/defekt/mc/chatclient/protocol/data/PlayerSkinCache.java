@@ -53,7 +53,7 @@ public class PlayerSkinCache {
 	 * @param texturesO texture URL of player
 	 * @param username  username of player
 	 */
-	public static void putSkin(final UUID uid, String texturesO, String username) {
+	public static void putSkin(final UUID uid, final String texturesO, final String username) {
 		if (!pending.contains(uid)) {
 			pending.add(uid);
 			new Thread(new Runnable() {

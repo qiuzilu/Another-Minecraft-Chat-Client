@@ -5,6 +5,9 @@ import java.util.Map;
 
 import net.defekt.mc.chatclient.protocol.packets.Packet;
 import net.defekt.mc.chatclient.protocol.packets.PacketRegistry;
+import net.defekt.mc.chatclient.protocol.packets.general.clientbound.login.ServerLoginEncryptionPacket;
+import net.defekt.mc.chatclient.protocol.packets.general.clientbound.login.ServerLoginResponsePacket;
+import net.defekt.mc.chatclient.protocol.packets.general.clientbound.login.ServerLoginSetCompressionPacket;
 import net.defekt.mc.chatclient.protocol.packets.general.clientbound.login.ServerLoginSuccessPacket;
 import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.ServerChatMessagePacket;
 import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.ServerCloseWindowPacket;
@@ -50,8 +53,11 @@ public class PacketRegistryV340 extends PacketRegistry {
 		return new HashMap<Integer, Class<? extends Packet>>() {
 			private static final long serialVersionUID = 1L;
 			{
-				put(0x00, ClientLoginRequestPacket.class);
+				put(0x99, ClientLoginRequestPacket.class);
+				put(0x00, ServerLoginResponsePacket.class);
+				put(0x01, ServerLoginEncryptionPacket.class);
 				put(0x02, ServerLoginSuccessPacket.class);
+				put(0x03, ServerLoginSetCompressionPacket.class);
 			}
 		};
 	}

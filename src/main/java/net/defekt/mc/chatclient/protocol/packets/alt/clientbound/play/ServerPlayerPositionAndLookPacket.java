@@ -1,4 +1,4 @@
-package net.defekt.mc.chatclient.protocol.packets.alternate.clientbound.play;
+package net.defekt.mc.chatclient.protocol.packets.alt.clientbound.play;
 
 import java.io.IOException;
 

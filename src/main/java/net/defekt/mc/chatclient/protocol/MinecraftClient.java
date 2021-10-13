@@ -12,7 +12,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.zip.Inflater;
 
-import net.defekt.mc.chatclient.protocol.data.ChatMessages;
 import net.defekt.mc.chatclient.protocol.data.ItemsWindow;
 import net.defekt.mc.chatclient.protocol.data.PlayerInfo;
 import net.defekt.mc.chatclient.protocol.io.ListenerHashMap;
@@ -121,7 +120,7 @@ public class MinecraftClient {
 		this.port = port;
 		this.protocol = protocol;
 		this.reg = PacketFactory.constructPacketRegistry(protocol);
-		state = protocol >= 753 ? State.IN : State.LOGIN;
+		state = State.LOGIN;
 	}
 
 	/**
@@ -190,27 +189,27 @@ public class MinecraftClient {
 			Packet login = PacketFactory.constructPacket(reg, "ClientLoginRequestPacket", username);
 			os.write(login.getData(compression));
 
-			int len = is.readVarInt();
-			if (len < 0)
-				throw new IOException(
-						Messages.getString("MinecraftClient.clientErrorInvalidPacketLen") + Integer.toString(len));
-
-			int id = is.readVarInt();
-			switch (id) {
-				case 0x01: {
-					throw new IOException(Messages.getString("MinecraftClient.clientErrorDisconnectedNoAuth"));
-				}
-				case 0x00: {
-					String reason = ChatMessages.parse(is.readString());
-					throw new IOException(Messages.getString("MinecraftClient.clientErrorDisconnected") + reason);
-				}
-				case 0x03: {
-					cThreshold = is.readVarInt();
-					if (cThreshold > -1)
-						compression = true;
-					break;
-				}
-			}
+//			int len = is.readVarInt();
+//			if (len < 0)
+//				throw new IOException(
+//						Messages.getString("MinecraftClient.clientErrorInvalidPacketLen") + Integer.toString(len));
+//
+//			int id = is.readVarInt();
+//			switch (id) {
+//				case 0x01: {
+//					throw new IOException(Messages.getString("MinecraftClient.clientErrorDisconnectedNoAuth"));
+//				}
+//				case 0x00: {
+//					String reason = ChatMessages.parse(is.readString());
+//					throw new IOException(Messages.getString("MinecraftClient.clientErrorDisconnected") + reason);
+//				}
+//				case 0x03: {
+//					cThreshold = is.readVarInt();
+//					if (cThreshold > -1)
+//						compression = true;
+//					break;
+//				}
+//			}
 
 			packetReaderThread = new Thread(new Runnable() {
 
@@ -252,7 +251,7 @@ public class MinecraftClient {
 								}
 							} else {
 								id = packetbuf.readVarInt();
-								packetData = new byte[len - 2];
+								packetData = new byte[len - 1];
 								packetbuf.readFully(packetData);
 							}
 
@@ -260,9 +259,7 @@ public class MinecraftClient {
 								Class<? extends Packet> pClass = reg.getByID(id, state);
 								if (pClass == null)
 									continue;
-
 								Packet packet = PacketFactory.constructPacket(reg, pClass.getSimpleName(), packetData);
-
 								for (InternalPacketListener lis : packetListeners)
 									lis.packetReceived(packet, reg);
 							}
@@ -295,9 +292,9 @@ public class MinecraftClient {
 									close();
 									return;
 								}
-								Packet playerPositionPacket = PacketFactory.constructPacket(reg,
-										"ClientPlayerPositionPacket", x, y, z, true);
-								os.write(playerPositionPacket.getData(isCompressionEnabled()));
+//								Packet playerPositionPacket = PacketFactory.constructPacket(reg,
+//										"ClientPlayerPositionPacket", x, y, z, true);
+//								os.write(playerPositionPacket.getData(isCompressionEnabled()));
 							} catch (Exception e) {
 								e.printStackTrace();
 							}
@@ -341,7 +338,6 @@ public class MinecraftClient {
 		return cThreshold;
 	}
 
-	@SuppressWarnings("javadoc")
 	protected Object getLock() {
 		return lock;
 	}
@@ -744,5 +740,17 @@ public class MinecraftClient {
 	 */
 	public ItemsWindow getInventory() {
 		return inventory;
+	}
+
+	public boolean isCompression() {
+		return compression;
+	}
+
+	public void setCompression(boolean compression) {
+		this.compression = compression;
+	}
+
+	public boolean isConnected() {
+		return connected;
 	}
 }

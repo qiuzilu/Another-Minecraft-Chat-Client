@@ -95,6 +95,19 @@ public class Packet {
 	}
 
 	/**
+	 * Put an Integer to this packet
+	 * 
+	 * @param v Integer value
+	 */
+	protected void putInt(int v) {
+		try {
+			varBuffer.writeInt(v);
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
+		}
+	}
+
+	/**
 	 * Put slot data to this packet
 	 * 
 	 * @param v VarInt value

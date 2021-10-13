@@ -5,8 +5,11 @@ import java.util.Map;
 
 import net.defekt.mc.chatclient.protocol.packets.Packet;
 import net.defekt.mc.chatclient.protocol.packets.PacketRegistry;
-import net.defekt.mc.chatclient.protocol.packets.alternate.clientbound.play.ServerKeepAlivePacket;
-import net.defekt.mc.chatclient.protocol.packets.alternate.serverbound.play.ClientKeepAlivePacket;
+import net.defekt.mc.chatclient.protocol.packets.alt.clientbound.play.ServerKeepAlivePacket;
+import net.defekt.mc.chatclient.protocol.packets.alt.serverbound.play.ClientKeepAlivePacket;
+import net.defekt.mc.chatclient.protocol.packets.general.clientbound.login.ServerLoginEncryptionPacket;
+import net.defekt.mc.chatclient.protocol.packets.general.clientbound.login.ServerLoginResponsePacket;
+import net.defekt.mc.chatclient.protocol.packets.general.clientbound.login.ServerLoginSetCompressionPacket;
 import net.defekt.mc.chatclient.protocol.packets.general.clientbound.login.ServerLoginSuccessPacket;
 import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.ServerChatMessagePacket;
 import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.ServerCloseWindowPacket;
@@ -20,6 +23,7 @@ import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.Server
 import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.ServerResourcePackSendPacket;
 import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.ServerSetSlotPacket;
 import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.ServerStatisticsPacket;
+import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.ServerTimeUpdatePacket;
 import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.ServerUpdateHealthPacket;
 import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.ServerWindowItemsPacket;
 import net.defekt.mc.chatclient.protocol.packets.general.serverbound.login.ClientLoginRequestPacket;
@@ -49,8 +53,11 @@ public class PacketRegistryV315 extends PacketRegistry {
 		return new HashMap<Integer, Class<? extends Packet>>() {
 			private static final long serialVersionUID = 1L;
 			{
-				put(0x00, ClientLoginRequestPacket.class);
+				put(0x99, ClientLoginRequestPacket.class);
+				put(0x00, ServerLoginResponsePacket.class);
+				put(0x01, ServerLoginEncryptionPacket.class);
 				put(0x02, ServerLoginSuccessPacket.class);
+				put(0x03, ServerLoginSetCompressionPacket.class);
 			}
 		};
 	}
@@ -98,6 +105,7 @@ public class PacketRegistryV315 extends PacketRegistry {
 				put(0x14, ServerWindowItemsPacket.class);
 				put(0x16, ServerSetSlotPacket.class);
 				put(0x11, ServerConfirmTransactionPacket.class);
+				put(0x44, ServerTimeUpdatePacket.class);
 			}
 		};
 	}

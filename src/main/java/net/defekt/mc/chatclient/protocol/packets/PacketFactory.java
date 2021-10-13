@@ -47,6 +47,7 @@ public class PacketFactory {
 			put(578, 573);
 			put(735, 735);
 			put(754, 753);
+			put(756, 755);
 		}
 	};
 

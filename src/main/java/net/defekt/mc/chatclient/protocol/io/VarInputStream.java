@@ -41,7 +41,8 @@ public class VarInputStream extends DataInputStream {
 	 * @throws IOException thrown when there was an error reading from stream
 	 */
 	public String readString() throws IOException {
-		byte[] data = new byte[readVarInt()];
+		int i = readVarInt();
+		byte[] data = new byte[i];
 		readFully(data);
 		return new String(data, StandardCharsets.UTF_8);
 	}
@@ -94,6 +95,8 @@ public class VarInputStream extends DataInputStream {
 	 */
 	@SuppressWarnings("resource")
 	public ItemStack readSlotData(int protocol) throws IOException {
+		if (protocol >= 755)
+			return null;
 		if (protocol >= 477)
 			if (!readBoolean())
 				return new ItemStack((short) 0, 0, (short) 0, null);

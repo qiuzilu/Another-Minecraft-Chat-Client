@@ -88,7 +88,8 @@ public class ItemsWindow {
 	 * @param client   Minecraft client instance
 	 * @param registry Packet registry instance
 	 */
-	public ItemsWindow(String title, int size, int windowID, MinecraftClient client, PacketRegistry registry) {
+	public ItemsWindow(String title, int size, final int windowID, final MinecraftClient client,
+			final PacketRegistry registry) {
 
 		isInventory = size == 46;
 
@@ -114,7 +115,7 @@ public class ItemsWindow {
 				@SuppressWarnings("serial")
 				final JPopupMenu pm = new JPopupMenu() {
 					{
-						boolean isHotbar = isInventory && (xIndex >= 36 && xIndex <= 44);
+						final boolean isHotbar = isInventory && (xIndex >= 36 && xIndex <= 44);
 						add(new JMenuItem(Messages.getString("ItemsWindow.itemWindowOptionShiftClick")) {
 							{
 								addActionListener(new ActionListener() {
@@ -505,6 +506,7 @@ public class ItemsWindow {
 
 			dialog.revalidate();
 			dialog.pack();
+			SwingUtils.centerWindow(dialog);
 		}
 	}
 

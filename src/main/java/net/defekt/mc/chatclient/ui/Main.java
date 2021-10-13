@@ -7,7 +7,6 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.Menu;
@@ -29,7 +28,6 @@ import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
-import java.awt.image.RescaleOp;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -50,7 +48,9 @@ import java.util.UUID;
 import javax.imageio.ImageIO;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
 import javax.swing.DefaultListCellRenderer;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -65,6 +65,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
+import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JSpinner;
@@ -120,10 +121,9 @@ public class Main {
 
 	}
 
-	public static final BufferedImage bgImage = new BufferedImage(64, 64, BufferedImage.TYPE_INT_ARGB);
 	private static BufferedImage logoImage = null;
 
-	public static final String version = "1.3.0";
+	public static final String version = "1.4.0";
 	private static final String changelogURL = "https://raw.githubusercontent.com/Defective4/Another-Minecraft-Chat-Client/master/Changes";
 
 	public static Font mcFont = Font.decode(null);
@@ -197,7 +197,7 @@ public class Main {
 			JComboBox<Language> languages = new JComboBox<>(Language.values());
 			languages.setSelectedItem(up.getAppLanguage() == null ? Language.English : up.getAppLanguage());
 
-			JFrame win = new JFrame("Choose your language");
+			final JFrame win = new JFrame("Choose your language");
 			win.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 			JButton ct = new JButton("Ok");
@@ -246,17 +246,6 @@ public class Main {
 			logoImage = ImageIO.read(Main.class.getResourceAsStream("/resources/logo.png"));
 		} catch (Exception e) {
 			e.printStackTrace();
-		}
-
-		Graphics2D g2 = bgImage.createGraphics();
-		try {
-			BufferedImage dimg = ImageIO.read(Main.class.getResourceAsStream("/resources/dirt.png"));
-			RescaleOp resc = new RescaleOp(0.3f, 15, null);
-			resc.filter(dimg, dimg);
-			g2.drawImage(dimg, 0, 0, 64, 64, null);
-		} catch (Exception e) {
-			g2.setColor(Color.white);
-			g2.fillRect(0, 0, 64, 64);
 		}
 		if (up.isEnableInventoryHandling() && up.isLoadInventoryTextures())
 			ItemsWindow.initTextures(new Main(), true);
@@ -763,15 +752,40 @@ public class Main {
 
 				}
 
-				Box box = Box.createVerticalBox();
+				JVBoxPanel box = new JVBoxPanel();
 				box.add(new JLabel(Messages.getString("Main.enterUsernameLabel")));
 
+				Box uCtl = Box.createHorizontalBox();
+
+				BufferedImage x = null;
+				try {
+					x = ImageIO.read(getClass().getResourceAsStream("/resources/x.png"));
+					x = IOUtils.resizeImageProp(x, 12);
+				} catch (Exception e2) {
+					e2.printStackTrace();
+				}
+				JButton unameClear = x == null ? new JButton("C") : new JButton(new ImageIcon(x));
+				unameClear.setToolTipText(Messages.getString("Main.clearUnames"));
+
 				JComboBox<String> unameField = new JComboBox<>();
+				unameClear.addActionListener(new ActionListener() {
+
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						up.clearLastUserNames();
+						unameField.removeAllItems();
+					}
+				});
 				unameField.setEditable(true);
 				unameField.setAlignmentX(Component.LEFT_ALIGNMENT);
 				for (String uname : up.getLastUserNames())
 					unameField.addItem(uname);
-				box.add(unameField);
+
+				uCtl.add(unameField);
+				uCtl.add(unameClear);
+
+				box.add(uCtl);
+				box.alignAll();
 
 				do {
 					int response = JOptionPane.showOptionDialog(win, box, Messages.getString("Main.enterUsernameTitle"),
@@ -1892,7 +1906,6 @@ public class Main {
 		inventoryBox.add(showInventory);
 		inventoryBox.alignAll();
 
-		// TODO Convert to message keys from this point
 		JVBoxPanel worldBox = new JVBoxPanel();
 
 		Box timeBox = Box.createHorizontalBox();
@@ -1906,11 +1919,175 @@ public class Main {
 		worldBox.add(timeBox);
 		worldBox.alignAll();
 
+		JVBoxPanel autoMsgBox = new JVBoxPanel();
+
+		JCheckBox autoMsgEnable = new JCheckBox(Messages.getString("Main.enabled"));
+
+		JSpinner autoMsgDelay = new JSpinner(new SpinnerNumberModel(1, 0, Integer.MAX_VALUE, 1));
+		SwingUtils.alignSpinner(autoMsgDelay);
+		JSpinner autoMsgInterval = new JSpinner(new SpinnerNumberModel(1, 0, Integer.MAX_VALUE, 1));
+		SwingUtils.alignSpinner(autoMsgInterval);
+
+		JRadioButton intSeconds = new JRadioButton(Messages.getString("Main.seconds"));
+		intSeconds.setSelected(true);
+		JRadioButton intMinutes = new JRadioButton(Messages.getString("Main.minutes"));
+		ButtonGroup gp = new ButtonGroup();
+		gp.add(intMinutes);
+		gp.add(intSeconds);
+
+		JMemList<String> autoMessages = new JMemList<String>();
+		JScrollPane autoMsgPane = new JScrollPane(autoMessages);
+
+		JButton addMsg = new JButton("+");
+		JButton removeMsg = new JButton("-");
+		JButton downMsg = new JButton("v");
+		JButton upMsg = new JButton("^");
+
+		removeMsg.setEnabled(false);
+		upMsg.setEnabled(false);
+		downMsg.setEnabled(false);
+
+		autoMessages.addListSelectionListener(e -> {
+			if (!e.getValueIsAdjusting()) {
+				@SuppressWarnings("unchecked")
+				JMemList<String> ls = (JMemList<String>) e.getSource();
+
+				boolean eb = ls.getSelectedIndex() != -1 && ls.getSelectedValue() != null;
+				removeMsg.setEnabled(eb);
+				upMsg.setEnabled(eb && ls.getSelectedIndex() > 0);
+				downMsg.setEnabled(eb && ls.getSelectedIndex() < ls.getListData().length - 1);
+			}
+		});
+
+		upMsg.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (autoMessages.getSelectedIndex() > 0) {
+					String[] ld = autoMessages.getListData();
+					int x = autoMessages.getSelectedIndex();
+					String bf = ld[x - 1];
+					ld[x - 1] = ld[x];
+					ld[x] = bf;
+					autoMessages.setListData(ld);
+					autoMessages.setSelectedIndex(x - 1);
+				}
+			}
+		});
+
+		downMsg.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (autoMessages.getSelectedIndex() < autoMessages.getListData().length - 1) {
+					String[] ld = autoMessages.getListData();
+					int x = autoMessages.getSelectedIndex();
+					String bf = ld[x + 1];
+					ld[x + 1] = ld[x];
+					ld[x] = bf;
+					autoMessages.setListData(ld);
+					autoMessages.setSelectedIndex(x + 1);
+				}
+			}
+		});
+
+		removeMsg.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (autoMessages.getSelectedIndex() != -1) {
+					int z = autoMessages.getSelectedIndex();
+					String[] ld = autoMessages.getListData();
+					List<String> ls = new ArrayList<>();
+					for (int x = 0; x < ld.length; x++)
+						if (x != z)
+							ls.add(ld[x]);
+					autoMessages.setListData((String[]) ls.toArray(new String[ls.size()]));
+					autoMessages.setSelectedIndex(
+							z >= autoMessages.getListData().length ? autoMessages.getListData().length - 1 : z);
+				}
+			}
+		});
+
+		addMsg.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				JVBoxPanel autoMsgAddPanel = new JVBoxPanel();
+				autoMsgAddPanel.add(new JLabel(Messages.getString("Main.autoMsgAddLabel")));
+
+				JPlaceholderField jpf = new JPlaceholderField(Messages.getString("Main.message"));
+				autoMsgAddPanel.add(jpf);
+
+				autoMsgAddPanel.alignAll();
+
+				int resp = JOptionPane.showOptionDialog(win, autoMsgAddPanel,
+						Messages.getString("Main.autoMsgAddTitle"), JOptionPane.OK_CANCEL_OPTION,
+						JOptionPane.QUESTION_MESSAGE, null, null, 0);
+
+				if (resp == 0 && !jpf.getText().replace(" ", "").isEmpty()) {
+					String[] ld = autoMessages.getListData();
+					ld = ld == null ? new String[0] : ld;
+					String[] nld = new String[ld.length + 1];
+					for (int x = 0; x < ld.length; x++)
+						nld[x] = ld[x];
+					nld[nld.length - 1] = jpf.getText();
+					autoMessages.setListData(nld);
+				}
+			}
+		});
+
+		Box msgCtlBox = Box.createHorizontalBox();
+		msgCtlBox.add(addMsg);
+		msgCtlBox.add(removeMsg);
+		msgCtlBox.add(upMsg);
+		msgCtlBox.add(downMsg);
+
+		ActionListener ac = new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				boolean eb = autoMsgEnable.isSelected();
+				for (Component ct : autoMsgBox.getComponents()) {
+					if (ct instanceof JRadioButton || ct instanceof JSpinner)
+						ct.setEnabled(eb);
+				}
+			}
+		};
+		autoMsgEnable.addActionListener(ac);
+
+		autoMsgBox.add(autoMsgEnable);
+		autoMsgBox.add(new JLabel(" "));
+		autoMsgBox.add(new JLabel(Messages.getString("Main.autoMsgDelay")));
+		autoMsgBox.add(autoMsgDelay);
+		autoMsgBox.add(intSeconds);
+		autoMsgBox.add(intMinutes);
+		autoMsgBox.add(new JLabel(" "));
+		autoMsgBox.add(new JLabel(Messages.getString("Main.autoMsgInterval")));
+		autoMsgBox.add(autoMsgInterval);
+		autoMsgBox.add(new JLabel(" "));
+		autoMsgBox.add(new JLabel(Messages.getString("Main.autoMsgLabel")));
+		autoMsgBox.add(msgCtlBox);
+		autoMsgBox.add(autoMsgPane);
+
+		autoMsgBox.alignAll();
+
+		SwingUtilities.invokeLater(new Runnable() {
+
+			@Override
+			public void run() {
+				autoMsgInterval.setMaximumSize(new Dimension(autoMsgInterval.getWidth(), 20));
+				autoMsgDelay.setMaximumSize(new Dimension(autoMsgDelay.getWidth(), 20));
+				ac.actionPerformed(null);
+			}
+		});
+
 		controlsTabPane.addTab(Messages.getString("Main.playerListTab"), playerListBox);
 		controlsTabPane.addTab(Messages.getString("Main.playerTab"), new JScrollPane(playerBox));
 		controlsTabPane.addTab(Messages.getString("Main.statisticsTab"), statisticsPane);
 		controlsTabPane.addTab(Messages.getString("Main.inventoryTab"), inventoryBox);
 		controlsTabPane.addTab(Messages.getString("Main.worldTab"), worldBox);
+		controlsTabPane.addTab(Messages.getString("Main.autoMessagesTab"), autoMsgBox);
 
 		fPane.add(box);
 		fPane.add(controlsTabPane);
@@ -1989,7 +2166,6 @@ public class Main {
 						final MinecraftClient cl = new MinecraftClient(host, port, iprotocol);
 						clients.put(fPane, cl);
 						cl.getPlayersTabList().addChangeListener(new MapChangeListener<UUID, PlayerInfo>() {
-
 							@Override
 							public void itemRemoved(Object key, PlayerInfo value, HashMap<UUID, PlayerInfo> map) {
 								List<PlayerInfo> pl = new ArrayList<PlayerInfo>();
@@ -2018,6 +2194,43 @@ public class Main {
 							}
 						});
 						cl.addClientListener(new ClientListener() {
+							private final Thread autoMessagesThread = new Thread(new Runnable() {
+								@Override
+								public void run() {
+									while (cl.isConnected()) {
+										try {
+											int sleepVal = (int) (autoMsgDelay.getValue()) * 1000;
+											if (intMinutes.isSelected())
+												sleepVal *= 60;
+											Thread.sleep(sleepVal);
+											if (autoMsgEnable.isSelected() && autoMessages.getListData() != null) {
+												List<String> msgs = new ArrayList<String>();
+												for (String s : autoMessages.getListData())
+													msgs.add(s);
+												for (int x = 0; x < msgs.size(); x++) {
+													if (!cl.isConnected())
+														return;
+													cl.sendChatMessage(msgs.get(x));
+													if (x < msgs.size() - 1)
+														try {
+															Thread.sleep((int) autoMsgInterval.getValue() * 1000);
+														} catch (Exception e) {
+															e.printStackTrace();
+														}
+													if (!autoMsgEnable.isSelected())
+														break;
+												}
+											}
+										} catch (Exception e2) {
+											e2.printStackTrace();
+										}
+									}
+								}
+							}) {
+								{
+									start();
+								}
+							};
 
 							final JTextPane jtp = pane;
 							final JTextPane hjtp = hotbar;
@@ -2071,6 +2284,7 @@ public class Main {
 
 							@Override
 							public void disconnected(String reason) {
+								autoMessagesThread.interrupt();
 								SwingUtils.appendColoredText(
 										Messages.getString("Main.connectionLostChatMessage") + reason + "\r\n", jtp);
 
@@ -2205,6 +2419,10 @@ public class Main {
 								double minutesDouble = time % 1000;
 								minutesDouble = (minutesDouble / 1000) * 60;
 								int minutes = (int) Math.round(minutesDouble);
+								if (minutes == 60) {
+									minutes = 0;
+									hours++;
+								}
 
 								String timeString = IOUtils.padString(Integer.toString(hours), 2, "0", 1) + ":"
 										+ IOUtils.padString(Integer.toString(minutes), 2, "0", 1);

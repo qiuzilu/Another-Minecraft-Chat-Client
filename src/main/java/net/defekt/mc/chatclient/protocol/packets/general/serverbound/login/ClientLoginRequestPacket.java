@@ -20,6 +20,7 @@ public class ClientLoginRequestPacket extends Packet {
 	public ClientLoginRequestPacket(PacketRegistry reg, String username) {
 		super(reg);
 		putString(username);
+		id = 0;
 	}
 
 }

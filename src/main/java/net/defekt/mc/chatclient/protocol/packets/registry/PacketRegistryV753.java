@@ -5,7 +5,11 @@ import java.util.Map;
 
 import net.defekt.mc.chatclient.protocol.packets.Packet;
 import net.defekt.mc.chatclient.protocol.packets.PacketRegistry;
-import net.defekt.mc.chatclient.protocol.packets.alternate.clientbound.play.ServerOpenWindowPacket;
+import net.defekt.mc.chatclient.protocol.packets.alt.clientbound.login.ServerLoginSuccessPacket;
+import net.defekt.mc.chatclient.protocol.packets.alt.clientbound.play.ServerOpenWindowPacket;
+import net.defekt.mc.chatclient.protocol.packets.general.clientbound.login.ServerLoginEncryptionPacket;
+import net.defekt.mc.chatclient.protocol.packets.general.clientbound.login.ServerLoginResponsePacket;
+import net.defekt.mc.chatclient.protocol.packets.general.clientbound.login.ServerLoginSetCompressionPacket;
 import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.ServerChatMessagePacket;
 import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.ServerCloseWindowPacket;
 import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.ServerConfirmTransactionPacket;
@@ -17,6 +21,7 @@ import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.Server
 import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.ServerPluginMessagePacket;
 import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.ServerResourcePackSendPacket;
 import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.ServerSetSlotPacket;
+import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.ServerTimeUpdatePacket;
 import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.ServerUpdateHealthPacket;
 import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.ServerWindowItemsPacket;
 import net.defekt.mc.chatclient.protocol.packets.general.serverbound.login.ClientLoginRequestPacket;
@@ -47,7 +52,11 @@ public class PacketRegistryV753 extends PacketRegistry {
 		return new HashMap<Integer, Class<? extends Packet>>() {
 			private static final long serialVersionUID = 1L;
 			{
-				put(0x00, ClientLoginRequestPacket.class);
+				put(0x99, ClientLoginRequestPacket.class);
+				put(0x00, ServerLoginResponsePacket.class);
+				put(0x01, ServerLoginEncryptionPacket.class);
+				put(0x02, ServerLoginSuccessPacket.class);
+				put(0x03, ServerLoginSetCompressionPacket.class);
 			}
 		};
 	}
@@ -94,6 +103,7 @@ public class PacketRegistryV753 extends PacketRegistry {
 				put(0x13, ServerWindowItemsPacket.class);
 				put(0x15, ServerSetSlotPacket.class);
 				put(0x11, ServerConfirmTransactionPacket.class);
+				put(0x4E, ServerTimeUpdatePacket.class);
 			}
 		};
 	}

@@ -101,7 +101,7 @@ public class IOUtils {
 	 * @param height target height
 	 * @return resized image
 	 */
-	public static BufferedImage resizeImageProp(BufferedImage img, int height) {
+	public static BufferedImage resizeImageProp(BufferedImage img, double height) {
 		return scaleImage(img, height / img.getHeight());
 	}
 

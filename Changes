@@ -1,19 +1,16 @@
 AMCC Change Log
-v1.3.0
+v1.4.0
 
 [+] Added:
-- Universal support for RGB Chat Component
-- Mod Loader information and mods list information to StatusInfo object*
-- Option to move servers on server list (use right mouse button on a server you want to move)
-- Unfinished world tab (currently only displays world time, more features are planned)
-- ...and probably some more things I forgot about
+- Version 1.17.1
+- Added option to clear last used usernames
+- Added automatical messages
 
 [+] Fixed:
-- Client now supports sending chat messages that contain UTF-8 characters
-- Unicode characters being read incorrectly from language files
-
+- Integrated part of login sequence into packet listener
+  allowing client to function properly even when compression packet was not sent
+- Item windows not centered when adding new items
+  
 [/] Changed:
-- Multiple InternalPacketListeners can now be added to MinecraftClient*
-
-
-* These changes are made for preparation to add support for Forge Mod Loader
+- Replaced server list background image
+  with rng generated noise (due to issues on some Windows PCs)

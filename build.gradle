@@ -9,6 +9,7 @@
 plugins {
     // Apply the java-library plugin to add support for Java Library
     id 'java-library'
+    id 'eclipse'
 }
 
 repositories {
@@ -31,5 +32,5 @@ jar {
     configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
   }
   
-  archiveName 'AMCC-1.2.3.jar'
+  archiveName 'AMCC.jar'
 }

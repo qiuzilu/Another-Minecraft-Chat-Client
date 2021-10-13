@@ -314,6 +314,11 @@ public class UserPreferences implements Serializable {
 		return new ArrayList<String>(lastUsernames);
 	}
 
+	public void clearLastUserNames() {
+		getLastUserNames();
+		lastUsernames.clear();
+	}
+
 	public boolean isUsernameAlertSeen() {
 		return usernameAlertSeen;
 	}
