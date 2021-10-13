@@ -2165,6 +2165,41 @@ public class Main {
 							controlsTabPane.setEnabledAt(2, false);
 						final MinecraftClient cl = new MinecraftClient(host, port, iprotocol);
 						clients.put(fPane, cl);
+
+						final Thread autoMessagesThread = new Thread(new Runnable() {
+							@Override
+							public void run() {
+								while (cl.isConnected()) {
+									try {
+										int sleepVal = (int) (autoMsgDelay.getValue()) * 1000;
+										if (intMinutes.isSelected())
+											sleepVal *= 60;
+										Thread.sleep(sleepVal);
+										if (autoMsgEnable.isSelected() && autoMessages.getListData() != null) {
+											List<String> msgs = new ArrayList<String>();
+											for (String s : autoMessages.getListData())
+												msgs.add(s);
+											for (int x = 0; x < msgs.size(); x++) {
+												if (!cl.isConnected())
+													return;
+												cl.sendChatMessage(msgs.get(x));
+												if (x < msgs.size() - 1)
+													try {
+														Thread.sleep((int) autoMsgInterval.getValue() * 1000);
+													} catch (Exception e) {
+														e.printStackTrace();
+													}
+												if (!autoMsgEnable.isSelected())
+													break;
+											}
+										}
+									} catch (Exception e2) {
+										e2.printStackTrace();
+									}
+								}
+							}
+						});
+
 						cl.getPlayersTabList().addChangeListener(new MapChangeListener<UUID, PlayerInfo>() {
 							@Override
 							public void itemRemoved(Object key, PlayerInfo value, HashMap<UUID, PlayerInfo> map) {
@@ -2194,43 +2229,6 @@ public class Main {
 							}
 						});
 						cl.addClientListener(new ClientListener() {
-							private final Thread autoMessagesThread = new Thread(new Runnable() {
-								@Override
-								public void run() {
-									while (cl.isConnected()) {
-										try {
-											int sleepVal = (int) (autoMsgDelay.getValue()) * 1000;
-											if (intMinutes.isSelected())
-												sleepVal *= 60;
-											Thread.sleep(sleepVal);
-											if (autoMsgEnable.isSelected() && autoMessages.getListData() != null) {
-												List<String> msgs = new ArrayList<String>();
-												for (String s : autoMessages.getListData())
-													msgs.add(s);
-												for (int x = 0; x < msgs.size(); x++) {
-													if (!cl.isConnected())
-														return;
-													cl.sendChatMessage(msgs.get(x));
-													if (x < msgs.size() - 1)
-														try {
-															Thread.sleep((int) autoMsgInterval.getValue() * 1000);
-														} catch (Exception e) {
-															e.printStackTrace();
-														}
-													if (!autoMsgEnable.isSelected())
-														break;
-												}
-											}
-										} catch (Exception e2) {
-											e2.printStackTrace();
-										}
-									}
-								}
-							}) {
-								{
-									start();
-								}
-							};
 
 							final JTextPane jtp = pane;
 							final JTextPane hjtp = hotbar;
@@ -2433,6 +2431,7 @@ public class Main {
 
 						});
 						cl.connect(username);
+						autoMessagesThread.start();
 
 						SwingUtilities.invokeLater(new Runnable() {
 
