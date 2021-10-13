@@ -123,7 +123,7 @@ public class Main {
 
 	private static BufferedImage logoImage = null;
 
-	public static final String version = "1.4.0";
+	public static final String version = "1.4.1";
 	private static final String changelogURL = "https://raw.githubusercontent.com/Defective4/Another-Minecraft-Chat-Client/master/Changes";
 
 	public static Font mcFont = Font.decode(null);
