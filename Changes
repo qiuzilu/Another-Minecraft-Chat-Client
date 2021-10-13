@@ -1,16 +1,5 @@
 AMCC Change Log
-v1.4.0
+v1.4.1
 
-[+] Added:
-- Version 1.17.1
-- Added option to clear last used usernames
-- Added automatical messages
-
-[+] Fixed:
-- Integrated part of login sequence into packet listener
-  allowing client to function properly even when compression packet was not sent
-- Item windows not centered when adding new items
-  
-[/] Changed:
-- Replaced server list background image
-  with rng generated noise (due to issues on some Windows PCs)
+[+] Fixed
+- Auto messages not working on most servers
