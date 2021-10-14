@@ -37,7 +37,7 @@ public class MojangAPI {
 	 * 
 	 * @param uuid player's UUID
 	 * @return player's skin URL
-	 * @throws IOException thrown whene there was error communicating with API
+	 * @throws IOException thrown when there was error communicating with API
 	 */
 	public static String getSkin(String uuid) throws IOException {
 		JsonObject el = new JsonParser()

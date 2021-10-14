@@ -5,10 +5,23 @@ import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 import net.defekt.mc.chatclient.protocol.data.PlayerSkinCache;
+import net.defekt.mc.chatclient.ui.AutoResponseRule;
+import net.defekt.mc.chatclient.ui.swing.JAutoResponseList;
+import net.defekt.mc.chatclient.ui.swing.JMemList;
 
 /**
  * Class containing some IO and image manipulation utilities
@@ -220,5 +233,81 @@ public class IOUtils {
 			else
 				s = padCharacter + s;
 		return s;
+	}
+
+	public static void saveAmfFile(File out, JMemList<String> autoMessages) throws IOException {
+		forceExtension(out, ".amf");
+		String[] data = autoMessages.getListData();
+		if (data == null)
+			data = new String[0];
+		try (DataOutputStream dos = new DataOutputStream(new FileOutputStream(out))) {
+			dos.write("AMCCAMFV1".getBytes(StandardCharsets.UTF_8));
+			for (String s : data) {
+				byte[] sd = s.getBytes();
+				dos.writeInt(sd.length);
+				dos.write(sd);
+			}
+			dos.writeInt(-1);
+		} catch (Exception e) {
+			throw new IOException(e);
+		}
+	}
+
+	public static String[] loadAmfFile(File in) throws IOException {
+		try (DataInputStream dis = new DataInputStream(new FileInputStream(in))) {
+			byte[] header = new byte[9];
+			dis.read(header);
+			if (!new String(header).equals("AMCCAMFV1"))
+				throw new IOException("Invalid file header!");
+
+			List<String> items = new ArrayList<String>();
+			int len;
+			while ((len = dis.readInt()) != -1) {
+				byte[] sd = new byte[len];
+				dis.read(sd);
+				items.add(new String(sd));
+			}
+			return (String[]) items.toArray(new String[items.size()]);
+		} catch (Exception e) {
+			throw new IOException(e);
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	public static List<AutoResponseRule> loadArfFile(File in) throws IOException {
+		try (ObjectInputStream is = new ObjectInputStream(new FileInputStream(in))) {
+			List<AutoResponseRule> rules = (List<AutoResponseRule>) is.readObject();
+			return rules;
+		} catch (Exception e) {
+			throw new IOException(e);
+		}
+	}
+
+	public static void writeArfFile(File out, JAutoResponseList list) throws IOException {
+		if (list.getListData() == null)
+			throw new IOException("Rules list empty");
+		try (ObjectOutputStream os = new ObjectOutputStream(new FileOutputStream(out))) {
+			List<AutoResponseRule> rules = new ArrayList<AutoResponseRule>();
+			for (AutoResponseRule rule : list.getListData())
+				rules.add(rule);
+			os.writeObject(rules);
+		} catch (Exception e) {
+			throw new IOException(e);
+		}
+	}
+
+	public static File forceExtension(File file, String extension) {
+		String ext = getFileExtension(file);
+		if (ext == null || !ext.equals(extension)) {
+			file = new File(
+					(ext == null ? file.getPath() : file.getPath().substring(0, file.getPath().lastIndexOf(".")))
+							+ extension);
+		}
+		return file;
+	}
+
+	public static String getFileExtension(File file) {
+		String name = file.getName();
+		return name.contains(".") ? name.substring(name.indexOf(".")) : null;
 	}
 }

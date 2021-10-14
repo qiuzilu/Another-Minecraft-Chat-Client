@@ -43,6 +43,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.UUID;
 
 import javax.imageio.ImageIO;
@@ -56,6 +58,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -79,8 +82,11 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.plaf.basic.BasicArrowButton;
 
 import net.defekt.mc.chatclient.protocol.ClientListener;
@@ -99,10 +105,13 @@ import net.defekt.mc.chatclient.protocol.packets.PacketFactory;
 import net.defekt.mc.chatclient.protocol.packets.PacketRegistry;
 import net.defekt.mc.chatclient.protocol.packets.general.clientbound.play.ServerChatMessagePacket.Position;
 import net.defekt.mc.chatclient.protocol.packets.general.serverbound.play.ClientResourcePackStatusPacket.Status;
+import net.defekt.mc.chatclient.ui.AutoResponseRule.EffectType;
+import net.defekt.mc.chatclient.ui.AutoResponseRule.TriggerType;
 import net.defekt.mc.chatclient.ui.UserPreferences.ColorPreferences;
 import net.defekt.mc.chatclient.ui.UserPreferences.Constants;
 import net.defekt.mc.chatclient.ui.UserPreferences.Language;
 import net.defekt.mc.chatclient.ui.UserPreferences.SkinRule;
+import net.defekt.mc.chatclient.ui.swing.JAutoResponseList;
 import net.defekt.mc.chatclient.ui.swing.JColorChooserButton;
 import net.defekt.mc.chatclient.ui.swing.JColorChooserButton.ColorChangeListener;
 import net.defekt.mc.chatclient.ui.swing.JMemList;
@@ -111,6 +120,7 @@ import net.defekt.mc.chatclient.ui.swing.JMinecraftField;
 import net.defekt.mc.chatclient.ui.swing.JMinecraftPlayerList;
 import net.defekt.mc.chatclient.ui.swing.JMinecraftServerList;
 import net.defekt.mc.chatclient.ui.swing.JPlaceholderField;
+import net.defekt.mc.chatclient.ui.swing.JStringMemList;
 import net.defekt.mc.chatclient.ui.swing.JVBoxPanel;
 import net.defekt.mc.chatclient.ui.swing.SwingUtils;
 
@@ -118,12 +128,11 @@ import net.defekt.mc.chatclient.ui.swing.SwingUtils;
 public class Main {
 
 	private Main() {
-
 	}
 
 	private static BufferedImage logoImage = null;
 
-	public static final String version = "1.4.1";
+	public static final String version = "1.5.0";
 	private static final String changelogURL = "https://raw.githubusercontent.com/Defective4/Another-Minecraft-Chat-Client/master/Changes";
 
 	public static Font mcFont = Font.decode(null);
@@ -350,8 +359,7 @@ public class Main {
 		int resp = JOptionPane.showOptionDialog(null,
 				new Object[] { Messages.getString("Main.quickMessageRecipient") + label, mField },
 				Messages.getString("Main.quickMesage"), JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE,
-				null, new Object[] { Messages.getString("Main.qmOkOption"), Messages.getString("Main.qmCancelOption") },
-				0);
+				null, new Object[] { Messages.getString("Main.ok"), Messages.getString("Main.ok") }, 0);
 		qmdShowing = false;
 		if (resp == 0) {
 			String msg = mField.getText();
@@ -410,7 +418,7 @@ public class Main {
 					diag.setModal(true);
 					diag.setTitle(Messages.getString("Main.exitDialogTitle"));
 
-					JButton ok = new JButton(Messages.getString("Main.exitOkOption"));
+					JButton ok = new JButton(Messages.getString("Main.ok"));
 					JButton toTray = new JButton(Messages.getString("Main.exitMinimizeOption"));
 					JButton cancel = new JButton(Messages.getString("Main.exitCancelOption"));
 					toTray.setEnabled(SystemTray.isSupported());
@@ -582,9 +590,11 @@ public class Main {
 						}
 					}
 
-					JOptionPane op = new JOptionPane(new Object[] { Messages.getString("Main.trayExitQuestion")
-							+ Messages.getString("Main.trayExitQuestionLine2") + Integer.toString(clients.size())
-							+ Messages.getString("Main.trayExitQuestionLine2Append"), rememberOp },
+					JOptionPane op = new JOptionPane(
+							new Object[] {
+									Messages.getString("Main.trayExitQuestion") + Integer.toString(clients.size())
+											+ Messages.getString("Main.trayExitQuestionLine2Append"),
+									rememberOp },
 							JOptionPane.QUESTION_MESSAGE, JOptionPane.OK_CANCEL_OPTION, null,
 							new JButton[] { ok, toTray, cancel });
 
@@ -1094,9 +1104,7 @@ public class Main {
 		skBox.add(ruleBox);
 		skBox.add(new JTextPane() {
 			{
-				setText("\r\n" + Messages.getString("Main.skinFetchTipLine1")
-						+ Messages.getString("Main.skinFetchTipLine2") + Messages.getString("Main.skinFetchTipLine3")
-						+ Messages.getString("Main.skinFetchTipLine4"));
+				setText("\r\n" + Messages.getString("Main.skinFetchTip"));
 				setEditable(false);
 			}
 		});
@@ -1108,6 +1116,10 @@ public class Main {
 		JCheckBox ignoreKAPackets = new JCheckBox(Messages.getString("Main.ignoreKAPackets"));
 		ignoreKAPackets.setToolTipText(Messages.getString("Main.ignoreKAPacketsToolTop"));
 		ignoreKAPackets.setSelected(up.isIgnoreKeepAlive());
+
+		JCheckBox ignoreDSPackets = new JCheckBox(Messages.getString("Main.ignoreDSPackets"));
+		ignoreDSPackets.setToolTipText(Messages.getString("Main.ignoreDSPacketsToolTop"));
+		ignoreDSPackets.setSelected(up.isIgnoreDisconnect());
 
 		JTextField brandField = new JPlaceholderField(Messages.getString("Main.brandField"));
 		brandField.setToolTipText(Messages.getString("Main.brandToolTop"));
@@ -1122,6 +1134,7 @@ public class Main {
 		SwingUtils.alignSpinner(pingField);
 
 		pkBox.add(ignoreKAPackets);
+		pkBox.add(ignoreDSPackets);
 		pkBox.add(new JLabel(" "));
 		pkBox.add(new JLabel(Messages.getString("Main.pingLabel")));
 		pkBox.add(new JLabel(Messages.getString("Main.pingLabel2")));
@@ -1129,6 +1142,9 @@ public class Main {
 		pkBox.add(new JLabel(" "));
 		pkBox.add(new JLabel(Messages.getString("Main.brandLabel")));
 		pkBox.add(brandField);
+		SwingUtilities.invokeLater(() -> {
+			brandField.setMaximumSize(new Dimension(brandField.getWidth(), 20));
+		});
 
 		pkBox.add(new JTextPane() {
 			{
@@ -1195,8 +1211,7 @@ public class Main {
 					new Object[] { Messages.getString("Main.keywordDialogLabel"), kwField },
 					Messages.getString("Main.keywordDialogTitle"), JOptionPane.OK_CANCEL_OPTION,
 					JOptionPane.QUESTION_MESSAGE, null,
-					new String[] { Messages.getString("Main.qmOkOption"), Messages.getString("Main.qmCancelOption") },
-					0);
+					new String[] { Messages.getString("Main.ok"), Messages.getString("Main.qmCancelOption") }, 0);
 
 			if (response == 0 && !kwField.getText().isEmpty()) {
 				List<String> ld = new ArrayList<>();
@@ -1422,19 +1437,10 @@ public class Main {
 
 							@Override
 							public void actionPerformed(ActionEvent e) {
-								JOptionPane.showOptionDialog(od,
-										Messages.getString("Main.inventoryHandlingHelpLine1")
-												+ Messages.getString("Main.inventoryHandlingHelpLine2")
-												+ Messages.getString("Main.inventoryHandlingHelpLine3")
-												+ Messages.getString("Main.inventoryHandlingHelpLine4")
-												+ Messages.getString("Main.inventoryHandlingHelpLine5")
-												+ Messages.getString("Main.inventoryHandlingHelpLine6")
-												+ Messages.getString("Main.inventoryHandlingHelpLine7")
-												+ Messages.getString("Main.inventoryHandlingHelpLine8")
-												+ Messages.getString("Main.inventoryHandlingHelpLine9"),
+								JOptionPane.showOptionDialog(od, Messages.getString("Main.inventoryHandlingHelp"),
 										Messages.getString("Main.inventoryHandlingHelpTitle"),
 										JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE, null,
-										new Object[] { Messages.getString("Main.inventoryHandlingHelpOk") }, 0);
+										new Object[] { Messages.getString("Main.ok") }, 0);
 							}
 						});
 					}
@@ -1490,9 +1496,17 @@ public class Main {
 		jtp.add(Messages.getString("Main.settingsTabSkins"), skBox);
 		jtp.add(Messages.getString("Main.settingsTabProtocol"), pkBox);
 		jtp.add(Messages.getString("Main.settingsTabInventory"), ivBox);
+		jtp.addChangeListener(e -> {
+			JTabbedPane tp = (JTabbedPane) e.getSource();
+			if (tp.getSelectedIndex() == 5) {
+				JOptionPane.showOptionDialog(win, Messages.getString("Main.protocolSettingsWarning"),
+						Messages.getString("Main.protocolSettingsWarningTitle"), JOptionPane.OK_OPTION,
+						JOptionPane.WARNING_MESSAGE, null, new Object[] { Messages.getString("Main.ok") }, e);
+			}
+		});
 		b.add(jtp);
 
-		JButton sOk = new JButton(Messages.getString("Main.settingsOk"));
+		JButton sOk = new JButton(Messages.getString("Main.ok"));
 		JButton sCancel = new JButton(Messages.getString("Main.settingsCancel"));
 
 		sOk.addActionListener(new ActionListener() {
@@ -1507,6 +1521,7 @@ public class Main {
 				SkinRule skinFetchRule = (SkinRule) ruleBox.getSelectedItem();
 
 				boolean ignoreKeepAlive = ignoreKAPackets.isSelected();
+				boolean ignoreDisconnect = ignoreDSPackets.isSelected();
 				String brand = brandField.getText();
 				boolean sendMCBrand = !brand.isEmpty();
 
@@ -1518,6 +1533,7 @@ public class Main {
 				up.setSkinFetchRule(skinFetchRule);
 
 				up.setIgnoreKeepAlive(ignoreKeepAlive);
+				up.setIgnoreDisconnect(ignoreDisconnect);
 				up.setAdditionalPing((int) pingField.getValue());
 				up.setBrand(brand);
 				up.setSendMCBrand(sendMCBrand);
@@ -1538,8 +1554,7 @@ public class Main {
 							|| (up.isLoadInventoryTextures() != loadTextures.isSelected()))
 						if (ItemsWindow.getTexturesSize() > 0) {
 							int response = JOptionPane.showOptionDialog(od,
-									Messages.getString("Main.inventoryHandlingDisabledLine1")
-											+ Messages.getString("Main.inventoryHandlingDisabledLine2"),
+									Messages.getString("Main.inventoryHandlingDisabled"),
 									Messages.getString("Main.inventoryHandlingDisabledTitle"),
 									JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null,
 									new Object[] { Messages.getString("Main.inventoryHandlingDisabledYes"),
@@ -1552,9 +1567,7 @@ public class Main {
 				if (enableIVHandling.isSelected() && loadTextures.isSelected())
 					if ((up.isEnableInventoryHandling() != enableIVHandling.isSelected())
 							|| (up.isLoadInventoryTextures() != loadTextures.isSelected())) {
-						int response = JOptionPane.showOptionDialog(od,
-								Messages.getString("Main.itemLoadingEnabledLine1")
-										+ Messages.getString("Main.itemLoadingEnabledLine2"),
+						int response = JOptionPane.showOptionDialog(od, Messages.getString("Main.itemLoadingEnabled"),
 								Messages.getString("Main.itemLoadingEnabledTitle"), JOptionPane.YES_NO_OPTION,
 								JOptionPane.QUESTION_MESSAGE, null,
 								new Object[] { Messages.getString("Main.itemLoadingEnabledYes"),
@@ -1564,25 +1577,19 @@ public class Main {
 							od.dispose();
 							ItemsWindow.initTextures(Main.this, false);
 							if (clients.size() > 0)
-								JOptionPane.showOptionDialog(od,
-										Messages.getString("Main.itemTexturesLoadedLine1")
-												+ Messages.getString("Main.itemTexturesLoadedLine2")
-												+ Messages.getString("Main.itemTexturesLoadedLine3"),
+								JOptionPane.showOptionDialog(od, Messages.getString("Main.itemTexturesLoaded"),
 										Messages.getString("Main.itemTexturesLoadedTitle"),
 										JOptionPane.OK_CANCEL_OPTION, JOptionPane.INFORMATION_MESSAGE, null,
-										new Object[] { Messages.getString("Main.itemTexturesLoadedOk") }, 0);
+										new Object[] { Messages.getString("Main.ok") }, 0);
 						}
 					}
 
 				if (enableIVHandling.isSelected() && !up.isEnableInventoryHandling())
 					if (clients.size() > 0)
-						JOptionPane.showOptionDialog(od,
-								Messages.getString("Main.inventoryHandlingEnabledLine1")
-										+ Messages.getString("Main.inventoryHandlingEnabledLine2")
-										+ Messages.getString("Main.inventoryHandlingEnabledLine3"),
+						JOptionPane.showOptionDialog(od, Messages.getString("Main.inventoryHandlingEnabled"),
 								Messages.getString("Main.inventoryHandlingEnabledTitle"), JOptionPane.OK_CANCEL_OPTION,
-								JOptionPane.INFORMATION_MESSAGE, null,
-								new Object[] { Messages.getString("Main.inventoryHandlingEnabledOk") }, 0);
+								JOptionPane.INFORMATION_MESSAGE, null, new Object[] { Messages.getString("Main.ok") },
+								0);
 
 				up.setEnableInventoryHandling(enableIVHandling.isSelected());
 				up.setHideIncomingWindows(hideIncomingWindows.isSelected());
@@ -1605,9 +1612,7 @@ public class Main {
 				PlayerSkinCache.getSkincache().clear();
 
 				if (langChanged) {
-					int response = JOptionPane.showOptionDialog(od,
-							Messages.getString("Main.langChangedLabelLine1")
-									+ Messages.getString("Main.langChangedLabelLine2"),
+					int response = JOptionPane.showOptionDialog(od, Messages.getString("Main.langChangedLabel"),
 							Messages.getString("Main.langChangedDialogTitle"), JOptionPane.OK_OPTION,
 							JOptionPane.INFORMATION_MESSAGE, null,
 							new Object[] { Messages.getString("Main.langChangedLabelDialogOptionRestart"),
@@ -1928,6 +1933,31 @@ public class Main {
 		JSpinner autoMsgInterval = new JSpinner(new SpinnerNumberModel(1, 0, Integer.MAX_VALUE, 1));
 		SwingUtils.alignSpinner(autoMsgInterval);
 
+		ChangeListener cls = new ChangeListener() {
+			boolean permitted = false;
+
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				System.out.println(permitted);
+				JSpinner src = (JSpinner) e.getSource();
+				int val = (int) src.getValue();
+				if (val < 1 && !permitted) {
+					src.setValue(1);
+					String msg = Messages.getString("Main.autoValWarning");
+					int resp = JOptionPane.showOptionDialog(win, msg, Messages.getString("Main.autoValWarningTitle"),
+							JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, null,
+							new Object[] { Messages.getString("Main.yes"), Messages.getString("Main.no") }, 0);
+					if (resp == 0) {
+						permitted = true;
+					}
+				} else if (val > 1 && permitted)
+					permitted = false;
+			}
+		};
+
+		autoMsgDelay.addChangeListener(cls);
+		autoMsgInterval.addChangeListener(cls);
+
 		JRadioButton intSeconds = new JRadioButton(Messages.getString("Main.seconds"));
 		intSeconds.setSelected(true);
 		JRadioButton intMinutes = new JRadioButton(Messages.getString("Main.minutes"));
@@ -2056,6 +2086,71 @@ public class Main {
 		};
 		autoMsgEnable.addActionListener(ac);
 
+		Box autoMsgSvCtl = Box.createHorizontalBox();
+
+		JButton autoMsgSave = new JButton(Messages.getString("Main.save"));
+		JButton autoMsgLoad = new JButton(Messages.getString("Main.load"));
+
+		autoMsgSave.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				JFileChooser fc = new JFileChooser(new File("."));
+				fc.setAcceptAllFileFilterUsed(false);
+				fc.setApproveButtonText(Messages.getString("Main.save"));
+				fc.setDialogTitle(Messages.getString("Main.autoMsgSaveTitle"));
+				fc.setSelectedFile(new File("autoMessages.amf"));
+				fc.setFileFilter(new FileNameExtensionFilter(Messages.getString("Main.autoMsgFileName"), "amf"));
+				int ret = fc.showSaveDialog(win);
+				if (ret == JFileChooser.APPROVE_OPTION) {
+					File out = IOUtils.forceExtension(fc.getSelectedFile(), ".amf");
+					if (out.exists()) {
+						int ov = JOptionPane.showOptionDialog(win, Messages.getString("Main.overwriteFile"),
+								Messages.getString("Main.overwriteFileTitle"), JOptionPane.YES_NO_OPTION,
+								JOptionPane.WARNING_MESSAGE, null,
+								new Object[] { Messages.getString("Main.yes"), Messages.getString("Main.no") }, 0);
+						if (ov != 0)
+							return;
+					}
+					try {
+						IOUtils.saveAmfFile(out, autoMessages);
+					} catch (IOException e1) {
+						e1.printStackTrace();
+						SwingUtils.showErrorDialog(win, Messages.getString("Main.errorTitle"), e1,
+								Messages.getString("Main.autoMsgSaveError"));
+					}
+				}
+			}
+		});
+
+		autoMsgLoad.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				JFileChooser fc = new JFileChooser(new File("."));
+				fc.setAcceptAllFileFilterUsed(false);
+				fc.setApproveButtonText(Messages.getString("Main.load"));
+				fc.setDialogTitle(Messages.getString("Main.autoMsgLoadTitle"));
+				fc.setFileFilter(new FileNameExtensionFilter(Messages.getString("Main.autoMsgFileName"), "amf"));
+				int ret = fc.showOpenDialog(win);
+				if (ret == JFileChooser.APPROVE_OPTION) {
+					File f = fc.getSelectedFile();
+					if (f.exists()) {
+						try {
+							autoMessages.setListData(IOUtils.loadAmfFile(f));
+						} catch (IOException e1) {
+							e1.printStackTrace();
+							SwingUtils.showErrorDialog(win, Messages.getString("Main.errorTitle"), e1,
+									Messages.getString("Main.autoMsgLoadError"));
+						}
+					}
+				}
+			}
+		});
+
+		autoMsgSvCtl.add(autoMsgSave);
+		autoMsgSvCtl.add(autoMsgLoad);
+
 		autoMsgBox.add(autoMsgEnable);
 		autoMsgBox.add(new JLabel(" "));
 		autoMsgBox.add(new JLabel(Messages.getString("Main.autoMsgDelay")));
@@ -2069,32 +2164,437 @@ public class Main {
 		autoMsgBox.add(new JLabel(Messages.getString("Main.autoMsgLabel")));
 		autoMsgBox.add(msgCtlBox);
 		autoMsgBox.add(autoMsgPane);
+		autoMsgBox.add(autoMsgSvCtl);
 
 		autoMsgBox.alignAll();
 
-		SwingUtilities.invokeLater(new Runnable() {
+		JVBoxPanel autoRespBox = new JVBoxPanel();
+
+		JCheckBox autoRespEnabled = new JCheckBox(Messages.getString("Main.enabled"));
+
+		JAutoResponseList autoResponses = new JAutoResponseList();
+		JScrollPane autoResponsesPane = new JScrollPane(autoResponses);
+
+		JButton addAutoResponse = new JButton("+");
+		JButton removeAutoResponse = new JButton("-");
+		JButton editAutoResponse = new JButton(Messages.getString("Main.edit"));
+
+		removeAutoResponse.setEnabled(false);
+		editAutoResponse.setEnabled(false);
+
+		autoResponses.addListSelectionListener(new ListSelectionListener() {
 
 			@Override
-			public void run() {
-				autoMsgInterval.setMaximumSize(new Dimension(autoMsgInterval.getWidth(), 20));
-				autoMsgDelay.setMaximumSize(new Dimension(autoMsgDelay.getWidth(), 20));
-				ac.actionPerformed(null);
+			public void valueChanged(ListSelectionEvent e) {
+				if (!e.getValueIsAdjusting()) {
+					JAutoResponseList rs = (JAutoResponseList) e.getSource();
+					boolean en = rs.getSelectedIndex() != -1;
+					removeAutoResponse.setEnabled(en);
+					editAutoResponse.setEnabled(en);
+				}
 			}
 		});
+
+		ActionListener acl = new ActionListener() {
+
+			@SuppressWarnings("unchecked")
+			@Override
+			public void actionPerformed(ActionEvent e) {
+
+				AutoResponseRule rule = null;
+
+				if (e.getActionCommand().equals("edit")) {
+					rule = autoResponses.getSelectedValue();
+				}
+
+				JVBoxPanel addResponseBox = new JVBoxPanel();
+
+				JTextField ruleNameField = new JTextField(
+						Messages.getString("Main.autoResponseDefaultRuleName") + " " + Integer.toString(
+								autoResponses.getListData() == null ? 1 : autoResponses.getListData().length + 1));
+				JStringMemList triggers = new JStringMemList();
+				JStringMemList noTriggers = new JStringMemList();
+				JStringMemList effects = new JStringMemList();
+
+				JScrollPane triggersPane = new JScrollPane(triggers);
+				JScrollPane noTriggersPane = new JScrollPane(noTriggers);
+				JScrollPane effectsPane = new JScrollPane(effects);
+
+				Box triggersCtl = Box.createHorizontalBox();
+				Box noTriggersCtl = Box.createHorizontalBox();
+				Box effectsCtl = Box.createHorizontalBox();
+
+				JButton addTrigger = new JButton("+");
+				JButton addNotTrigger = new JButton("+");
+				JButton addEffect = new JButton("+");
+
+				JButton removeTrigger = new JButton("-");
+				JButton removeNotTrigger = new JButton("-");
+				JButton removeEffect = new JButton("-");
+
+				removeTrigger.setEnabled(false);
+				removeNotTrigger.setEnabled(false);
+				removeEffect.setEnabled(false);
+
+				ListSelectionListener sl = (ev) -> {
+					Object source = ev.getSource();
+					int index = ((JList<String>) source).getSelectedIndex();
+					if (!ev.getValueIsAdjusting()) {
+						if (source.equals(triggers))
+							removeTrigger.setEnabled(index != -1);
+						if (source.equals(noTriggers))
+							removeNotTrigger.setEnabled(index != -1);
+						if (source.equals(effects))
+							removeEffect.setEnabled(index != -1);
+					}
+				};
+
+				triggers.addListSelectionListener(sl);
+				noTriggers.addListSelectionListener(sl);
+				effects.addListSelectionListener(sl);
+
+				ActionListener remAc = (ev) -> {
+					Object src = ev.getSource();
+					if (src.equals(removeTrigger))
+						triggers.removeString(triggers.getSelectedIndex());
+					if (src.equals(removeNotTrigger))
+						noTriggers.removeString(noTriggers.getSelectedIndex());
+					if (src.equals(removeEffect))
+						effects.removeString(effects.getSelectedIndex());
+				};
+
+				ActionListener addAc = new ActionListener() {
+
+					@Override
+					public void actionPerformed(ActionEvent ev) {
+						Object src = ev.getSource();
+						String label = "";
+						if (src.equals(addTrigger))
+							label = Messages.getString("Main.addTrigger");
+						if (src.equals(addNotTrigger))
+							label = Messages.getString("Main.addException");
+						if (src.equals(addEffect))
+							label = Messages.getString("Main.addEffect");
+
+						JTextField jtf = new JTextField();
+						JVBoxPanel jvb = new JVBoxPanel();
+						jvb.add(new JLabel(label + ":"));
+						jvb.add(jtf);
+						jvb.alignAll();
+						jtf.requestFocus();
+						int resp = JOptionPane.showOptionDialog(win, jvb, label, JOptionPane.OK_CANCEL_OPTION,
+								JOptionPane.QUESTION_MESSAGE, null, null, 0);
+						if (resp == 0 && !jtf.getText().replace(" ", "").isEmpty()) {
+							String txt = jtf.getText();
+							if (src.equals(addTrigger))
+								triggers.addString(txt);
+							if (src.equals(addNotTrigger))
+								noTriggers.addString(txt);
+							if (src.equals(addEffect))
+								effects.addString(txt);
+						}
+					}
+				};
+
+				addTrigger.addActionListener(addAc);
+				addNotTrigger.addActionListener(addAc);
+				addEffect.addActionListener(addAc);
+
+				removeTrigger.addActionListener(remAc);
+				removeNotTrigger.addActionListener(remAc);
+				removeEffect.addActionListener(remAc);
+
+				triggersCtl.add(addTrigger);
+				triggersCtl.add(removeTrigger);
+				noTriggersCtl.add(addNotTrigger);
+				noTriggersCtl.add(removeNotTrigger);
+				effectsCtl.add(addEffect);
+				effectsCtl.add(removeEffect);
+
+				JRadioButton effectsRandom = new JRadioButton(Messages.getString("Main.random"));
+				JRadioButton effectsOrdered = new JRadioButton(Messages.getString("Main.ordered"));
+				JRadioButton effectsAll = new JRadioButton(Messages.getString("Main.all"));
+				effectsRandom.setSelected(true);
+				ButtonGroup bgp = new ButtonGroup();
+				bgp.add(effectsOrdered);
+				bgp.add(effectsRandom);
+				bgp.add(effectsAll);
+
+				JRadioButton triggersAnd = new JRadioButton(Messages.getString("Main.and"));
+				JRadioButton triggersOr = new JRadioButton(Messages.getString("Main.or"));
+				triggersOr.setSelected(true);
+				ButtonGroup tgp = new ButtonGroup();
+				tgp.add(triggersAnd);
+				tgp.add(triggersOr);
+
+				Box triggersBox = Box.createHorizontalBox();
+				triggersBox.add(triggersOr);
+				triggersBox.add(triggersAnd);
+
+				JSpinner allInterval = new JSpinner(new SpinnerNumberModel(1, 1, Integer.MAX_VALUE, 1));
+				allInterval.setEnabled(effectsAll.isSelected());
+
+				ActionListener radioListener = new ActionListener() {
+
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						allInterval.setEnabled(effectsAll.isSelected());
+					}
+				};
+
+				effectsRandom.addActionListener(radioListener);
+				effectsOrdered.addActionListener(radioListener);
+				effectsAll.addActionListener(radioListener);
+
+				Box radioBox = Box.createHorizontalBox();
+				radioBox.add(effectsRandom);
+				radioBox.add(effectsOrdered);
+				radioBox.add(effectsAll);
+
+				addResponseBox.add(new JLabel("<html><h3>"
+						+ Messages.getString(e.getActionCommand().equals("edit") ? "Main.autoResponseEditTitle"
+								: "Main.autoResponseAddTitle")
+						+ "</ht></html>"));
+				addResponseBox.add(new JLabel(Messages.getString("Main.autoResponseRuleName") + ":"));
+				addResponseBox.add(ruleNameField);
+				addResponseBox.add(new JLabel(" "));
+				addResponseBox.add(new JLabel(Messages.getString("Main.triggers") + ":"));
+				addResponseBox.add(triggersPane);
+				addResponseBox.add(triggersCtl);
+				addResponseBox.add(new JLabel(Messages.getString("Main.type") + ":"));
+				addResponseBox.add(triggersBox);
+				addResponseBox.add(new JLabel(" "));
+				addResponseBox.add(new JLabel(Messages.getString("Main.except") + ":"));
+				addResponseBox.add(noTriggersPane);
+				addResponseBox.add(noTriggersCtl);
+				addResponseBox.add(new JLabel(" "));
+				addResponseBox.add(new JLabel(Messages.getString("Main.effects") + ":"));
+				addResponseBox.add(effectsPane);
+				addResponseBox.add(effectsCtl);
+				addResponseBox.add(radioBox);
+				addResponseBox.add(new JLabel(Messages.getString("Main.messageInterval") + ":"));
+				addResponseBox.add(allInterval);
+				addResponseBox.add(new JLabel(" "));
+				SwingUtils.alignSpinner(allInterval);
+
+				addResponseBox.alignAll();
+
+				if (rule != null) {
+					String name = rule.getName();
+					List<String> rTriggers = rule.getTriggers();
+					List<String> rExceptions = rule.getExceptions();
+					List<String> rEffects = rule.getEffects();
+					EffectType effectType = rule.getType();
+					TriggerType triggerType = rule.getTriggerType();
+					int interval = rule.getInterval();
+
+					ruleNameField.setText(name);
+					triggers.setListData((String[]) rTriggers.toArray(new String[rTriggers.size()]));
+					noTriggers.setListData((String[]) rExceptions.toArray(new String[rExceptions.size()]));
+					effects.setListData((String[]) rEffects.toArray(new String[rEffects.size()]));
+
+					allInterval.setValue(interval);
+
+					if (triggerType == TriggerType.AND)
+						triggersAnd.doClick();
+
+					switch (effectType) {
+						case ALL: {
+							effectsAll.doClick();
+							break;
+						}
+						case ORDERED: {
+							effectsOrdered.doClick();
+							break;
+						}
+						default: {
+							effectsRandom.doClick();
+							break;
+						}
+					}
+				}
+
+				Box jj = Box.createHorizontalBox();
+				jj.add(new JLabel(" "));
+				jj.add(addResponseBox);
+				jj.add(new JLabel(" "));
+				JScrollPane sp = new JScrollPane(jj);
+				sp.setPreferredSize(new Dimension(SwingUtils.sSize.width / 3, SwingUtils.sSize.height / 2));
+				SwingUtilities.invokeLater(() -> {
+				});
+				int resp = JOptionPane.showOptionDialog(win, sp, Messages.getString("Main.autoResponseAddTitle"),
+						JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, 0);
+				if (resp == 0) {
+					String ruleName = ruleNameField.getText();
+					String[] triggersList = triggers.getListData();
+					String[] exceptionsList = noTriggers.getListData();
+					String[] effectsList = effects.getListData();
+					EffectType eType = effectsRandom.isSelected() ? EffectType.RANDOM
+							: effectsOrdered.isSelected() ? EffectType.ORDERED : EffectType.ALL;
+					int interval = (int) (allInterval.getValue());
+
+					if (ruleName.replace(" ", "").isEmpty())
+						ruleName = Messages.getString("Main.autoResponseDefaultRuleName") + " "
+								+ ((autoResponses.getListData() == null) ? "1"
+										: (Integer.toString(autoResponses.getListData().length + 1)));
+
+					if ((triggersList == null || triggersList.length <= 0)
+							|| (effectsList == null || effectsList.length <= 0)) {
+						JOptionPane.showOptionDialog(win, Messages.getString("Main.autoResponseAddEmptyError"),
+								Messages.getString("Main.errorTitle"), JOptionPane.OK_OPTION, JOptionPane.ERROR_MESSAGE,
+								null, new Object[] { Messages.getString("Main.ok") }, 0);
+						return;
+					}
+
+					TriggerType triggerType = triggersAnd.isSelected() ? TriggerType.AND : TriggerType.OR;
+
+					if (e.getActionCommand().equals("edit")) {
+						rule.setEffects(effectsList);
+						rule.setExceptions(exceptionsList);
+						rule.setInterval(interval);
+						rule.setName(ruleName);
+						rule.setTriggers(triggersList);
+						rule.setType(eType);
+						rule.setTriggerType(triggerType);
+						autoResponses.repaint();
+					} else
+						autoResponses.addRule(new AutoResponseRule(ruleName, eType, triggerType, interval, triggersList,
+								exceptionsList, effectsList));
+
+				}
+			}
+		};
+		addAutoResponse.addActionListener(acl);
+
+		removeAutoResponse.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				autoResponses.removeRule(autoResponses.getSelectedIndex());
+			}
+		});
+
+		editAutoResponse.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				acl.actionPerformed(new ActionEvent(e.getSource(), e.getID(), "edit"));
+			}
+		});
+
+		Box autoResponseCtl = Box.createHorizontalBox();
+		autoResponseCtl.add(addAutoResponse);
+		autoResponseCtl.add(removeAutoResponse);
+		autoResponseCtl.add(editAutoResponse);
+
+		Box autoResponsesIOCtl = Box.createHorizontalBox();
+
+		JButton autoRespSave = new JButton(Messages.getString("Main.save"));
+		JButton autoRespLoad = new JButton(Messages.getString("Main.load"));
+
+		autoRespLoad.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				JFileChooser fc = new JFileChooser(new File("."));
+				fc.setAcceptAllFileFilterUsed(false);
+				fc.setDialogTitle(Messages.getString("Main.autoMsgLoadTitle"));
+				fc.setFileFilter(new FileNameExtensionFilter(Messages.getString("Main.autoRespFileName"), "arf"));
+				fc.setSelectedFile(new File("automaticResponses.arf"));
+				fc.setApproveButtonText(Messages.getString("Main.load"));
+				int resp = fc.showOpenDialog(win);
+				if (resp == JFileChooser.APPROVE_OPTION) {
+					File in = fc.getSelectedFile();
+					if (in.exists()) {
+						try {
+							List<AutoResponseRule> rules = IOUtils.loadArfFile(in);
+							autoResponses.setListData(
+									(AutoResponseRule[]) rules.toArray(new AutoResponseRule[rules.size()]));
+						} catch (Exception e2) {
+							SwingUtils.showErrorDialog(win, Messages.getString("Main.errorTitle"), e2,
+									Messages.getString("Main.autoMsgLoadError"));
+							e2.printStackTrace();
+						}
+						autoResponses.repaint();
+					}
+				}
+			}
+		});
+
+		autoRespSave.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				JFileChooser fc = new JFileChooser(new File("."));
+				fc.setAcceptAllFileFilterUsed(false);
+				fc.setDialogTitle(Messages.getString("Main.autoMsgSaveTitle"));
+				fc.setFileFilter(new FileNameExtensionFilter(Messages.getString("Main.autoRespFileName"), "arf"));
+				fc.setSelectedFile(new File("automaticResponses.arf"));
+				fc.setApproveButtonText(Messages.getString("Main.save"));
+				int resp = fc.showSaveDialog(win);
+				if (resp == JFileChooser.APPROVE_OPTION) {
+					File out = IOUtils.forceExtension(fc.getSelectedFile(), ".arf");
+					if (out.exists()) {
+						int rsp = JOptionPane.showOptionDialog(win, Messages.getString("Main.overwriteFile"),
+								Messages.getString("overwriteFileTitle"), JOptionPane.YES_NO_OPTION,
+								JOptionPane.WARNING_MESSAGE, null,
+								new Object[] { Messages.getString("Main.yes"), Messages.getString("Main.no") }, 0);
+						if (rsp != 0) {
+							return;
+						}
+					}
+					try {
+						IOUtils.writeArfFile(out, autoResponses);
+					} catch (Exception e2) {
+						e2.printStackTrace();
+						SwingUtils.showErrorDialog(win, Messages.getString("Main.errorTitle"), e2,
+								Messages.getString("Main.autoMsgSaveError"));
+					}
+				}
+			}
+		});
+
+		autoResponsesIOCtl.add(autoRespSave);
+		autoResponsesIOCtl.add(autoRespLoad);
+
+		autoRespBox.add(autoRespEnabled);
+		autoRespBox.add(new JLabel(" "));
+		autoRespBox.add(new JLabel(Messages.getString("Main.autoResponseRules")));
+		autoRespBox.add(autoResponseCtl);
+		autoRespBox.add(autoResponsesPane);
+		autoRespBox.add(autoResponsesIOCtl);
+
+		autoRespBox.alignAll();
+
+		JTabbedPane messagesTabPane = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
+		messagesTabPane.addTab(Messages.getString("Main.intervalMessagesTab"), autoMsgBox);
+		messagesTabPane.addTab(Messages.getString("Main.autoResponsesTab"), autoRespBox);
 
 		controlsTabPane.addTab(Messages.getString("Main.playerListTab"), playerListBox);
 		controlsTabPane.addTab(Messages.getString("Main.playerTab"), new JScrollPane(playerBox));
 		controlsTabPane.addTab(Messages.getString("Main.statisticsTab"), statisticsPane);
 		controlsTabPane.addTab(Messages.getString("Main.inventoryTab"), inventoryBox);
 		controlsTabPane.addTab(Messages.getString("Main.worldTab"), worldBox);
-		controlsTabPane.addTab(Messages.getString("Main.autoMessagesTab"), autoMsgBox);
+		controlsTabPane.addTab(Messages.getString("Main.autoMessagesTab"), messagesTabPane);
 
 		fPane.add(box);
 		fPane.add(controlsTabPane);
+
+		Runnable rn = new Runnable() {
+			@Override
+			public void run() {
+				autoMsgInterval.setMaximumSize(new Dimension(win.getWidth(), 20));
+				autoMsgDelay.setMaximumSize(new Dimension(win.getWidth(), 20));
+				ac.actionPerformed(null);
+			}
+		};
+
 		SwingUtilities.invokeLater(new Runnable() {
+
 			@Override
 			public void run() {
 				fPane.setDividerLocation(0.8);
+				rn.run();
 			}
 		});
 
@@ -2151,7 +2651,7 @@ public class Main {
 
 					JOptionPane.showOptionDialog(win, bb, Messages.getString("Main.chooseMinecraftVersionTitle"),
 							JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null,
-							new String[] { Messages.getString("Main.chooseMinecraftVersionOptionOl") }, null);
+							new String[] { Messages.getString("Main.ok") }, null);
 
 					protocol = ProtocolNumber.getForName((String) pcBox.getSelectedItem()).protocol;
 				}
@@ -2194,7 +2694,7 @@ public class Main {
 											}
 										}
 									} catch (Exception e2) {
-										e2.printStackTrace();
+//										e2.printStackTrace();
 									}
 								}
 							}
@@ -2265,6 +2765,39 @@ public class Main {
 									}
 
 									SwingUtils.appendColoredText(message + "\r\n", jtp);
+									if (autoRespEnabled.isSelected() && autoResponses.getListData() != null) {
+										String rText = ChatMessages.removeColors(message);
+										for (AutoResponseRule rule : autoResponses.getListData()) {
+											String[] matches = rule.match(rText);
+											if (matches != null && matches.length > 0) {
+												int interval = rule.getInterval() * 1000;
+												Timer tm = new Timer(true);
+												tm.scheduleAtFixedRate(new TimerTask() {
+													String[] localM = matches;
+													int index = 0;
+
+													@Override
+													public void run() {
+														if (!cl.isConnected()) {
+															cl.close();
+															cancel();
+														}
+														try {
+															cl.sendChatMessage(localM[index]);
+															index++;
+															if (index >= localM.length)
+																cancel();
+														} catch (Exception e) {
+															e.printStackTrace();
+															for (ClientListener cll : cl.getClientListeners())
+																cll.disconnected(e.toString());
+															cl.close();
+														}
+													}
+												}, 250, interval);
+											}
+										}
+									}
 									try {
 										Thread.sleep(10);
 									} catch (InterruptedException e) {
@@ -2431,6 +2964,11 @@ public class Main {
 
 						});
 						cl.connect(username);
+						try {
+							Thread.sleep(1000);
+						} catch (InterruptedException e2) {
+							e2.printStackTrace();
+						}
 						autoMessagesThread.start();
 
 						SwingUtilities.invokeLater(new Runnable() {

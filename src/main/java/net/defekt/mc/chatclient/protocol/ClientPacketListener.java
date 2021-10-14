@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.UUID;
 
 import net.defekt.mc.chatclient.protocol.data.ChatMessages;
@@ -60,6 +62,9 @@ public class ClientPacketListener implements InternalPacketListener {
 	private final MinecraftClient cl;
 	private final UserPreferences up = Main.up;
 
+	private final Timer keepAliveTimer = new Timer("keepAliveTimer", true);
+	private long lastKeepAlivePacket = System.currentTimeMillis();
+
 	/**
 	 * Constructs packet listener bound to specified client
 	 * 
@@ -69,6 +74,22 @@ public class ClientPacketListener implements InternalPacketListener {
 		this.cl = client;
 		this.os = cl.getOutputStream();
 		this.protocol = cl.getProtocol();
+		keepAliveTimer.scheduleAtFixedRate(new TimerTask() {
+
+			@Override
+			public void run() {
+				if (!cl.isConnected()) {
+					keepAliveTimer.cancel();
+					return;
+				}
+
+				if (System.currentTimeMillis() - lastKeepAlivePacket > 60000) {
+					for (ClientListener cls : cl.getClientListeners())
+						cls.disconnected("Timed Out");
+					cl.close();
+				}
+			}
+		}, 0, 1000);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -243,6 +264,7 @@ public class ClientPacketListener implements InternalPacketListener {
 				cl.setCurrentState(State.IN);
 			else if (packet instanceof ServerKeepAlivePacket
 					|| packet instanceof net.defekt.mc.chatclient.protocol.packets.alt.clientbound.play.ServerKeepAlivePacket) {
+				lastKeepAlivePacket = System.currentTimeMillis();
 				if (up.isIgnoreKeepAlive())
 					return;
 				new Thread(new Runnable() {
@@ -298,10 +320,16 @@ public class ClientPacketListener implements InternalPacketListener {
 				}
 			} else if (packet instanceof ServerDisconnectPacket) {
 				String json = (String) packet.accessPacketMethod("getReason");
+				boolean dsIgnore = up.isIgnoreDisconnect();
 
 				for (ClientListener ls : cl.getClientListeners())
-					ls.disconnected(ChatMessages.parse(json));
-				cl.close();
+					if (dsIgnore)
+						ls.messageReceived("\u00A7cPacket " + Integer.toHexString(packet.getID()) + ": "
+								+ ChatMessages.parse(json), Position.CHAT);
+					else
+						ls.disconnected(ChatMessages.parse(json));
+				if (!dsIgnore)
+					cl.close();
 			} else if (packet instanceof ServerPluginMessagePacket) {
 				String channel = (String) packet.accessPacketMethod("getChannel");
 				byte[] data = (byte[]) packet.accessPacketMethod("getDataF");
