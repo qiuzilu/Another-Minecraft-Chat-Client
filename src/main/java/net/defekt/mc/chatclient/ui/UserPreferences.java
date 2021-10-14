@@ -151,6 +151,7 @@ public class UserPreferences implements Serializable {
 	private SkinRule skinFetchRule = SkinRule.SERVER;
 
 	private boolean ignoreKeepAlive = false;
+	private boolean ignoreDisconnect = false;
 	private int additionalPing = 0;
 	private boolean sendMCBrand = true;
 	private String brand = "vanilla";
@@ -386,5 +387,13 @@ public class UserPreferences implements Serializable {
 
 	public boolean isWasLangSet() {
 		return wasLangSet;
+	}
+
+	public boolean isIgnoreDisconnect() {
+		return ignoreDisconnect;
+	}
+
+	public void setIgnoreDisconnect(boolean ignoreDisconnect) {
+		this.ignoreDisconnect = ignoreDisconnect;
 	}
 }

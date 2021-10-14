@@ -265,6 +265,9 @@ public class MinecraftClient {
 							}
 						}
 					} catch (Exception e) {
+						e.printStackTrace();
+						for (ClientListener cl : clientListeners)
+							cl.disconnected(e.toString());
 						close();
 					}
 				}
@@ -292,9 +295,9 @@ public class MinecraftClient {
 									close();
 									return;
 								}
-//								Packet playerPositionPacket = PacketFactory.constructPacket(reg,
-//										"ClientPlayerPositionPacket", x, y, z, true);
-//								os.write(playerPositionPacket.getData(isCompressionEnabled()));
+								Packet playerPositionPacket = PacketFactory.constructPacket(reg,
+										"ClientPlayerPositionPacket", x, y, z, true);
+								os.write(playerPositionPacket.getData(isCompressionEnabled()));
 							} catch (Exception e) {
 								e.printStackTrace();
 							}

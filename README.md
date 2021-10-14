@@ -2,7 +2,7 @@
 ![license](https://img.shields.io/github/license/Defective4/Minecraft-Chat-Client)
 ![version](https://img.shields.io/github/v/release/Defective4/Minecraft-Chat-Client)
 ![lastCommit](https://img.shields.io/github/last-commit/Defective4/Minecraft-Chat-Client)
-![version](https://img.shields.io/badge/latest_mc_version-1.17-success)
+![version](https://img.shields.io/badge/latest_mc_version-1.17.1-success)
 [![Java CI with Gradle](https://github.com/Defective4/Another-Minecraft-Chat-Client/actions/workflows/gradle.yml/badge.svg)](https://github.com/Defective4/Another-Minecraft-Chat-Client/actions/workflows/gradle.yml)
 
 AMCC is a GUI application that lets you join a Minecraft server and chat freely without opening your Minecraft game.
@@ -13,12 +13,50 @@ AMCC is a GUI application that lets you join a Minecraft server and chat freely 
 * 📋 Tray support.
 * ⚙️ My own lightweight implementation of Minecraft protocol, supporting versions 1.8 to 1.17.
 * 📦 Basic inventory handling and item using.
+* ⏰ Automatic messages and responses, perfect for AFKing.
 
 ## 📙 My goals
 This project is my take on implementing Minecraft's protocol from scratch.<br>
 It started as a simple command line chat client and was quickly wrapped in a GUI.<br>
 Now my main goal is to implement as many features from Minecraft's original protocol as I can
 without using any other third-party libraries.
+
+##	✉️ Automatic messages
+AMCC offers two ways of sending chat messages without user's intervention.<br>
+They are defined per connection, and are not saved in program's main save file,<br>
+but they can be saved separately.<br>
+You can access their settings in the "Auto. messages" tab in the control panel of client's connection.<br>
+
+### ⏰ Interval messages
+Interval messages allow user to send chat messages periodically.<br>
+For example you can use them to automated advertisements.<br>
+Setting up interval messages is relatively easy.<br>
+You just have to add your messages using the "+" button, adjusting values in delay and interval fields and finally check the "Enable" check box.<br>
+Your client should now send defined messages every *x* seconds/minutes as specifed by user.<br>
+
+### 🔔 Automatic responses
+Automatic responses can be used to automatically respond to certain messages.<br>
+You can use them, for example, to reply to private messages while you are AFK,<br>
+or to respond in-game events, or even commands.<br>
+They are a little more complex to set up than interval messages, but it shouldn't be a hassle to understand all available options.<br>
+First you have to add a rule.<br>
+Rules consist of three basic components:<br>
+
+- Triggers - they determine *when* the client should respond.<br>
+If for example there is a trigger "Pie", client will respond when someone says "Pie" on chat.<br>
+Triggers have two modes:<br>
+"**Or**" - is the main mode. It activates the rule when *any* of triggers is present.<br>
+For example, when you added "Foo" and "Bar", client will react when someone says either, or both of these words.<br>
+"**And**" - will activate only when every defined phrase is present in one chat message.<br>
+
+- Exceptions - they determine when the client should *not* respond.<br>
+When user defines "Foo" as a trigger, and "Bar" as an exception, client will respond if received message contains the word "Foo", but won't react to "Foo Bar".<br>
+
+- Responses - they are sent by the client when triggers are activated.<br>
+They have 3 modes:<br>
+"**Random**" - every activation a random phrase from list is choosen and sent by client.<br>
+"**Ordered**" - phrases will be sent one by one in sequence every activation, looping at the end of list.<br>
+"**All**" - all phrases will be sent at once after activation.<br>
 
 ## 📦 Inventory handling
 ⚠️ **Caution** If you have a `mcc.prefs` file from version v1.1.0 or older and you want to use inventory handling make sure to first enable it in settings!<br><br>
@@ -85,7 +123,7 @@ You can download latest executable version [Here](https://github.com/Defective4/
   - [ ] Exporting player skins
 - [x] LAN games
 - [x] Basic player actions (sneaking, sprinting)
-- [x] Health updates and automatical respawning
+- [x] Health updates and automatic respawning
 - [x] Appearance settings
 - [x] Movement
 - [x] Statistics (1.8 - 1.12.2)

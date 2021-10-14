@@ -114,9 +114,9 @@ public class JMinecraftServerList extends JMemList<ServerEntry> {
 //				g.drawImage(Main.bgImage, x * 64, y * 64, 64, 64, null);
 		g.setColor(new Color(60, 47, 74));
 		g.fillRect(0, 0, getWidth(), getHeight());
-		for (int x = 0; x < bytemap.length; x++) {
-			for (int y = 0; y < bytemap[x].length; y++) {
-				int mod = bytemap[x][y] * 10;
+		for (int x = 0; x < getWidth()/16; x++) {
+			for (int y = 0; y < getHeight()/16; y++) {
+				int mod = bytemap[x % bytemap.length][y % bytemap[x].length] * 10;
 				g.setColor(new Color(60 - mod, 47 - mod, 74 - mod));
 				g.fillRect(x * 16, y * 16, 16, 16);
 			}

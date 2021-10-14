@@ -147,7 +147,7 @@ public class SwingUtils {
 		errDial.setTitle(title);
 
 		JOptionPane jop = new JOptionPane(message, JOptionPane.ERROR_MESSAGE, JOptionPane.DEFAULT_OPTION, null,
-				new Object[] { new JButton(Messages.getString("SwingUtils.errorDialogOptionOk")) {
+				new Object[] { new JButton(Messages.getString("Main.ok")) {
 					{
 						addActionListener(ev -> {
 							errDial.dispose();
@@ -238,7 +238,7 @@ public class SwingUtils {
 			if (ct instanceof JComponent)
 				((JComponent) ct).setAlignmentX(Component.LEFT_ALIGNMENT);
 
-		JButton ok = new JButton(Messages.getString("SwingUtils.updateDialogOptionOk"));
+		JButton ok = new JButton(Messages.getString("Main.ok"));
 		ok.addActionListener(ev -> {
 			synchronized (win) {
 				win.notify();
@@ -266,7 +266,7 @@ public class SwingUtils {
 				JOptionPane.showOptionDialog(win, jsp,
 						Messages.getString("SwingUtils.updateDialogChangesTitle") + newVersion,
 						JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null,
-						new String[] { Messages.getString("SwingUtils.updateDialogChangesOptionOk") }, 0);
+						new String[] { Messages.getString("Main.ok") }, 0);
 			}
 		});
 		JButton update = new JButton(Messages.getString("SwingUtils.updateDialogOptionUpdate"));
@@ -320,8 +320,8 @@ public class SwingUtils {
 				append(ex.toString() + "\r\n");
 				for (StackTraceElement ste : ex.getStackTrace())
 					append(ste.toString() + "\r\n");
-				setForeground(new Color(150, 0, 0));
-				setFont(getFont().deriveFont(13f));
+				setForeground(new Color(200, 0, 0));
+				setFont(getFont().deriveFont(11f));
 			}
 		}) {
 			{
@@ -344,6 +344,6 @@ public class SwingUtils {
 
 		JOptionPane.showOptionDialog(parent, box, Messages.getString("SwingUtils.exceptionDetailsDialogTitle"),
 				JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null,
-				new Object[] { Messages.getString("SwingUtils.exceptionDetailsDialogOptionOk") }, 0);
+				new Object[] { Messages.getString("Main.ok") }, 0);
 	}
 }

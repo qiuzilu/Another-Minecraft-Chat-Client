@@ -314,7 +314,7 @@ public class JMinecraftPlayerList extends JMemList<PlayerInfo> {
 							private static final long serialVersionUID = 1L;
 							{
 								setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
-								add(new JButton(Messages.getString("JMinecraftPlayerList.42")) {
+								add(new JButton("<") {
 									{
 										addActionListener(ev -> {
 											inRef[0]--;
@@ -327,7 +327,7 @@ public class JMinecraftPlayerList extends JMemList<PlayerInfo> {
 									}
 								});
 								add(new JLabel(Messages.getString("JMinecraftPlayerList.userSkinDialogChangeView")));
-								add(new JButton(Messages.getString("JMinecraftPlayerList.44")) {
+								add(new JButton(">") {
 									{
 										addActionListener(ev -> {
 											inRef[0]++;

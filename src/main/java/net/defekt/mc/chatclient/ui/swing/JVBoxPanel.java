@@ -5,6 +5,7 @@ import java.awt.Component;
 import javax.swing.BoxLayout;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
+import javax.swing.JTextPane;
 
 /**
  * Simple {@link JPanel} extension with vertical {@link BoxLayout}
@@ -29,7 +30,7 @@ public class JVBoxPanel extends JPanel {
 			if (ct instanceof JComponent) {
 				JComponent jct = (JComponent) ct;
 				jct.setAlignmentX(Component.LEFT_ALIGNMENT);
-				jct.setOpaque(false);
+				jct.setOpaque(!(ct instanceof JTextPane));
 			}
 	}
 }
