@@ -1,20 +1,5 @@
 AMCC Change Log
-v1.5.0
-
-[+] Added
-- Automatic responses
-- Warnings when setting low delay/interval between auto messages
-- A warning when trying to access protocol settings tab
-- Ability to save automatic messages to a file
-- New option in protocol settings tab
+v1.5.1
 
 [+] Fixed
-- Language files structure
-- Server list background
-- Fixed auto messages delay and interval sliders disappearing
-- Fixed player position thread
-- Client will now disconnect when a keep alive packet was not received for more than 60 seconds
-- Some text fields not being opaque
-
-[/] Changed
-- Error details color and font size
+- client crashing after loading auto responses from file with "Random" mode

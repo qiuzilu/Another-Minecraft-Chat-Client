@@ -16,7 +16,7 @@ public class AutoResponseRule implements Serializable {
 		AND, OR
 	}
 
-	private final transient Random rand = new Random();
+	private transient Random rand = new Random();
 
 	private String name;
 	private int interval;
@@ -29,6 +29,10 @@ public class AutoResponseRule implements Serializable {
 	private transient int index = 0;
 
 	public String[] match(String message) {
+		if (rand == null)
+			rand = new Random();
+		if (index < 0)
+			index = 0;
 		if (effects.size() == 0)
 			return null;
 		message = message.toLowerCase();
