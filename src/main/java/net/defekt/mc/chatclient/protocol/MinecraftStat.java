@@ -110,7 +110,8 @@ public class MinecraftStat {
 			@Override
 			public void run() {
 				try (MulticastSocket soc = new MulticastSocket(4445)) {
-					soc.joinGroup(InetAddress.getByName("224.0.2.60"));
+					String lanIP = "224.0.2.60";
+					soc.joinGroup(InetAddress.getByName(lanIP));
 					byte[] recv = new byte[1024];
 					while (true)
 						try {

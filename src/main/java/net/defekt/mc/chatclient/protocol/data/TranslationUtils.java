@@ -91,8 +91,8 @@ public class TranslationUtils {
 							String itemName = itemS;
 							if (itemData.has("name")) {
 								itemName = translateKey("item." + itemData.get("name").getAsString() + ".name");
-								if (itemName.equals(itemData.get("name").getAsString()))
-									if (itemData.has("display_name"))
+								if (itemName.equals(itemData.get("name").getAsString())
+										&& itemData.has("display_name"))
 										itemName = itemData.get("display_name").getAsString();
 							} else if (itemData.has("display_name"))
 								itemName = itemData.get("display_name").getAsString();

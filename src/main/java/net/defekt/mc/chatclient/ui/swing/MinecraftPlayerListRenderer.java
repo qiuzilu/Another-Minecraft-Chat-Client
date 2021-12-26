@@ -186,21 +186,20 @@ public class MinecraftPlayerListRenderer extends DefaultListCellRenderer {
 		if (info.getTexture() != null)
 			try {
 				PlayerSkinCache.putSkin(info.getUUID(), info.getTexture(), info.getName());
-				if (true)
-					playerLine.add(new JPanel() {
-						BufferedImage img = PlayerSkinCache.getHead(info.getUUID());
-						private static final long serialVersionUID = 1L;
-						{
-							setPreferredSize(new Dimension(32, 40));
-							setOpaque(false);
-						}
+				playerLine.add(new JPanel() {
+					BufferedImage img = PlayerSkinCache.getHead(info.getUUID());
+					private static final long serialVersionUID = 1L;
+					{
+						setPreferredSize(new Dimension(32, 40));
+						setOpaque(false);
+					}
 
-						@Override
-						public void paintComponent(Graphics g) {
-							super.paintComponent(g);
-							g.drawImage(img, 0, 0, 32, 32, null);
-						}
-					});
+					@Override
+					public void paintComponent(Graphics g) {
+						super.paintComponent(g);
+						g.drawImage(img, 0, 0, 32, 32, null);
+					}
+				});
 			} catch (Exception e) {
 
 			}

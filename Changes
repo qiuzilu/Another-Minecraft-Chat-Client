@@ -1,5 +1,13 @@
 AMCC Change Log
-v1.5.1
+v1.5.2
 
-[+] Fixed
-- client crashing after loading auto responses from file with "Random" mode
+[+] Added:
+- Minecraft version 1.18/1.18.1
+
+[+] Fixed:
+- Invalid translation key in auto messages file overwrite dialog
+- Invalid buttons text in tray automatic reply dialog
+- Application freezing after disconnecting a client from tray
+
+[-] Broken:
+- Temporarily disable resource packs support in 1.18.1

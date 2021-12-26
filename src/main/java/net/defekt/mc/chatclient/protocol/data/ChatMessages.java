@@ -55,9 +55,8 @@ public class ChatMessages {
 
 			recursiveParse(root, strRef);
 
-			if (strRef.get().contains(pChar))
-				if (root.has("translate"))
-					strRef.set(root.get("translate").getAsString());
+			if (strRef.get().contains(pChar) && root.has("translate"))
+				strRef.set(root.get("translate").getAsString());
 			return strRef.get();
 		} catch (Exception e) {
 			return json;
@@ -66,12 +65,12 @@ public class ChatMessages {
 
 	private static void recursiveParse(JsonElement ob, AtomicReference<String> str) {
 
-		if (ob.isJsonPrimitive())
-			if (!ob.getAsString().isEmpty())
-				if (str.get().contains(pChar + "%s"))
-					str.set(str.get().replaceFirst(pChar + "%s", ob.getAsString()));
-				else
-					str.set(str.get() + ob.getAsString());
+		if ((ob.isJsonPrimitive()) && !ob.getAsString().isEmpty())
+			if (str.get().contains(pChar + "%s")) {
+				str.set(str.get().replaceFirst(pChar + "%s", ob.getAsString()));
+			} else {
+				str.set(str.get() + ob.getAsString());
+			}
 
 		if (ob.isJsonArray())
 			for (JsonElement el : ob.getAsJsonArray())

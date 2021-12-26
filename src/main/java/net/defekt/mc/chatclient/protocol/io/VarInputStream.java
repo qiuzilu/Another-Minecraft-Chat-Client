@@ -97,9 +97,8 @@ public class VarInputStream extends DataInputStream {
 	public ItemStack readSlotData(int protocol) throws IOException {
 		if (protocol >= 755)
 			return null;
-		if (protocol >= 477)
-			if (!readBoolean())
-				return new ItemStack((short) 0, 0, (short) 0, null);
+		if (protocol >= 477 && !readBoolean())
+			return new ItemStack((short) 0, 0, (short) 0, null);
 		int id = protocol >= 477 ? readVarInt() : readShort();
 		int count = 0;
 		short damage = 0;

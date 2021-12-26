@@ -100,17 +100,17 @@ public class ItemsWindow {
 		this.registry = registry;
 		bts = new JButton[size];
 		items = new ItemStack[size];
-		for (int x = 0; x < size; x++) {
-			final int xIndexLocal = x;
-			items[x] = null;
-			bts[x] = new JButton(" ");
+		for (int x1 = 0; x1 < size; x1++) {
+			final int xIndexLocal = x1;
+			items[x1] = null;
+			bts[x1] = new JButton(" ");
 
 			BufferedImage picon = null;
 			if (isInventory)
-				picon = getPlaceholderIcon(x);
-			bts[x].setIcon(picon == null ? null : new ImageIcon(picon));
+				picon = getPlaceholderIcon(x1);
+			bts[x1].setIcon(picon == null ? null : new ImageIcon(picon));
 
-			bts[x].addMouseListener(new MouseAdapter() {
+			bts[x1].addMouseListener(new MouseAdapter() {
 				final int xIndex = xIndexLocal;
 				@SuppressWarnings("serial")
 				final JPopupMenu pm = new JPopupMenu() {
@@ -303,7 +303,7 @@ public class ItemsWindow {
 				}
 			});
 
-			bts[x].addActionListener(new ActionListener() {
+			bts[x1].addActionListener(new ActionListener() {
 				final int xIndex = xIndexLocal;
 
 				@Override

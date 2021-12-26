@@ -132,7 +132,7 @@ public class Main {
 
 	private static BufferedImage logoImage = null;
 
-	public static final String version = "1.5.1";
+	public static final String version = "1.5.2";
 	private static final String changelogURL = "https://raw.githubusercontent.com/Defective4/Another-Minecraft-Chat-Client/master/Changes";
 
 	public static Font mcFont = Font.decode(null);
@@ -296,8 +296,7 @@ public class Main {
 			servers.set(index, s2);
 		}
 
-		ServerEntry[] entries = new ServerEntry[servers.size()];
-		entries = servers.toArray(entries);
+		ServerEntry[] entries = (ServerEntry[]) servers.toArray(new ServerEntry[servers.size()]);
 
 		serverListComponent.setListData(entries);
 
@@ -318,8 +317,7 @@ public class Main {
 		}
 		entry.ping();
 
-		ServerEntry[] entries = new ServerEntry[servers.size()];
-		entries = servers.toArray(entries);
+		ServerEntry[] entries = (ServerEntry[]) servers.toArray(new ServerEntry[servers.size()]);
 
 		serverListComponent.setListData(entries);
 
@@ -329,8 +327,7 @@ public class Main {
 		synchronized (servers) {
 			servers.remove(entry);
 		}
-		ServerEntry[] entries = new ServerEntry[servers.size()];
-		entries = servers.toArray(entries);
+		ServerEntry[] entries = (ServerEntry[]) servers.toArray(new ServerEntry[servers.size()]);
 		serverListComponent.setListData(entries);
 	}
 
@@ -359,7 +356,7 @@ public class Main {
 		int resp = JOptionPane.showOptionDialog(null,
 				new Object[] { Messages.getString("Main.quickMessageRecipient") + label, mField },
 				Messages.getString("Main.quickMesage"), JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE,
-				null, new Object[] { Messages.getString("Main.ok"), Messages.getString("Main.ok") }, 0);
+				null, new Object[] { Messages.getString("Main.ok"), Messages.getString("Main.cancel") }, 0);
 		qmdShowing = false;
 		if (resp == 0) {
 			String msg = mField.getText();
@@ -376,13 +373,14 @@ public class Main {
 
 	private void init() {
 
-		for (ServerEntry ent : up.getServers()) {
-			addToList(ent.getHost(), ent.getPort(), ent.getName(), ent.getVersion());
-			ent.ping();
+		synchronized (up.getServers()) {
+			for (ServerEntry ent : up.getServers()) {
+				addToList(ent.getHost(), ent.getPort(), ent.getName(), ent.getVersion());
+				ent.ping();
+			}
 		}
 		servers = up.getServers();
-		ServerEntry[] entries = new ServerEntry[servers.size()];
-		entries = servers.toArray(entries);
+		ServerEntry[] entries = (ServerEntry[]) servers.toArray(new ServerEntry[servers.size()]);
 
 		MinecraftStat.listenOnLAN(new LANListener() {
 
@@ -1549,47 +1547,46 @@ public class Main {
 						cl.getInventory().closeWindow();
 					}
 
-				if (!enableIVHandling.isSelected() || !loadTextures.isSelected())
-					if ((up.isEnableInventoryHandling() != enableIVHandling.isSelected())
-							|| (up.isLoadInventoryTextures() != loadTextures.isSelected()))
-						if (ItemsWindow.getTexturesSize() > 0) {
-							int response = JOptionPane.showOptionDialog(od,
-									Messages.getString("Main.inventoryHandlingDisabled"),
-									Messages.getString("Main.inventoryHandlingDisabledTitle"),
-									JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null,
-									new Object[] { Messages.getString("Main.inventoryHandlingDisabledYes"),
-											Messages.getString("Main.inventoryHandlingDisabledNo") },
-									0);
-							if (response == 0)
-								ItemsWindow.clearTextures(Main.this);
-						}
+				if ((!enableIVHandling.isSelected() || !loadTextures.isSelected())
+						&& ((up.isEnableInventoryHandling() != enableIVHandling.isSelected())
+								|| (up.isLoadInventoryTextures() != loadTextures.isSelected()))
+						&& ItemsWindow.getTexturesSize() > 0) {
+					int response = JOptionPane.showOptionDialog(od,
+							Messages.getString("Main.inventoryHandlingDisabled"),
+							Messages.getString("Main.inventoryHandlingDisabledTitle"), JOptionPane.YES_NO_OPTION,
+							JOptionPane.QUESTION_MESSAGE, null,
+							new Object[] { Messages.getString("Main.inventoryHandlingDisabledYes"),
+									Messages.getString("Main.inventoryHandlingDisabledNo") },
+							0);
+					if (response == 0)
+						ItemsWindow.clearTextures(Main.this);
+				}
 
-				if (enableIVHandling.isSelected() && loadTextures.isSelected())
-					if ((up.isEnableInventoryHandling() != enableIVHandling.isSelected())
-							|| (up.isLoadInventoryTextures() != loadTextures.isSelected())) {
-						int response = JOptionPane.showOptionDialog(od, Messages.getString("Main.itemLoadingEnabled"),
-								Messages.getString("Main.itemLoadingEnabledTitle"), JOptionPane.YES_NO_OPTION,
-								JOptionPane.QUESTION_MESSAGE, null,
-								new Object[] { Messages.getString("Main.itemLoadingEnabledYes"),
-										Messages.getString("Main.itemLoadingEnabledNo") },
-								0);
-						if (response == 0) {
-							od.dispose();
-							ItemsWindow.initTextures(Main.this, false);
-							if (clients.size() > 0)
-								JOptionPane.showOptionDialog(od, Messages.getString("Main.itemTexturesLoaded"),
-										Messages.getString("Main.itemTexturesLoadedTitle"),
-										JOptionPane.OK_CANCEL_OPTION, JOptionPane.INFORMATION_MESSAGE, null,
-										new Object[] { Messages.getString("Main.ok") }, 0);
-						}
+				if ((enableIVHandling.isSelected() && loadTextures.isSelected())
+						&& (up.isEnableInventoryHandling() != enableIVHandling.isSelected())
+						|| (up.isLoadInventoryTextures() != loadTextures.isSelected())) {
+					int response = JOptionPane.showOptionDialog(od, Messages.getString("Main.itemLoadingEnabled"),
+							Messages.getString("Main.itemLoadingEnabledTitle"), JOptionPane.YES_NO_OPTION,
+							JOptionPane.QUESTION_MESSAGE, null,
+							new Object[] { Messages.getString("Main.itemLoadingEnabledYes"),
+									Messages.getString("Main.itemLoadingEnabledNo") },
+							0);
+					if (response == 0) {
+						od.dispose();
+						ItemsWindow.initTextures(Main.this, false);
+						if (clients.size() > 0)
+							JOptionPane.showOptionDialog(od, Messages.getString("Main.itemTexturesLoaded"),
+									Messages.getString("Main.itemTexturesLoadedTitle"), JOptionPane.OK_CANCEL_OPTION,
+									JOptionPane.INFORMATION_MESSAGE, null,
+									new Object[] { Messages.getString("Main.ok") }, 0);
 					}
+				}
 
-				if (enableIVHandling.isSelected() && !up.isEnableInventoryHandling())
-					if (clients.size() > 0)
-						JOptionPane.showOptionDialog(od, Messages.getString("Main.inventoryHandlingEnabled"),
-								Messages.getString("Main.inventoryHandlingEnabledTitle"), JOptionPane.OK_CANCEL_OPTION,
-								JOptionPane.INFORMATION_MESSAGE, null, new Object[] { Messages.getString("Main.ok") },
-								0);
+				if (enableIVHandling.isSelected() && !up.isEnableInventoryHandling() && (clients.size() > 0)) {
+					JOptionPane.showOptionDialog(od, Messages.getString("Main.inventoryHandlingEnabled"),
+							Messages.getString("Main.inventoryHandlingEnabledTitle"), JOptionPane.OK_CANCEL_OPTION,
+							JOptionPane.INFORMATION_MESSAGE, null, new Object[] { Messages.getString("Main.ok") }, 0);
+				}
 
 				up.setEnableInventoryHandling(enableIVHandling.isSelected());
 				up.setHideIncomingWindows(hideIncomingWindows.isSelected());
@@ -2536,7 +2533,7 @@ public class Main {
 					File out = IOUtils.forceExtension(fc.getSelectedFile(), ".arf");
 					if (out.exists()) {
 						int rsp = JOptionPane.showOptionDialog(win, Messages.getString("Main.overwriteFile"),
-								Messages.getString("overwriteFileTitle"), JOptionPane.YES_NO_OPTION,
+								Messages.getString("Main.overwriteFileTitle"), JOptionPane.YES_NO_OPTION,
 								JOptionPane.WARNING_MESSAGE, null,
 								new Object[] { Messages.getString("Main.yes"), Messages.getString("Main.no") }, 0);
 						if (rsp != 0) {
@@ -2819,7 +2816,8 @@ public class Main {
 								SwingUtils.appendColoredText(
 										Messages.getString("Main.connectionLostChatMessage") + reason + "\r\n", jtp);
 
-								if (trayIcon != null && up.isTrayShowDisconnectMessages()) {
+								if (trayIcon != null && up.isTrayShowDisconnectMessages()
+										&& !reason.equals(Messages.getString("Main.trayClosedReason"))) {
 									trayLastMessageType = 1;
 									String ttext = Messages.getString("Main.connectionLostTrayMessage")
 											+ ChatMessages.removeColors(reason);
@@ -2827,16 +2825,16 @@ public class Main {
 											cl.getHost() + ":" + cl.getPort() + " (" + cl.getUsername() + ")", ttext,
 											MessageType.ERROR);
 									PopupMenu pm = trayIcon.getPopupMenu();
-									for (int x = 0; x < pm.getItemCount(); x++) {
-										MenuComponent ct = pm.getItem(x);
+									for (int x1 = 0; x1 < pm.getItemCount(); x1++) {
+										MenuComponent ct = pm.getItem(x1);
 										if (ct instanceof Menu) {
 											Menu cm = (Menu) ct;
 											String lbl = cm.getLabel();
 											if (lbl.equals(cl.getHost() + ":" + cl.getPort()))
-												for (int y = 0; y < cm.getItemCount(); x++) {
-													Menu pmenu = (Menu) cm.getItem(y);
+												for (int y1 = 0; y1 < cm.getItemCount(); x1++) {
+													Menu pmenu = (Menu) cm.getItem(y1);
 													if (pmenu.getLabel().equals(cl.getUsername()))
-														cm.remove(y);
+														cm.remove(y1);
 												}
 											if (cm.getItemCount() == 0)
 												pm.remove(cm);
@@ -2851,13 +2849,13 @@ public class Main {
 									Component ct = tabPane.getTabComponentAt(x);
 									if (ct == null)
 										continue;
-									if (ct.getName().equals(entry.getHost() + "_" + entry.getName() + "_" + username))
-										if (ct instanceof Box) {
-											Box ctb = (Box) ct;
-											for (Component ctt : ctb.getComponents())
-												if (ctt instanceof JLabel)
-													ctt.setForeground(Color.gray);
-										}
+									if (ct.getName().equals(entry.getHost() + "_" + entry.getName() + "_" + username)
+											&& (ct instanceof Box)) {
+										Box ctb = (Box) ct;
+										for (Component ctt : ctb.getComponents())
+											if (ctt instanceof JLabel)
+												ctt.setForeground(Color.gray);
+									}
 								}
 								cl.close();
 								clients.remove(fPane);
@@ -3035,4 +3033,5 @@ public class Main {
 	public ActionListener getConnectionACL() {
 		return alis;
 	}
+
 }

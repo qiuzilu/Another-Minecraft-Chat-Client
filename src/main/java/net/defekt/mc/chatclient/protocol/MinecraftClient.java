@@ -265,7 +265,7 @@ public class MinecraftClient {
 							}
 						}
 					} catch (Exception e) {
-						e.printStackTrace();
+//						e.printStackTrace();
 						for (ClientListener cl : clientListeners)
 							cl.disconnected(e.toString());
 						close();
