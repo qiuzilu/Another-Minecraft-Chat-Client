@@ -11,7 +11,7 @@ AMCC is a GUI application that lets you join a Minecraft server and chat freely 
 * 📖 Complete GUI with Minecraft styled server list, in-game player list with skins and a tabbed pane allowing you to chat on multiple clients.
 * 🎨 Minecraft style UI elements, such as chat font (Minecraftia), configurable buttons and text fields.
 * 📋 Tray support.
-* ⚙️ My own lightweight implementation of Minecraft protocol, supporting versions 1.8 to 1.17.
+* ⚙️ My own lightweight implementation of Minecraft protocol, supporting versions 1.8 to 1.18.1.
 * 📦 Basic inventory handling and item using.
 * ⏰ Automatic messages and responses, perfect for AFKing.
 
