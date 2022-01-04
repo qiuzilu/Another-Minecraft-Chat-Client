@@ -50,10 +50,10 @@ public class MinecraftServerListRenderer extends DefaultListCellRenderer {
 		JLabel name = new JLabel(" " + entry.getName());
 		JTextPane version = new JTextPane();
 		version.setText("???");
-		JLabel players = new JLabel(
-				Messages.getString("MinecraftServerListRenderer.serverListPlayersLabel") + entry.getVersion() + ")");
+		JLabel players = new JLabel(" " + Messages.getString("MinecraftServerListRenderer.serverListPlayersLabel")
+				+ entry.getVersion() + ")");
 		JTextPane description = new JTextPane();
-		description.setText(Messages.getString("MinecraftServerListRenderer.serverListStatusPinging"));
+		description.setText(" " + Messages.getString("MinecraftServerListRenderer.serverListStatusPinging"));
 
 		serverBox.add(name);
 		serverBox.add(players);
@@ -85,7 +85,7 @@ public class MinecraftServerListRenderer extends DefaultListCellRenderer {
 			if (inf.getOnlinePlayers() != -1)
 				players.setText(
 						" " + Integer.toString(inf.getOnlinePlayers()) + "/" + Integer.toString(inf.getMaxPlayers())
-								+ Messages.getString("MinecraftServerListRenderer.serverListPlayersLabel2")
+								+ " " + Messages.getString("MinecraftServerListRenderer.serverListPlayersLabel2")
 								+ entry.getVersion() + ")");
 			description.setText("");
 			SwingUtils.appendColoredText(" " + inf.getDescription().replace("\n", "\n "), description);

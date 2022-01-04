@@ -78,11 +78,13 @@ public class ServerEntry implements Serializable {
 					try {
 						info = MinecraftStat.serverListPing(host, port);
 					} catch (UnknownHostException e) {
-						info = new StatusInfo(Messages.getString("ServerEntry.serverEntryUnknownHost"), -1, -1, "", -1,
-								null, null, null);
+						info = new StatusInfo("\u00a74" + Messages.getString("ServerEntry.serverEntryUnknownHost"), -1,
+								-1, "", -1, null, null, null);
 						error = true;
 					} catch (Exception e) {
-						info = new StatusInfo(Messages.getString("ServerEntry.serverEntryCantConnect"), -1, -1, "", -1,
+						info = new StatusInfo("\u00a74" + Messages.getString("ServerEntry.serverEntryCantConnect"), -1,
+								-1, "", -1,
+
 								null, null, null);
 						error = true;
 					}
@@ -153,7 +155,7 @@ public class ServerEntry implements Serializable {
 	public int hashCode() {
 		return super.hashCode();
 	}
-	
+
 	@Override
 	public boolean equals(Object et) {
 		if (!(et instanceof ServerEntry))

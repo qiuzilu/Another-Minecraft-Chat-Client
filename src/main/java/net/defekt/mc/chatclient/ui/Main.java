@@ -1291,15 +1291,15 @@ public class Main {
 		sampleDisabledButton.setEnabled(false);
 
 		apButtonSettings.add(apButtonLockColors);
-		apButtonSettings.add(new JLabel(Messages.getString("Main.apButtonSettingsBGLabel")));
+		apButtonSettings.add(new JLabel(" " + Messages.getString("Main.apButtonSettingsBGLabel")));
 		apButtonSettings.add(apButtonEnabled);
-		apButtonSettings.add(new JLabel(Messages.getString("Main.apButtonSettingsHoverLabel")));
+		apButtonSettings.add(new JLabel(" " + Messages.getString("Main.apButtonSettingsHoverLabel")));
 		apButtonSettings.add(apButtonEnabledHover);
-		apButtonSettings.add(new JLabel(Messages.getString("Main.apButtonSettingsDisabledLabel")));
+		apButtonSettings.add(new JLabel(" " + Messages.getString("Main.apButtonSettingsDisabledLabel")));
 		apButtonSettings.add(apButtonDisabled);
-		apButtonSettings.add(new JLabel(Messages.getString("Main.apButtonSettingsTextColor")));
+		apButtonSettings.add(new JLabel(" " + Messages.getString("Main.apButtonSettingsTextColor")));
 		apButtonSettings.add(apButtonText);
-		apButtonSettings.add(new JLabel(Messages.getString("Main.apButtonSettingsDTexTColor")));
+		apButtonSettings.add(new JLabel(" " + Messages.getString("Main.apButtonSettingsDTexTColor")));
 		apButtonSettings.add(apButtonTextDisabled);
 		apButtonSettings.add(new JLabel(" "));
 		apButtonSettings.add(apButtonReset);
@@ -2619,7 +2619,8 @@ public class Main {
 								protocol = -2;
 						} catch (Exception e) {
 							SwingUtils.appendColoredText(
-									Messages.getString("Main.connectionFailedChatMessage") + e.toString(), pane);
+									"\u00a7c" + Messages.getString("Main.connectionFailedChatMessage") + e.toString(),
+									pane);
 							e.printStackTrace();
 						}
 						break;
@@ -2814,7 +2815,9 @@ public class Main {
 							public void disconnected(String reason) {
 								autoMessagesThread.interrupt();
 								SwingUtils.appendColoredText(
-										Messages.getString("Main.connectionLostChatMessage") + reason + "\r\n", jtp);
+										"\u00a7c" + Messages.getString("Main.connectionLostChatMessage") + ": \r\n"
+												+ reason + "\r\n",
+										jtp);
 
 								if (trayIcon != null && up.isTrayShowDisconnectMessages()
 										&& !reason.equals(Messages.getString("Main.trayClosedReason"))) {
@@ -3003,7 +3006,8 @@ public class Main {
 										cl.sendChatMessage(message);
 									} catch (IOException e1) {
 										SwingUtils.appendColoredText(
-												Messages.getString("Main.connectionLostChatMessage2") + e1.toString(),
+												"\u00a7c" + Messages.getString("Main.connectionLostChatMessage2")
+														+ ": \r\n" + e1.toString(),
 												pane);
 										e1.printStackTrace();
 										for (Component ct : chatControls.getComponents())
@@ -3020,8 +3024,8 @@ public class Main {
 					} catch (
 
 					IOException e) {
-						SwingUtils.appendColoredText(
-								Messages.getString("Main.connectionFailedChatMessage2") + e.toString(), pane);
+						SwingUtils.appendColoredText("\u00a7c" + Messages.getString("Main.connectionFailedChatMessage2")
+								+ "\r\n\r\n" + e.toString(), pane);
 					}
 				}
 			}
