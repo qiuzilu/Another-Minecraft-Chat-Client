@@ -7,6 +7,7 @@ import net.defekt.mc.chatclient.protocol.packets.Packet;
 import net.defekt.mc.chatclient.protocol.packets.PacketRegistry;
 import net.defekt.mc.chatclient.protocol.packets.alt.clientbound.login.ServerLoginSuccessPacket;
 import net.defekt.mc.chatclient.protocol.packets.alt.clientbound.play.ServerOpenWindowPacket;
+import net.defekt.mc.chatclient.protocol.packets.alt.clientbound.play.ServerResourcePackSendPacket;
 import net.defekt.mc.chatclient.protocol.packets.general.clientbound.login.ServerLoginEncryptionPacket;
 import net.defekt.mc.chatclient.protocol.packets.general.clientbound.login.ServerLoginResponsePacket;
 import net.defekt.mc.chatclient.protocol.packets.general.clientbound.login.ServerLoginSetCompressionPacket;
@@ -90,7 +91,7 @@ public class PacketRegistryV757 extends PacketRegistry {
 				put(0x0F, ServerChatMessagePacket.class);
 				put(0x38, ServerPlayerPositionAndLookPacket.class);
 				put(0x1A, ServerDisconnectPacket.class);
-//				put(0x3C, ServerResourcePackSendPacket.class);
+				put(0x3C, ServerResourcePackSendPacket.class);
 				put(0x18, ServerPluginMessagePacket.class);
 				put(0x52, ServerUpdateHealthPacket.class);
 				put(0x26, ServerJoinGamePacket.class);

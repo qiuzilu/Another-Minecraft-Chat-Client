@@ -339,7 +339,8 @@ public class ClientPacketListener implements InternalPacketListener {
 				if (commonChannelName.equals("register"))
 					os.write(PacketFactory.constructPacket(registry, "ClientPluginMessagePacket", channel, data)
 							.getData(cl.isCompressionEnabled()));
-			} else if (packet instanceof ServerResourcePackSendPacket) {
+			} else if (packet instanceof ServerResourcePackSendPacket
+					|| packet instanceof net.defekt.mc.chatclient.protocol.packets.alt.clientbound.play.ServerResourcePackSendPacket) {
 				if (up.isShowResourcePackMessages())
 					for (ClientListener ls : cl.getClientListeners())
 						ls.messageReceived(
